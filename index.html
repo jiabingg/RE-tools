@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Engineering Tools</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #1e1e1e; /* Dark background */
+            color: #f0f0f0; /* Light text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #333; /* Darker container */
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            display: grid; /* Use CSS Grid for layout */
+            grid-template-columns: repeat(3, 1fr); /* Creates 3 equal columns */
+            grid-template-rows: auto auto; /* Explicitly define two rows */
+            gap: 20px; /* Spacing of 20px between rows and columns */
+            width: 900px; /* Adjust container width as needed */
+        }
+        h1 {
+            color: #f0f0f0;
+            margin-bottom: 30px;
+            grid-column: 1 / -1; /* Make the heading span all columns */
+        }
+        .link-button {
+            display: flex; /* Use Flexbox inside the button for icon alignment */
+            align-items: center; /* Vertically align icon and text */
+            justify-content: center; /* Center content horizontally */
+            width: 80%; /* Take full width of the grid cell */
+            padding: 30px 24px; /* Increased vertical padding for taller buttons */
+            background-color: #444; /* Dark button color */
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px; /* Bigger font size */
+            transition: background-color 0.3s ease;
+            min-height: 100px; /* Set a minimum height for the buttons */
+        }
+        .link-button:hover {
+            background-color: #555;
+        }
+        .link-button i {
+            margin-right: 15px; /* Space between icon and text */
+            font-size: 24px; /* Slightly bigger icon size */
+            color: #bbb; /* Slightly lighter icon color */
+        }
+        .link-button span {
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Engineering Tools</h1>
+        <a href="marx_langenheim.html" class="link-button" target="_blank"><i class="fa-solid fa-marxlangenheim"></i> <span>Marx & Langenheim</span></a>
+        <a href="tool2.html" class="link-button" target="_blank"><i class="fa-solid fa-chart-line"></i> <span>Analysis Tool</span></a>
+        <a href="tool3.html" class="link-button" target="_blank"><i class="fa-solid fa-pencil-ruler"></i> <span>Design Tool</span></a>
+        <a href="tool4.html" class="link-button" target="_blank"><i class="fa-solid fa-play"></i> <span>Simulation Tool</span></a>
+        <a href="tool5.html" class="link-button" target="_blank"><i class="fa-solid fa-list-check"></i> <span>Planning Tool</span></a>
+        <a href="tool6.html" class="link-button" target="_blank"><i class="fa-solid fa-wrench"></i> <span>General Tool</span></a>
+    </div>
+    <script src="https://kit.fontawesome.com/your_font_awesome_kit_id.js" crossorigin="anonymous"></script>
+</body>
+</html>
