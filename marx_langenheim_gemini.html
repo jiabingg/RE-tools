@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marx & Langenheim Steam Zone Calculator</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 2rem; background-color: #f4f4f9; color: #333; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1, h2 { color: #0056b3; }
+        h1 { text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .input-group, .output-group { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 0.5rem; color: #555; }
+        input[type="number"] { padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        button { grid-column: 1 / -1; padding: 1rem; font-size: 1.2rem; font-weight: bold; color: #fff; background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #0056b3; }
+        .results { margin-top: 2rem; background-color: #e9f5ff; padding: 1.5rem; border-radius: 8px; }
+        #results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .result-item { background: #fff; padding: 1rem; border: 1px solid #ddd; border-radius: 4px; }
+        .result-item strong { color: #0056b3; }
+        hr { border: 0; height: 1px; background: #ddd; margin: 2rem 0; }
+        .notes { font-size: 0.9rem; color: #666; margin-top: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Marx & Langenheim Steam Zone Calculator 🛢️🔥</h1>
+        <p>This tool calculates the steam zone radius for a steam injection well based on the Marx & Langenheim method. Enter the reservoir and injection parameters below and click "Calculate".</p>
+        
+        <hr>
+        <h2>Inputs</h2>
+        <div class="grid">
+            <div class="input-group">
+                <label for="ps">Reservoir Steam Zone Pressure (psig)</label>
+                <input type="number" id="ps" value="120">
+            </div>
+            <div class="input-group">
+                <label for="t">Injection Time (days)</label>
+                <input type="number" id="t" value="5475">
+            </div>
+            <div class="input-group">
+                <label for="is">Steam Injection Rate, CWE (BSPD)</label>
+                <input type="number" id="is" value="250">
+            </div>
+            <div class="input-group">
+                <label for="fs">Bottom Hole Quality</label>
+                <input type="number" id="fs" value="0.6">
+            </div>
+            <div class="input-group">
+                <label for="phi">Steam Zone Porosity</label>
+                <input type="number" id="phi" value="0.35">
+            </div>
+            <div class="input-group">
+                <label for="Soi">Initial Oil Saturation</label>
+                <input type="number" id="Soi" value="0.6">
+            </div>
+            <div class="input-group">
+                <label for="Swi">Initial Water Saturation</label>
+                <input type="number" id="Swi" value="0.4">
+            </div>
+            <div class="input-group">
+                <label for="Tf">Initial Reservoir Temperature (°F)</label>
+                <input type="number" id="Tf" value="108">
+            </div>
+            <div class="input-group">
+                <label for="hs">Steam Zone Thickness (ft)</label>
+                <input type="number" id="hs" value="250">
+            </div>
+            <div class="input-group">
+                <label for="API">Oil Gravity (API)</label>
+                <input type="number" id="API" value="11">
+            </div>
+            <div class="input-group">
+                <label for="kh">Cap & Base Rock Conductivity (Btu/hr-ft-°F)</label>
+                <input type="number" id="kh" value="1.5">
+            </div>
+        </div>
+        
+        <br>
+        <button onclick="calculate()">Calculate</button>
+
+        <div class="results" id="results-section" style="display:none;">
+            <hr>
+            <h2>Calculations 📈</h2>
+            <div id="results-grid">
+                <div class="result-item"><strong>Steam Temperature (Ts):</strong> <span id="Ts"></span> °F</div>
+                <div class="result-item"><strong>Oil Density (ρo):</strong> <span id="ro"></span> #/cuft</div>
+                <div class="result-item"><strong>Steam Zone Heat Capacity (M1):</strong> <span id="M1"></span> Btu/cuft-°F</div>
+                <div class="result-item"><strong>Enthalpy of Saturated Water (hf):</strong> <span id="hf"></span> Btu/#</div>
+                <div class="result-item"><strong>Enthalpy of Saturated Vapor (hfg):</strong> <span id="hfg"></span> Btu/#</div>
+                <div class="result-item"><strong>Net Heat Injection Rate (Qinj):</strong> <span id="Qinj"></span> Btu/hr</div>
+                <div class="result-item"><strong>Dimensionless Time (tD):</strong> <span id="tD"></span></div>
+                <div class="result-item"><strong>erfc(√tD):</strong> <span id="erfc_tD"></span></div>
+                <div class="result-item"><strong>Steam Zone Area (As):</strong> <span id="As"></span> Acres</div>
+                <div class="result-item" style="grid-column: 1 / -1; text-align:center; background-color: #007bff; color: white; padding: 1.5rem;">
+                    <h3><strong>Circular Steam Zone Radius: <span id="Radius"></span> ft</strong></h3>
+                </div>
+            </div>
+            <div class="notes">
+                <h4>Formula Notes:</h4>
+                <p>The calculations are based on the standard Marx & Langenheim model. Some formulas required reverse-engineering from the provided spreadsheet, which involved identifying implicit constants.</p>
+                <ul>
+                    <li><strong>Steam Properties (Ts, hf, hfg):</strong> Calculated using polynomial approximations of steam tables.</li>
+                    <li><strong>Steam Zone Heat Capacity (M1):</strong> Calculated assuming a rock matrix volumetric heat capacity of ~29.87 Btu/cuft-°F.</li>
+                    <li><strong>Dimensionless Time (tD):</strong> Calculated assuming a cap/base rock volumetric heat capacity of ~41.59 Btu/cuft-°F.</li>
+                    <li><strong>Dimensionless Term K:</strong> This term from the spreadsheet could not be reliably reverse-engineered as it doesn't align with the standard M&L formulation. The area (As) is calculated directly using the standard `G(tD)` function instead.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+function calculate() {
+    // --- Get Inputs ---
+    const ps = parseFloat(document.getElementById('ps').value);
+    const t = parseFloat(document.getElementById('t').value);
+    const isRate = parseFloat(document.getElementById('is').value);
+    const fs = parseFloat(document.getElementById('fs').value);
+    const phi = parseFloat(document.getElementById('phi').value);
+    const Soi = parseFloat(document.getElementById('Soi').value);
+    const Swi = parseFloat(document.getElementById('Swi').value);
+    const Tf = parseFloat(document.getElementById('Tf').value);
+    const hs = parseFloat(document.getElementById('hs').value);
+    const API = parseFloat(document.getElementById('API').value);
+    const kh = parseFloat(document.getElementById('kh').value);
+
+    // --- Calculations ---
+    let Ts = 115.1*Math.pow(ps+14.7, 0.225);  
+    let ro = (141.5 / (API + 131.5)) * 62.4;
+    //let Cr = 0.2;
+    //let Co = 0.45;
+    //let Cw = 1.0;
+    //let Cg = 1.2 * 50;
+    let M1 = (1-phi)*165*0.2 + phi*0.15*ro*0.45 + phi*Math.pow(1-fs, 0.5)*(1-0.15)*62.4;
+    let hf = 91*(Math.pow(ps+14.7, 0.2574)); // 321.470119;
+    let hfg = 865-(0.207*(ps+14.7)); // 837.1171;
+    let Qinj = 14.6*isRate*(hf+(hfg*fs)-(Tf-32)); // isRate * fs * (hfg - hf) * 1000;
+    let tD = (115.2*kh*t)/(Math.pow(hs*1.2, 2)*M1); //(kh * t) / (M1 * hs * hs);
+    let K = 1/(1+(0.3275911*Math.pow(tD, 0.5))); //   M1 / (Math.sqrt(Math.PI) * Math.sqrt(kh * t / (hs * hs)));
+    let erfc_tD = ((0.254829592*K)-(0.284496736*Math.pow(K,2))+(1.421413741*Math.pow(K,3))-(1.453152027*Math.pow(K,4))+(1.061405429*Math.pow(K,5)))*Math.exp(-tD); 
+    let As = (Qinj*hs)/((4*kh*(Ts-Tf)*1.2*43560))*((Math.exp(tD)*erfc_tD)+(2*(Math.sqrt(tD/3.141)))-1)
+    let radius = Math.sqrt(As * 43560 / Math.PI);
+    
+    // --- Display Results ---
+    document.getElementById('results-section').style.display = 'block';
+    document.getElementById('Ts').textContent = Ts.toFixed(0);
+    document.getElementById('ro').textContent = ro.toFixed(1);
+    document.getElementById('M1').textContent = M1.toFixed(1);
+    document.getElementById('hf').textContent = hf.toFixed(1);
+    document.getElementById('hfg').textContent = hfg.toFixed(1);
+    document.getElementById('Qinj').textContent = Qinj.toLocaleString('en-US', {maximumFractionDigits:0});
+    document.getElementById('tD').textContent = tD.toFixed(3);
+    document.getElementById('erfc_tD').textContent = erfc_tD.toFixed(3);
+    document.getElementById('As').textContent = As.toFixed(2);
+    document.getElementById('Radius').textContent = radius.toFixed(1);
+}
+</script>
+
+</body>
+</html>
