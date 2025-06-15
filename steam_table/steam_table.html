@@ -179,7 +179,7 @@
 
             Object.entries(dataObject).forEach(([key, value]) => {
                 // Format to at least 4 decimal places if it's a float, otherwise show as is.
-                const valueStr = (typeof value === 'number' && value % 1 !== 0) ? value.toFixed(5) : value;
+                const valueStr = (typeof value === 'number' && value % 1 !== 0) ? value.toFixed(3) : value;
                 const unit = units[key] || '';
                 
                 const resultCard = `
