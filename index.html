@@ -3,73 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Engineering Tools</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Engineering Toolbox</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Custom scrollbar for webkit browsers */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        /* Basic font styling */
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #1e1e1e; /* Dark background */
-            color: #f0f0f0; /* Light text */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
         }
-        .container {
-            background-color: #333; /* Darker container */
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            display: grid; /* Use CSS Grid for layout */
-            grid-template-columns: repeat(3, 1fr); /* Creates 3 equal columns */
-            grid-template-rows: auto auto; /* Explicitly define two rows */
-            gap: 20px; /* Spacing of 20px between rows and columns */
-            width: 900px; /* Adjust container width as needed */
+        /* Hide all content sections by default */
+        .content-section {
+            display: none;
         }
-        h1 {
-            color: #f0f0f0;
-            margin-bottom: 30px;
-            grid-column: 1 / -1; /* Make the heading span all columns */
-        }
-        .link-button {
-            display: flex; /* Use Flexbox inside the button for icon alignment */
-            align-items: center; /* Vertically align icon and text */
-            justify-content: center; /* Center content horizontally */
-            width: 80%; /* Take full width of the grid cell */
-            padding: 30px 24px; /* Increased vertical padding for taller buttons */
-            background-color: #444; /* Dark button color */
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 18px; /* Bigger font size */
-            transition: background-color 0.3s ease;
-            min-height: 100px; /* Set a minimum height for the buttons */
-        }
-        .link-button:hover {
-            background-color: #555;
-        }
-        .link-button i {
-            margin-right: 15px; /* Space between icon and text */
-            font-size: 24px; /* Slightly bigger icon size */
-            color: #bbb; /* Slightly lighter icon color */
-        }
-        .link-button span {
-            white-space: nowrap; /* Prevent text wrapping */
+        /* Show the active content section */
+        .content-section.active {
+            display: block;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>My Engineering Tools</h1>
-        <a href="marx_langenheim.html" class="link-button" target="_blank"><i class="fa-solid fa-marxlangenheim"></i> <span>Marx & Langenheim</span></a>
-        <a href="neuman_CalGEM.html" class="link-button" target="_blank"><i class="fa-solid fa-chart-line"></i> <span>Neuman</span></a>
-        <a href="steam_table/steam_table.html" class="link-button" target="_blank"><i class="fa-solid fa-pencil-ruler"></i> <span>Steam Properties Lookup</span></a>
-        <a href="tool4.html" class="link-button" target="_blank"><i class="fa-solid fa-play"></i> <span>Simulation Tool</span></a>
-        <a href="tool5.html" class="link-button" target="_blank"><i class="fa-solid fa-list-check"></i> <span>Planning Tool</span></a>
-        <a href="tool6.html" class="link-button" target="_blank"><i class="fa-solid fa-wrench"></i> <span>General Tool</span></a>
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="flex h-screen">
+        <!-- Left Navigation Pane -->
+        <nav id="sidebar" class="w-64 bg-gray-800 border-r border-gray-700 flex-shrink-0 custom-scrollbar overflow-y-auto">
+            <div class="p-4">
+                <h1 class="text-2xl font-bold text-gray-100">Toolbox</h1>
+            </div>
+            <ul class="mt-4">
+                <li><a href="#steamflood" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">Steamflood</a></li>
+                <li><a href="#fluid-mechanics" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">Fluid Mechanics</a></li>
+                <li><a href="#thermodynamics" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">Thermodynamics</a></li>
+                <li><a href="#statics" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">Statics & Mechanics</a></li>
+                <li><a href="#hvac" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">HVAC Systems</a></li>
+            </ul>
+        </nav>
+
+        <!-- Right Main Content Panel -->
+        <main class="flex-1 p-6 sm:p-8 md:p-10 custom-scrollbar overflow-y-auto">
+            
+            <!-- Welcome Section (Default) -->
+            <div id="welcome" class="content-section">
+                 <h2 class="text-3xl font-bold border-b border-gray-700 pb-2 mb-6">Welcome to the Toolbox</h2>
+                 <p class="text-lg">Select a category from the left to display relevant engineering tools and resources.</p>
+            </div>
+
+            <!-- Steamflood Section -->
+            <div id="steamflood" class="content-section">
+                <h2 class="text-3xl font-bold text-white border-b-2 border-blue-500 pb-2 mb-8">Steamflood</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="steam_table/steam_table.html" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">Steam Properties</a>
+                        <a href="marx_langenheim.html" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">Marx & Langenheim ZEI</a>
+                    </div>
+            </div>
+
+            <!-- Fluid Mechanics Section -->
+            <div id="fluid-mechanics" class="content-section">
+                <h2 class="text-3xl font-bold text-white border-b-2 border-green-500 pb-2 mb-8">Fluid Mechanics</h2>
+                
+                <div class="mb-10">
+                    <h3 class="text-2xl font-semibold text-gray-200 mb-4">Pipe & Flow</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-green-500 transition-colors">Pipe Sizing Calculator</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-green-500 transition-colors">Pressure Drop Calculation</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-green-500 transition-colors">Reynolds Number</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-200 mb-4">Pumps & Turbines</h3>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-green-500 transition-colors">Pump Affinity Laws</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-green-500 transition-colors">Net Positive Suction Head (NPSH)</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Thermodynamics Section -->
+            <div id="thermodynamics" class="content-section">
+                <h2 class="text-3xl font-bold text-white border-b-2 border-red-500 pb-2 mb-8">Thermodynamics</h2>
+                 <div class="mb-10">
+                    <h3 class="text-2xl font-semibold text-gray-200 mb-4">Heat Transfer</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-red-500 transition-colors">Conduction Calculator</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-red-500 transition-colors">Convection Coefficients</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-red-500 transition-colors">Radiation Heat Transfer</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statics & Mechanics Section -->
+            <div id="statics" class="content-section">
+                <h2 class="text-3xl font-bold text-white border-b-2 border-purple-500 pb-2 mb-8">Statics & Mechanics</h2>
+                <div class="mb-10">
+                    <h3 class="text-2xl font-semibold text-gray-200 mb-4">Structural Analysis</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-purple-500 transition-colors">Beam Deflection</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-purple-500 transition-colors">Truss Analysis</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-purple-500 transition-colors">Moment of Inertia</a>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- HVAC Section -->
+            <div id="hvac" class="content-section">
+                <h2 class="text-3xl font-bold text-white border-b-2 border-yellow-500 pb-2 mb-8">HVAC Systems</h2>
+                 <div class="mb-10">
+                    <h3 class="text-2xl font-semibold text-gray-200 mb-4">Air & Psychrometrics</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Psychrometric Chart</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Duct Sizing</a>
+                        <a href="#" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Air Change Rate</a>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
-    <script src="https://kit.fontawesome.com/your_font_awesome_kit_id.js" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const welcomeSection = document.getElementById('welcome');
+            
+            // Function to set the active state
+            function setActive(link, section) {
+                 // Remove active class from all links and sections
+                navLinks.forEach(l => {
+                    l.style.backgroundColor = '';
+                    l.style.fontWeight = 'normal';
+                    l.style.color = '#9ca3af'; // Tailwind gray-400
+                });
+                contentSections.forEach(s => s.classList.remove('active'));
+
+                // Add active class to the clicked link and corresponding section
+                link.style.backgroundColor = '#374151'; // Tailwind gray-700
+                link.style.fontWeight = '600'; // semibold
+                link.style.color = '#ffffff'; // white
+                section.classList.add('active');
+            }
+
+            // Set default view to "Welcome" on page load
+             welcomeSection.classList.add('active');
+
+            // Add click event listeners to navigation links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        setActive(this, targetSection);
+                    }
+                });
+            });
+
+            // Optional: Set "Basics" as the default active link visually
+            if (navLinks.length > 0) {
+                 // Initially show the content for the first link, not the welcome message
+                 const firstLink = navLinks[0];
+                 firstLink.click();
+            }
+        });
+    </script>
 </body>
 </html>
