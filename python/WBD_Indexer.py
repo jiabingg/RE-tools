@@ -132,8 +132,6 @@ class PdfIndexerApp:
                         if match:
                             api = match.group(1)
                             full_path = os.path.join(dirpath, filename)
-                            
-                            # Use forward slashes for file URI compatibility in the HTML
                             path_for_html = full_path.replace('\\', '/')
                             
                             well_data.append({
