@@ -44,7 +44,7 @@
         </div>
 
         <!-- Status & Results Count -->
-        <div id="status" class="text-center text-gray-500 mb-4 h-6"></div>
+        <div id="status" class="text-center text-gray-500 mb-4 h-6 transition-all duration-300"></div>
 
         <!-- Results Container -->
         <main id="resultsContainer" class="space-y-4">
@@ -59,6 +59,40 @@
             const statusDiv = document.getElementById('status');
             
             let wellData = []; // To store the loaded well data
+
+            // --- NEW: Function to copy file path and provide user feedback ---
+            function copyPathToClipboard(path, buttonElement) {
+                // Use a temporary textarea to securely copy the path
+                const textArea = document.createElement('textarea');
+                textArea.value = path;
+                textArea.style.position = 'fixed'; // Prevent scrolling to bottom of page
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        // Provide visual feedback
+                        const originalText = buttonElement.textContent;
+                        buttonElement.textContent = 'Copied!';
+                        buttonElement.classList.add('bg-green-600', 'hover:bg-green-700');
+                        buttonElement.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+
+                        setTimeout(() => {
+                            buttonElement.textContent = originalText;
+                            buttonElement.classList.remove('bg-green-600', 'hover:bg-green-700');
+                            buttonElement.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                        }, 2000);
+                    }
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                    alert('Could not copy path. Please copy it manually from the card.');
+                }
+
+                document.body.removeChild(textArea);
+            }
 
             // Function to fetch and load the JSON data
             async function loadData() {
@@ -95,18 +129,17 @@
                     const resultCard = document.createElement('div');
                     resultCard.className = 'bg-white p-4 rounded-lg shadow-md transition-all hover:shadow-lg hover:scale-[1.01]';
                     
-                    // Note: 'file:///' is the protocol for accessing local files.
+                    // --- MODIFIED: The link is now a button that calls the copy function ---
                     resultCard.innerHTML = `
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center">
                             <div>
                                 <p class="text-lg font-semibold text-blue-700">${item.api}</p>
                                 <p class="text-gray-600 text-sm">${item.filename}</p>
                             </div>
-                            <a href="file:///${item.path}" 
-                               target="_blank" 
+                            <button onclick="copyPathToClipboard('${item.path.replace(/\\/g, '\\\\')}', this)"
                                class="mt-3 sm:mt-0 inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
-                                Open PDF
-                            </a>
+                                Copy Path
+                            </button>
                         </div>
                         <p class="text-xs text-gray-400 mt-2 break-all">Path: ${item.path}</p>
                     `;
@@ -139,3 +172,6 @@
 
 </body>
 </html>
+```
+
+I've now updated the interface. The "Open PDF" button has been replaced with a "Copy Path" button. When you click it, the button will briefly change to "Copied!" to confirm the action, and the full file path will be ready on your clipboard to paste into your File Explor
