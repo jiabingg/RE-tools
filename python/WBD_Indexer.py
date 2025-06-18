@@ -121,7 +121,8 @@ class PdfIndexerApp:
         pdf_count = 0
         
         # Regex to find a 10-digit number. \b ensures we match whole words only.
-        api_regex = re.compile(r'\b(\d{10})\b')
+        # api_regex = re.compile(r'\b(\d{10})\b')
+        api_regex = re.compile(r'^(\d{10})')
 
         try:
             for dirpath, _, filenames in os.walk(source_dir):
