@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Well API Search</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a cleaner look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for the search input to have a nice focus state */
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4); /* Blue-300 with opacity */
+            border-color: #3b82f6; /* Blue-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        <!-- Header -->
+        <header class="bg-white shadow-md rounded-xl p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Well API Document Search</h1>
+            <p class="mt-2 text-gray-600">
+                Search for PDF documents by their 10-digit Well API. The data is loaded from the
+                <code class="bg-gray-200 text-sm font-mono p-1 rounded">well_data.json</code> file.
+            </p>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="mb-6">
+            <input type="text" id="searchInput"
+                   placeholder="Enter 10-digit API to search..."
+                   class="w-full p-4 text-lg border-2 border-gray-300 rounded-lg transition duration-200 ease-in-out search-input"
+                   aria-label="Search by Well API">
+        </div>
+
+        <!-- Status & Results Count -->
+        <div id="status" class="text-center text-gray-500 mb-4 h-6"></div>
+
+        <!-- Results Container -->
+        <main id="resultsContainer" class="space-y-4">
+            <!-- Search results will be dynamically inserted here -->
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const statusDiv = document.getElementById('status');
+            
+            let wellData = []; // To store the loaded well data
+
+            // Function to fetch and load the JSON data
+            async function loadData() {
+                try {
+                    statusDiv.textContent = 'Loading well data...';
+                    const response = await fetch('well_data.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}. Make sure 'well_data.json' is in the same folder as this HTML file.`);
+                    }
+                    wellData = await response.json();
+                    statusDiv.textContent = `Loaded ${wellData.length} records. Ready to search.`;
+                } catch (error) {
+                    console.error('Failed to load well data:', error);
+                    statusDiv.innerHTML = `<span class="text-red-600 font-bold">Error:</span> Could not load <code class="bg-red-100 text-sm font-mono p-1 rounded">well_data.json</code>. <br> ${error.message}`;
+                    searchInput.disabled = true;
+                }
+            }
+
+            // Function to render the search results
+            function renderResults(results) {
+                resultsContainer.innerHTML = ''; // Clear previous results
+
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                            <p class="font-semibold text-gray-700">No results found.</p>
+                            <p class="text-gray-500 text-sm mt-1">Try a different API number.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                results.forEach(item => {
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'bg-white p-4 rounded-lg shadow-md transition-all hover:shadow-lg hover:scale-[1.01]';
+                    
+                    // Note: 'file:///' is the protocol for accessing local files.
+                    resultCard.innerHTML = `
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center">
+                            <div>
+                                <p class="text-lg font-semibold text-blue-700">${item.api}</p>
+                                <p class="text-gray-600 text-sm">${item.filename}</p>
+                            </div>
+                            <a href="file:///${item.path}" 
+                               target="_blank" 
+                               class="mt-3 sm:mt-0 inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
+                                Open PDF
+                            </a>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2 break-all">Path: ${item.path}</p>
+                    `;
+                    resultsContainer.appendChild(resultCard);
+                });
+            }
+
+            // Event listener for the search input
+            searchInput.addEventListener('keyup', () => {
+                const query = searchInput.value.trim().toLowerCase();
+                
+                if (query === '') {
+                    resultsContainer.innerHTML = ''; // Clear results if search is empty
+                    statusDiv.textContent = `Loaded ${wellData.length} records. Ready to search.`;
+                    return;
+                }
+
+                const filteredResults = wellData.filter(item => 
+                    item.api.includes(query)
+                );
+                
+                renderResults(filteredResults);
+                statusDiv.textContent = `Found ${filteredResults.length} matching record(s).`;
+            });
+
+            // Initial load of the data
+            loadData();
+        });
+    </script>
+
+</body>
+</html>
