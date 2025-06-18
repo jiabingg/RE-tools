@@ -60,7 +60,7 @@
             
             let wellData = []; // To store the loaded well data
 
-            // --- NEW: Function to copy file path and provide user feedback ---
+            // Function to copy file path and provide user feedback
             function copyPathToClipboard(path, buttonElement) {
                 // Use a temporary textarea to securely copy the path
                 const textArea = document.createElement('textarea');
@@ -72,6 +72,7 @@
                 textArea.select();
 
                 try {
+                    // This is the core copy command
                     const successful = document.execCommand('copy');
                     if (successful) {
                         // Provide visual feedback
@@ -80,6 +81,7 @@
                         buttonElement.classList.add('bg-green-600', 'hover:bg-green-700');
                         buttonElement.classList.remove('bg-blue-600', 'hover:bg-blue-700');
 
+                        // Change it back after 2 seconds
                         setTimeout(() => {
                             buttonElement.textContent = originalText;
                             buttonElement.classList.remove('bg-green-600', 'hover:bg-green-700');
@@ -129,15 +131,15 @@
                     const resultCard = document.createElement('div');
                     resultCard.className = 'bg-white p-4 rounded-lg shadow-md transition-all hover:shadow-lg hover:scale-[1.01]';
                     
-                    // --- MODIFIED: The link is now a button that calls the copy function ---
+                    // --- MODIFIED: Removed onclick, added class and data-path attribute ---
                     resultCard.innerHTML = `
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center">
                             <div>
                                 <p class="text-lg font-semibold text-blue-700">${item.api}</p>
                                 <p class="text-gray-600 text-sm">${item.filename}</p>
                             </div>
-                            <button onclick="copyPathToClipboard('${item.path.replace(/\\/g, '\\\\')}', this)"
-                               class="mt-3 sm:mt-0 inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
+                            <button data-path="${item.path}"
+                               class="copy-btn mt-3 sm:mt-0 inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
                                 Copy Path
                             </button>
                         </div>
@@ -165,6 +167,17 @@
                 statusDiv.textContent = `Found ${filteredResults.length} matching record(s).`;
             });
 
+            // --- NEW: Use event delegation for all copy button clicks ---
+            resultsContainer.addEventListener('click', (event) => {
+                // Find the button that was clicked, even if the click was on an element inside it
+                const button = event.target.closest('.copy-btn');
+
+                if (button) {
+                    const path = button.dataset.path;
+                    copyPathToClipboard(path, button);
+                }
+            });
+
             // Initial load of the data
             loadData();
         });
@@ -174,4 +187,4 @@
 </html>
 ```
 
-I've now updated the interface. The "Open PDF" button has been replaced with a "Copy Path" button. When you click it, the button will briefly change to "Copied!" to confirm the action, and the full file path will be ready on your clipboard to paste into your File Explor
+The "Copy Path" button should now work correctly, changing its text to "Copied!" and successfully copying the path to your clipboa
