@@ -174,7 +174,8 @@
 
                 if (button) {
                     const path = button.dataset.path;
-                    copyPathToClipboard(path, button);
+                    new_path = path.replace(/\//g, '\\');
+                    copyPathToClipboard(new_path, button);
                 }
             });
 
