@@ -23,8 +23,11 @@ class PdfIndexerApp:
         # --- YOU CAN EDIT THIS LIST TO ADD YOUR FOLDER PATHS ---
         # Use forward slashes (/) or escaped backslashes (\\) for paths.
         self.folders_to_scan = [
-            "C:/Users/bj211404/Downloads/CopyFile/Test/Source",
-            "C:/Users/bj211404/Downloads/CopyFile/Test/Source2",
+            #"I:/EHS - DOGGR/AORs",
+            #"I:/EHS - DOGGR/UIC\Project by Project Reviews",
+            "J:/Development/Reservoir/AOR- Wellbore Diagrams",
+            #"C:/Users/bj211404/Downloads/CopyFile/Test/Source",
+            #"C:/Users/bj211404/Downloads/CopyFile/Test/Source2",
             # Add more folder paths here
         ]
 
@@ -114,7 +117,7 @@ class PdfIndexerApp:
         pdf_count = 0
         
         # Regex to find a 10-digit number. \b ensures we match whole words only.
-        api_regex = re.compile(r'\b(\d{10})\b')
+        api_regex = re.compile(r'^(\d{10})')
 
         try:
             # Loop through the list of folders provided in the code
