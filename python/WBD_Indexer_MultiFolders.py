@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox, scrolledtext
 import os
 import re
 import json
+import csv # Imported the csv module
 import threading
 from datetime import datetime
 
@@ -23,11 +24,9 @@ class PdfIndexerApp:
         # --- YOU CAN EDIT THIS LIST TO ADD YOUR FOLDER PATHS ---
         # Use forward slashes (/) or escaped backslashes (\\) for paths.
         self.folders_to_scan = [
-            #"I:/EHS - DOGGR/AORs",
-            #"I:/EHS - DOGGR/UIC\Project by Project Reviews",
-            "J:/Development/Reservoir/AOR- Wellbore Diagrams",
-            #"C:/Users/bj211404/Downloads/CopyFile/Test/Source",
-            #"C:/Users/bj211404/Downloads/CopyFile/Test/Source2",
+            "I:/EHS - DOGGR/AORs",
+            "I:/EHS - DOGGR/UIC\Project by Project Reviews",
+            #"J:/Development/Reservoir/AOR- Wellbore Diagrams",
             # Add more folder paths here
         ]
 
@@ -37,7 +36,6 @@ class PdfIndexerApp:
         main_frame.columnconfigure(1, weight=1)
 
         # --- Input Fields ---
-        # Removed the UI for selecting a single source folder.
         # 1. Output Data File
         tk.Label(main_frame, text="Save Data File As:", font=("Helvetica", 11, "bold"), bg="#f0f2f5").grid(row=0, column=0, sticky="w", pady=5)
         self.output_path = tk.StringVar()
@@ -116,44 +114,55 @@ class PdfIndexerApp:
         well_data = []
         pdf_count = 0
         
-        # Regex to find a 10-digit number. \b ensures we match whole words only.
         api_regex = re.compile(r'^(\d{10})')
 
         try:
             # Loop through the list of folders provided in the code
             for folder_to_scan in self.folders_to_scan:
-                if not os.path.isdir(folder_to_scan):
-                    self.log(f"WARNING: Folder not found, skipping: {folder_to_scan}")
-                    continue
-                
-                self.log(f"INFO: Scanning folder: {folder_to_scan}")
-                for dirpath, _, filenames in os.walk(folder_to_scan):
-                    for filename in filenames:
-                        if filename.lower().endswith('.pdf'):
-                            match = api_regex.search(filename)
-                            if match:
-                                api = match.group(1)
-                                full_path = os.path.join(dirpath, filename)
-                                path_for_html = full_path.replace('/', '\\')
+                # --- MODIFIED: Added a try/except block for each folder ---
+                # This ensures that an error in one folder does not stop the entire process.
+                try:
+                    if not os.path.isdir(folder_to_scan):
+                        self.log(f"WARNING: Folder not found, skipping: {folder_to_scan}")
+                        continue
+                    
+                    self.log(f"INFO: Scanning folder: {folder_to_scan}")
+                    for dirpath, _, filenames in os.walk(folder_to_scan):
+                        # --- NEW: Condition to exclude specific directory paths ---
+                        if "Don't use" in dirpath:
+                            self.log(f"  -> SKIPPING directory: {dirpath}")
+                            continue # Skip this directory and all its files
 
-                                # Get file modification date
-                                mod_timestamp = os.path.getmtime(full_path)
-                                mod_date_str = datetime.fromtimestamp(mod_timestamp).strftime('%Y-%m-%d %H:%M:%S')
-                                
-                                well_data.append({
-                                    'api': api,
-                                    'filename': filename,
-                                    'path': path_for_html, # Using original path with backslashes
-                                    'modified': mod_date_str
-                                })
-                                pdf_count += 1
-                                self.log(f"  -> FOUND: API {api} in '{filename}' (Modified: {mod_date_str})")
+                        for filename in filenames:
+                            if filename.lower().endswith('.pdf') and len(filename) <= 20:
+                                match = api_regex.search(filename)
+                                if match:
+                                    api = match.group(1)
+                                    full_path = os.path.join(dirpath, filename)
+                                    path_for_html = full_path.replace('/', '\\')
+
+                                    # Get file modification date
+                                    mod_timestamp = os.path.getmtime(full_path)
+                                    mod_date_str = datetime.fromtimestamp(mod_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+                                    
+                                    well_data.append({
+                                        'api': api,
+                                        'filename': filename,
+                                        'path': path_for_html, # Using original path with backslashes
+                                        'modified': mod_date_str
+                                    })
+                                    pdf_count += 1
+                                    self.log(f"  -> FOUND: API {api} in '{filename}' (Modified: {mod_date_str})")
+                except Exception as e:
+                    self.log(f"ERROR: Could not process folder '{folder_to_scan}'. Reason: {e}")
+                    # The loop will automatically continue to the next folder.
             
             self.log("-" * 60)
             
             if not well_data:
-                self.log("WARNING: Scan complete, but no PDFs with 10-digit APIs were found.")
-                messagebox.showwarning("Scan Complete", "No PDFs with valid 10-digit APIs were found in the specified folders.")
+                self.log("WARNING: Scan complete, but no PDFs starting with a 10-digit API were found.")
+                # Using root.after to ensure messagebox is called from the main thread
+                self.root.after(0, lambda: messagebox.showwarning("Scan Complete", "No PDFs starting with a valid 10-digit API were found in the specified folders."))
                 return
 
             # Write the collected data to the JSON file
@@ -162,13 +171,31 @@ class PdfIndexerApp:
                 json.dump(well_data, f, indent=2)
 
             self.log("SUCCESS: Index file created successfully!")
+
+            # --- NEW: Write the same data to a CSV file ---
+            base_output_path, _ = os.path.splitext(output_file)
+            csv_output_file = base_output_path + '.csv'
+            self.log(f"INFO: Writing to CSV file...")
+            try:
+                with open(csv_output_file, 'w', newline='', encoding='utf-8') as f:
+                    # Define the header, matching the keys in the dictionaries
+                    fieldnames = ['api', 'filename', 'path', 'modified']
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    
+                    writer.writeheader()
+                    writer.writerows(well_data)
+                self.log(f"SUCCESS: CSV file created successfully at {csv_output_file}")
+            except Exception as e:
+                self.log(f"ERROR: Failed to write CSV file. Reason: {e}")
+
             self.root.after(0, lambda: messagebox.showinfo("Success", f"Successfully created index file with {pdf_count} entries at:\n{output_file}"))
 
         except Exception as e:
-            self.log(f"ERROR: An unexpected error occurred: {e}")
-            self.root.after(0, lambda: messagebox.showerror("Error", f"An error occurred during scanning: {e}"))
+            # This outer block catches critical errors (like being unable to write the final file)
+            self.log(f"ERROR: A critical error occurred during the operation: {e}")
+            self.root.after(0, lambda: messagebox.showerror("Critical Error", f"An error occurred: {e}"))
         finally:
-            # Re-enable the button
+            # This will run no matter what, ensuring the GUI is responsive again.
             self.root.after(0, self.process_button.config, {'state': tk.NORMAL, 'text': 'Start Scanning and Create Index File'})
 
 
