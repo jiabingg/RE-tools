@@ -127,16 +127,22 @@
                     return;
                 }
 
+                // --- NEW: Sort results by modified date, newest first ---
+                results.sort((a, b) => new Date(b.modified) - new Date(a.modified));
+
                 results.forEach(item => {
                     const resultCard = document.createElement('div');
                     resultCard.className = 'bg-white p-4 rounded-lg shadow-md transition-all hover:shadow-lg hover:scale-[1.01]';
                     
-                    // --- MODIFIED: Removed onclick, added class and data-path attribute ---
+                    // --- UPDATED: Added a line to display the 'modified' date ---
                     resultCard.innerHTML = `
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center">
                             <div>
                                 <p class="text-lg font-semibold text-blue-700">${item.api}</p>
                                 <p class="text-gray-600 text-sm">${item.filename}</p>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    <span class="font-medium">Modified:</span> ${item.modified || 'N/A'}
+                                </p>
                             </div>
                             <button data-path="${item.path}"
                                class="copy-btn mt-3 sm:mt-0 inline-block bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
@@ -167,15 +173,14 @@
                 statusDiv.textContent = `Found ${filteredResults.length} matching record(s).`;
             });
 
-            // --- NEW: Use event delegation for all copy button clicks ---
+            // Use event delegation for all copy button clicks
             resultsContainer.addEventListener('click', (event) => {
                 // Find the button that was clicked, even if the click was on an element inside it
                 const button = event.target.closest('.copy-btn');
 
                 if (button) {
                     const path = button.dataset.path;
-                    new_path = path.replace(/\//g, '\\');
-                    copyPathToClipboard(new_path, button);
+                    copyPathToClipboard(path, button);
                 }
             });
 
@@ -186,6 +191,3 @@
 
 </body>
 </html>
-```
-
-replace / to \
