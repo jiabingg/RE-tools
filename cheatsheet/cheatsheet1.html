@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Cheat Sheet (Original Size)</title>
+    <style>
+        /* CSS updated for a flexible, wrapping layout */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        #image-container {
+            /* Using Flexbox for a flexible wrapping layout */
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start; /* Aligns items to the top of the line */
+            gap: 25px; /* Defines the space between images */
+            padding: 25px;
+        }
+
+        .image-item {
+            /* The container for each image and its name */
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .image-item img {
+            /* IMPORTANT: No max-width or height to show the image in its original size */
+            display: block; /* Removes extra space below the image */
+            margin-bottom: 10px;
+        }
+
+        .image-item p {
+            margin: 0;
+            font-size: 14px;
+            color: #555;
+            word-wrap: break-word; /* Ensures long filenames don't overflow */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Image Cheat Sheet</h1>
+    </div>
+
+    <div id="image-container">
+        </div>
+
+    <script>
+        // --- Step 1: Add your image file names to this array ---
+        const imageFiles = [
+            "image1/image31.png",
+            "image1/image31A.png",
+            "image1/image38.png",  //single phase flow
+            "image1/image44.png",  //1D flow
+            "image1/image45.png",  //multiphase flow
+            "image1/image33.png",
+            "image1/image34.png",
+            "image1/image35.png",
+            "image1/image36.png",
+            "image1/image41.png",
+            "image1/image42.png",
+            "image1/image43.png",
+            "image1/image46.png",
+            "image1/image47.png",
+            "image1/image49.png",
+            "image1/image50.png",
+            "image1/image51.png",
+            "image1/image52.png",
+            "image1/image53.png",
+            "image1/image54.png",
+            "image1/image55.png",
+            "image1/image56.png",
+            "image1/image57.png",
+            "image1/image58.png",
+            "image1/image59.png",
+            "image1/image48.png",
+            "image1/image37.png"
+        ];
+
+        // --- Step 2: The script below will automatically create the cheat sheet ---
+        window.onload = function() {
+            const imageContainer = document.getElementById('image-container');
+
+            if (imageFiles.length === 0) {
+                const message = document.createElement('p');
+                message.textContent = 'No image files have been added yet. Please edit the "imageFiles" array in the script section of this HTML file.';
+                imageContainer.appendChild(message);
+                return;
+            }
+
+            imageFiles.forEach(fileName => {
+                const itemContainer = document.createElement('div');
+                itemContainer.className = 'image-item';
+
+                const img = document.createElement('img');
+                img.src = fileName;
+                img.alt = fileName;
+
+                // Add an error handler for broken image links
+                img.onerror = function() {
+                    this.parentElement.innerHTML = `<p>Error loading:<br>${fileName}</p>`;
+                    this.parentElement.style.color = 'red';
+                    this.parentElement.style.width = '150px'; // Give error box a size
+                };
+
+                const caption = document.createElement('p');
+                caption.textContent = fileName;
+
+                itemContainer.appendChild(img);
+                itemContainer.appendChild(caption);
+                imageContainer.appendChild(itemContainer);
+            });
+        };
+    </script>
+
+</body>
+</html>
