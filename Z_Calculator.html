@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dranchuk-Abou-Kassem Z-Factor Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-12">
+    <div class="w-full max-w-3xl bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Gas Compressibility (Z-Factor) Calculator</h1>
+            <p class="text-gray-600 mt-2">Calculates the Z-factor using the Dranchuk-Abou-Kassem (1975) method with corrections for non-hydrocarbon components.</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+                <label for="sg" class="block text-sm font-medium text-gray-700 mb-1">Gas Specific Gravity</label>
+                <input type="number" id="sg" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 0.7">
+            </div>
+            <div>
+                <label for="pressure" class="block text-sm font-medium text-gray-700 mb-1">Pressure (psia)</label>
+                <input type="number" id="pressure" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 2000">
+            </div>
+            <div>
+                <label for="temperature" class="block text-sm font-medium text-gray-700 mb-1">Temperature (°F)</label>
+                <input type="number" id="temperature" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 150">
+            </div>
+            <div>
+                <label for="h2s" class="block text-sm font-medium text-gray-700 mb-1">H₂S (mole %)</label>
+                <input type="number" id="h2s" value="0" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 5">
+            </div>
+            <div>
+                <label for="co2" class="block text-sm font-medium text-gray-700 mb-1">CO₂ (mole %)</label>
+                <input type="number" id="co2" value="0" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 10">
+            </div>
+            <div>
+                <label for="n2" class="block text-sm font-medium text-gray-700 mb-1">N₂ (mole %)</label>
+                <input type="number" id="n2" value="0" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 2">
+            </div>
+        </div>
+        
+        <!-- Action Button -->
+        <button id="calculateBtn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+            Calculate Z-Factor
+        </button>
+
+        <!-- Result Section -->
+        <div id="result" class="hidden pt-4">
+             <div class="bg-gray-50 p-6 rounded-lg grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x">
+                <div class="text-center py-2 md:py-0">
+                    <h3 class="text-sm font-medium text-gray-600">Pseudo-Reduced Pressure</h3>
+                    <p id="pprValue" class="text-2xl font-bold text-gray-800"></p>
+                </div>
+                <div class="text-center py-2 md:py-0">
+                     <h3 class="text-sm font-medium text-gray-600">Pseudo-Reduced Temp.</h3>
+                    <p id="tprValue" class="text-2xl font-bold text-gray-800"></p>
+                </div>
+                <div class="text-center py-2 md:py-0">
+                    <h2 class="text-sm font-medium text-indigo-700">Calculated Z-Factor</h2>
+                    <p id="zFactorValue" class="text-4xl font-bold text-indigo-600"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Message/Error Section -->
+        <div id="message" class="hidden text-center text-red-600 bg-red-100 p-4 rounded-lg"></div>
+
+    </div>
+
+    <script>
+        // --- Dranchuk-Abou-Kassem (DAK) Constants ---
+        const A1 = 0.3265, A2 = -1.0700, A3 = -0.5339, A4 = 0.01569, A5 = -0.05165;
+        const A6 = 0.5475, A7 = -0.7361, A8 = 0.1844, A9 = 0.1056, A10 = 0.6134, A11 = 0.7210;
+        
+        // --- Critical Properties & SG for Non-Hydrocarbons ---
+        const T_C_H2S = 672.3, P_C_H2S = 1306, SG_H2S = 1.1768; // H2S: Tc(°R), Pc(psia), SG
+        const T_C_CO2 = 547.6, P_C_CO2 = 1071, SG_CO2 = 1.5197; // CO2: Tc(°R), Pc(psia), SG
+        const T_C_N2  = 227.2, P_C_N2  = 492.4,SG_N2  = 0.9672; // N2:  Tc(°R), Pc(psia), SG
+
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultDiv = document.getElementById('result');
+        const messageDiv = document.getElementById('message');
+
+        calculateBtn.addEventListener('click', () => {
+            // Hide previous results and messages
+            resultDiv.classList.add('hidden');
+            messageDiv.classList.add('hidden');
+            
+            try {
+                // 1. Get and validate all inputs
+                const inputs = getInputs();
+
+                // 2. Calculate pseudo-critical properties for the gas mixture
+                const pseudoCriticals = calculatePseudoCriticals(inputs);
+
+                // 3. Calculate pseudo-reduced properties
+                const ppr = inputs.pressure / pseudoCriticals.ppc_mix;
+                const tpr = inputs.tempR / pseudoCriticals.tpc_mix;
+                
+                // 4. Calculate Z-factor using DAK method
+                const z = solveForZ(ppr, tpr);
+
+                // 5. Display results
+                displayResults(ppr, tpr, z);
+
+            } catch (error) {
+                showMessage(error.message);
+            }
+        });
+
+        function getInputs() {
+            const sg = parseFloat(document.getElementById('sg').value);
+            const pressure = parseFloat(document.getElementById('pressure').value);
+            const tempF = parseFloat(document.getElementById('temperature').value);
+            const h2s = parseFloat(document.getElementById('h2s').value);
+            const co2 = parseFloat(document.getElementById('co2').value);
+            const n2 = parseFloat(document.getElementById('n2').value);
+            
+            if (isNaN(sg) || isNaN(pressure) || isNaN(tempF) || isNaN(h2s) || isNaN(co2) || isNaN(n2)) {
+                throw new Error("All input fields must contain valid numbers.");
+            }
+            if (sg <= 0 || pressure <= 0) {
+                 throw new Error("Specific gravity and pressure must be positive values.");
+            }
+            const y_h2s = h2s / 100.0;
+            const y_co2 = co2 / 100.0;
+            const y_n2 = n2 / 100.0;
+            const y_non_hc = y_h2s + y_co2 + y_n2;
+            
+            if (y_non_hc >= 1.0) {
+                throw new Error("The sum of non-hydrocarbon mole fractions cannot exceed 100%.");
+            }
+            
+            return {
+                sg, pressure, tempF, 
+                tempR: tempF + 459.67,
+                y_h2s, y_co2, y_n2, y_non_hc
+            };
+        }
+        
+        function calculatePseudoCriticals(inputs) {
+            const { sg, y_h2s, y_co2, y_n2, y_non_hc } = inputs;
+            const y_hc = 1.0 - y_non_hc;
+
+            // Calculate specific gravity of the hydrocarbon portion
+            const sg_hc = (sg - (SG_H2S * y_h2s) - (SG_CO2 * y_co2) - (SG_N2 * y_n2)) / y_hc;
+            
+            if (sg_hc <= 0) {
+                throw new Error("Invalid gas composition. The calculated hydrocarbon specific gravity is negative or zero.");
+            }
+            
+            // Calculate pseudo-critical properties of the hydrocarbon portion using Sutton's correlation
+            const tpc_hc = 169.2 + 349.5 * sg_hc - 74 * sg_hc**2;
+            const ppc_hc = 756.8 - 131.0 * sg_hc - 3.6 * sg_hc**2;
+
+            // Calculate overall pseudo-critical properties using Kay's Mixing Rule
+            const tpc_mix = (tpc_hc * y_hc) + (T_C_H2S * y_h2s) + (T_C_CO2 * y_co2) + (T_C_N2 * y_n2);
+            const ppc_mix = (ppc_hc * y_hc) + (P_C_H2S * y_h2s) + (P_C_CO2 * y_co2) + (P_C_N2 * y_n2);
+
+            return { tpc_mix, ppc_mix };
+        }
+
+        function displayResults(ppr, tpr, z) {
+            document.getElementById('pprValue').textContent = ppr.toFixed(4);
+            document.getElementById('tprValue').textContent = tpr.toFixed(4);
+            document.getElementById('zFactorValue').textContent = z.toFixed(5);
+            resultDiv.classList.remove('hidden');
+        }
+
+        function showMessage(msg) {
+            messageDiv.textContent = msg;
+            messageDiv.classList.remove('hidden');
+        }
+
+        /**
+         * Calculates the Z-factor using the Newton-Raphson iterative method on the DAK equation.
+         * @param {number} ppr - Pseudo-reduced pressure.
+         * @param {number} tpr - Pseudo-reduced temperature.
+         * @returns {number} The calculated Z-factor.
+         */
+        function solveForZ(ppr, tpr) {
+            const MAX_ITERATIONS = 100;
+            const TOLERANCE = 1e-9;
+            
+            // Initial guess for reduced density (pr) from ideal gas assumption. Z=1 => pr = 0.27*Ppr/Tpr
+            let pr = 0.27 * ppr / tpr;
+
+            for (let i = 0; i < MAX_ITERATIONS; i++) {
+                const z_current = (0.27 * ppr) / (pr * tpr);
+                const { func_val, deriv_val } = evaluateDAK(pr, tpr, z_current);
+
+                if (Math.abs(deriv_val) < 1e-10) { // Avoid division by zero
+                    throw new Error("Derivative is too small; calculation cannot proceed.");
+                }
+
+                const pr_new = pr - func_val / deriv_val;
+
+                if (Math.abs(pr_new - pr) < TOLERANCE) {
+                    return (0.27 * ppr) / (pr_new * tpr);
+                }
+                pr = pr_new;
+            }
+
+            throw new Error("Calculation did not converge. Please check input values or the model's applicability range.");
+        }
+
+        /**
+         * The Dranchuk-Abou-Kassem equation is implicit in Z and is often solved for reduced density (pr).
+         * This function evaluates the equation (rearranged to F(pr) = 0) and its derivative.
+         * F(pr) = Z_calc(pr) - Z_from_pr_relation = 0
+         */
+        function evaluateDAK(pr, tpr, z) {
+            const T1 = A1 + A2/tpr + A3/(tpr**3) + A4/(tpr**4) + A5/(tpr**5);
+            const T2 = A6 + A7/tpr + A8/(tpr**2);
+            const T3 = A9 * (A7/tpr + A8/(tpr**2));
+            
+            const exp_term = Math.exp(-A11 * pr**2);
+            const z_calc = 1 + T1*pr + T2*pr**2 - T3*pr**5 + (A10/(tpr**3)) * (pr**2 * (1 + A11*pr**2) * exp_term);
+
+            const func_val = z_calc - z;
+            
+            // Derivative of Z_calc with respect to pr
+            const dZcalc_dpr = T1 + 2*T2*pr - 5*T3*pr**4 + (A10/tpr**3) * exp_term * (2*pr + (2*pr**3*A11) - (2*pr*A11*(pr**2)*(1+A11*pr**2)));
+            
+            // Derivative of Z with respect to pr: d/d(pr) [0.27*Ppr/(pr*Tpr)] = -0.27*Ppr/(pr^2*Tpr) = -Z/pr
+            const dZ_dpr = -z / pr;
+
+            const deriv_val = dZcalc_dpr - dZ_dpr;
+
+            return { func_val, deriv_val };
+        }
+
+    </script>
+</body>
+</html>
