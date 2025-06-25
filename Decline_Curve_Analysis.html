@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decline Curve Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+        input, select {
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Decline Curve Analysis</h1>
+            <p class="text-gray-600 mt-2">Visualize and analyze oil production decline over time.</p>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left Column: Inputs -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Input Parameters</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="qi" class="block text-sm font-medium text-gray-700">Initial Production Rate (Qi, BOPD)</label>
+                            <input type="number" id="qi" value="1000">
+                        </div>
+                        
+                        <div>
+                            <label for="di" class="block text-sm font-medium text-gray-700">Initial Nominal Decline Rate (Di, %/year)</label>
+                            <input type="number" id="di" value="20">
+                        </div>
+
+                        <div>
+                            <label for="model" class="block text-sm font-medium text-gray-700">Decline Curve Model</label>
+                            <select id="model">
+                                <option value="exponential">Exponential</option>
+                                <option value="hyperbolic" selected>Hyperbolic</option>
+                                <option value="harmonic">Harmonic</option>
+                            </select>
+                        </div>
+                        
+                        <div id="b_factor_container">
+                            <label for="b_factor" class="block text-sm font-medium text-gray-700">Hyperbolic 'b' Factor</label>
+                            <input type="number" id="b_factor" value="0.5" step="0.1">
+                        </div>
+
+                        <div>
+                            <label for="run_life" class="block text-sm font-medium text-gray-700">Run Life (Years)</label>
+                            <input type="number" id="run_life" value="10">
+                        </div>
+
+                        <div>
+                            <label for="yAxisScale" class="block text-sm font-medium text-gray-700">Y-Axis Scale</label>
+                            <select id="yAxisScale">
+                                <option value="linear" selected>Linear</option>
+                                <option value="logarithmic">Logarithmic</option>
+                            </select>
+                        </div>
+                        
+                        <button id="calculateBtn" class="w-full btn-primary mt-2">Calculate & Visualize</button>
+                    </div>
+                </div>
+                <div class="card" id="formula-card">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-2">Formula Used</h2>
+                    <div id="formula" class="text-gray-800 p-4 bg-gray-50 rounded-lg text-center text-sm sm:text-base">
+                        <!-- Formula will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Chart and Table -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Production Rate vs. Time</h2>
+                    <div class="h-96">
+                      <canvas id="dcaChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Annual Production Summary</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Decline Rate (%/year)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Production Rate (BOPD)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTable" class="bg-white divide-y divide-gray-200">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const qiInput = document.getElementById('qi');
+        const diInput = document.getElementById('di');
+        const modelSelect = document.getElementById('model');
+        const bFactorContainer = document.getElementById('b_factor_container');
+        const bFactorInput = document.getElementById('b_factor');
+        const runLifeInput = document.getElementById('run_life');
+        const yAxisScaleSelect = document.getElementById('yAxisScale');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultsTable = document.getElementById('resultsTable');
+        const formulaDiv = document.getElementById('formula');
+        const ctx = document.getElementById('dcaChart').getContext('2d');
+        
+        let dcaChart;
+
+        // --- Formulas Display ---
+        const formulas = {
+            exponential: '$$ q(t) = q_i e^{-D_i t} $$',
+            hyperbolic: '$$ q(t) = \\frac{q_i}{(1 + b D_i t)^{1/b}} $$',
+            harmonic: '$$ q(t) = \\frac{q_i}{1 + D_i t} $$'
+        };
+
+        // --- Event Listeners ---
+        modelSelect.addEventListener('change', toggleBFactorInput);
+        calculateBtn.addEventListener('click', performAnalysis);
+        yAxisScaleSelect.addEventListener('change', performAnalysis); // Recalculate on scale change
+        
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleBFactorInput();
+            performAnalysis(); // Run analysis on page load with default values
+        });
+
+        function toggleBFactorInput() {
+            const selectedModel = modelSelect.value;
+            bFactorContainer.style.display = selectedModel === 'hyperbolic' ? 'block' : 'none';
+            performAnalysis(); // Also re-calculate when model changes
+        }
+
+        // --- Core Calculation Logic ---
+        function performAnalysis() {
+            // 1. Get Inputs
+            const qi = parseFloat(qiInput.value);
+            const di_percent = parseFloat(diInput.value);
+            const di = di_percent / 100; // Convert percentage to decimal
+            const model = modelSelect.value;
+            const b = parseFloat(bFactorInput.value);
+            const runLife = parseInt(runLifeInput.value);
+            const scaleType = yAxisScaleSelect.value;
+
+            if (isNaN(qi) || isNaN(di) || isNaN(runLife) || (model === 'hyperbolic' && isNaN(b))) {
+                // Using console.error instead of alert for a cleaner user experience
+                console.error("Invalid input values. Calculation halted.");
+                return;
+            }
+
+            // 2. Generate Data for Chart (Monthly)
+            const months = runLife * 12;
+            const labels = [];
+            const productionData = [];
+            
+            for (let t_month = 0; t_month <= months; t_month++) {
+                const t_year = t_month / 12;
+                labels.push(t_month);
+                let qt = 0;
+
+                switch (model) {
+                    case 'exponential':
+                        qt = qi * Math.exp(-di * t_year);
+                        break;
+                    case 'hyperbolic':
+                        if (b <= 0) {
+                             console.error("The 'b' factor for hyperbolic decline must be greater than 0.");
+                            return;
+                        }
+                        qt = qi / Math.pow((1 + b * di * t_year), (1 / b));
+                        break;
+                    case 'harmonic':
+                        qt = qi / (1 + di * t_year);
+                        break;
+                }
+                // For log scale, ensure no non-positive values are pushed
+                productionData.push(qt > 0 ? qt.toFixed(2) : 0);
+            }
+
+            // 3. Update Chart
+            updateChart(labels, productionData, scaleType);
+            
+            // 4. Update Table (Annually)
+            updateTable(qi, di, model, b, runLife);
+
+            // 5. Update Formula Display
+            updateFormula(model);
+        }
+
+        // --- Chart Update ---
+        function updateChart(labels, data, scaleType) {
+            if (dcaChart) {
+                dcaChart.destroy();
+            }
+            dcaChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Production Rate (BOPD)',
+                        data: data,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        pointRadius: 0,
+                        tension: 0.1,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time (Months)'
+                            },
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        },
+                        y: {
+                            type: scaleType, // Dynamic Y-axis scale
+                            title: {
+                                display: true,
+                                text: 'Production Rate (BOPD)'
+                            },
+                             grid: {
+                                color: '#e5e7eb'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // --- Table Update ---
+        function updateTable(qi, di, model, b, runLife) {
+            resultsTable.innerHTML = ''; // Clear previous results
+
+            for (let year = 0; year <= runLife; year++) {
+                let qt_year_start = 0;
+                let qt_year_end = 0;
+
+                // Calculate production at the start of the year
+                switch (model) {
+                    case 'exponential':
+                        qt_year_start = qi * Math.exp(-di * year);
+                        break;
+                    case 'hyperbolic':
+                        qt_year_start = qi / Math.pow((1 + b * di * year), (1 / b));
+                        break;
+                    case 'harmonic':
+                        qt_year_start = qi / (1 + di * year);
+                        break;
+                }
+                
+                // Calculate production at the end of the year to find decline
+                 if (year < runLife) {
+                     let next_year = year + 1;
+                     switch (model) {
+                         case 'exponential':
+                             qt_year_end = qi * Math.exp(-di * next_year);
+                             break;
+                         case 'hyperbolic':
+                             qt_year_end = qi / Math.pow((1 + b * di * next_year), (1 / b));
+                             break;
+                         case 'harmonic':
+                             qt_year_end = qi / (1 + di * next_year);
+                             break;
+                     }
+                 } else {
+                     qt_year_end = qt_year_start; // At end of life, assume rate holds for calc
+                 }
+
+
+                // Calculate effective decline rate for the year
+                let annual_decline_rate = 0;
+                if(qt_year_start > 0) {
+                    annual_decline_rate = ((qt_year_start - qt_year_end) / qt_year_start) * 100;
+                }
+                
+                // For year 0, the decline is based on the initial nominal rate.
+                let display_decline = (year === 0) ? (di * 100) : annual_decline_rate;
+                if(year === runLife) display_decline = annual_decline_rate;
+
+
+                const row = `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${year}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${display_decline.toFixed(2)}%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${qt_year_start.toFixed(2)}</td>
+                    </tr>
+                `;
+                resultsTable.innerHTML += row;
+            }
+        }
+        
+        // --- Formula Update ---
+        function updateFormula(model) {
+            formulaDiv.innerHTML = formulas[model];
+            // We need to tell MathJax to re-render the content
+            if (window.MathJax) {
+                MathJax.typesetPromise([formulaDiv]);
+            }
+        }
+
+    </script>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
