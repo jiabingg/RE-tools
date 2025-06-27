@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bottom Hole Pressure Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            transition: all 0.3s ease-in-out;
+        }
+        input[type="radio"]:checked + label {
+            background-color: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <!-- Main container with reduced max-width -->
+    <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Calculator Card -->
+        <div class="card">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Bottom Hole Pressure Calculator</h1>
+            <p class="text-gray-500 mb-6">Enter the well parameters to calculate the Bottom Hole Pressure (BHP).</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="surfacePressure" class="block text-sm font-medium text-gray-700 mb-1">Surface Pressure (psia)</label>
+                    <input type="number" id="surfacePressure" value="1000" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+
+                <!-- Input Mode Toggle -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fluid Property</label>
+                    <div class="flex rounded-lg shadow-sm">
+                        <input type="radio" name="fluidInputMode" id="modePpg" value="ppg" class="sr-only" checked>
+                        <label for="modePpg" class="w-full text-center px-4 py-2 rounded-l-lg border border-gray-300 cursor-pointer transition">Fluid Weight (ppg)</label>
+                        
+                        <input type="radio" name="fluidInputMode" id="modeGradient" value="gradient" class="sr-only">
+                        <label for="modeGradient" class="w-full text-center px-4 py-2 rounded-r-lg border-t border-b border-r border-gray-300 cursor-pointer transition">Fluid Gradient (psi/ft)</label>
+                    </div>
+                </div>
+
+                <!-- Fluid Weight Input -->
+                <div id="ppgInputContainer">
+                    <label for="fluidWeight" class="block text-sm font-medium text-gray-700 mb-1">Fluid Weight (ppg)</label>
+                    <input type="number" id="fluidWeight" value="9.5" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                
+                <!-- Fluid Gradient Input -->
+                <div id="gradientInputContainer" class="hidden">
+                    <label for="fluidGradient" class="block text-sm font-medium text-gray-700 mb-1">Fluid Gradient (psi/ft)</label>
+                    <input type="number" id="fluidGradient" value="0.494" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+
+                <div>
+                    <label for="depth" class="block text-sm font-medium text-gray-700 mb-1">True Vertical Depth (ft)</label>
+                    <input type="number" id="depth" value="5000" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+            </div>
+
+            <button id="calculateBtn" class="w-full mt-6 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition transform hover:scale-105">
+                Calculate
+            </button>
+
+            <div id="result" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center hidden">
+                <p class="text-lg text-gray-600">Calculated Bottom Hole Pressure:</p>
+                <p id="bhpValue" class="text-3xl font-bold text-blue-800"></p>
+            </div>
+            
+            <div id="error-message" class="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-center text-red-700 hidden"></div>
+
+            <br>
+            <p class="text-gray-500 mb-6">The pressure gradient of fresh water is approximately 0.433 psi/ft.</p>
+            <p class="text-gray-500 mb-6">Fresh water's weight is approximately 8.33 ppg.</p>
+            <p class="text-gray-500 mb-6">The conversion factor from pounds per gallon (ppg) to pounds per square inch per foot (psi/ft) is 0.052.</p>
+
+        </div>
+
+        <!-- Visualization Card -->
+        <div class="card flex flex-col">
+            <h2 class="text-xl font-bold text-gray-800 mb-2 text-center">Pressure Profile Visualization</h2>
+            <p id="visualization-subtitle" class="text-gray-500 mb-4 text-center text-sm">A plot of pressure vs. true vertical depth.</p>
+            <!-- Chart container: Simplified to just provide responsive space -->
+            <div class="relative w-full aspect-square flex-1">
+                 <canvas id="pressureChart" class="w-full h-full"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const surfacePressureInput = document.getElementById('surfacePressure');
+        const fluidWeightInput = document.getElementById('fluidWeight');
+        const fluidGradientInput = document.getElementById('fluidGradient');
+        const depthInput = document.getElementById('depth');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultDiv = document.getElementById('result');
+        const bhpValueP = document.getElementById('bhpValue');
+        const errorMessageDiv = document.getElementById('error-message');
+        const canvas = document.getElementById('pressureChart');
+        const ctx = canvas.getContext('2d');
+        const modePpgRadio = document.getElementById('modePpg');
+        const modeGradientRadio = document.getElementById('modeGradient');
+        const ppgInputContainer = document.getElementById('ppgInputContainer');
+        const gradientInputContainer = document.getElementById('gradientInputContainer');
+
+        // --- Constants ---
+        const HYDROSTATIC_GRADIENT_CONSTANT = 0.052;
+
+        // --- Functions ---
+        function calculateBHP() {
+            resultDiv.classList.add('hidden');
+            errorMessageDiv.classList.add('hidden');
+
+            const sp = parseFloat(surfacePressureInput.value);
+            const d = parseFloat(depthInput.value);
+            const inputMode = document.querySelector('input[name="fluidInputMode"]:checked').value;
+            
+            let hydrostaticPressure = 0;
+            
+            if (isNaN(sp) || isNaN(d) || sp < 0 || d <= 0) {
+                showError('Please enter valid, positive numbers for Surface Pressure and Depth.');
+                return;
+            }
+
+            if (inputMode === 'ppg') {
+                const fw = parseFloat(fluidWeightInput.value);
+                if (isNaN(fw) || fw <= 0) {
+                    showError('Please enter a valid, positive number for Fluid Weight.');
+                    return;
+                }
+                hydrostaticPressure = HYDROSTATIC_GRADIENT_CONSTANT * fw * d;
+            } else {
+                const fg = parseFloat(fluidGradientInput.value);
+                if (isNaN(fg) || fg <= 0) {
+                    showError('Please enter a valid, positive number for Fluid Gradient.');
+                    return;
+                }
+                hydrostaticPressure = fg * d;
+            }
+
+            const bhp = sp + hydrostaticPressure;
+
+            bhpValueP.textContent = `${bhp.toFixed(0)} psia`;
+            resultDiv.classList.remove('hidden');
+            
+            drawPressureProfile(sp, bhp, d);
+        }
+        
+        function showError(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.classList.remove('hidden');
+            clearCanvas();
+        }
+
+        function switchInputMode(event) {
+            const mode = event.target.value;
+            if (mode === 'ppg') {
+                ppgInputContainer.classList.remove('hidden');
+                gradientInputContainer.classList.add('hidden');
+                const gradient = parseFloat(fluidGradientInput.value);
+                if (!isNaN(gradient)) {
+                    fluidWeightInput.value = (gradient / HYDROSTATIC_GRADIENT_CONSTANT).toFixed(2);
+                }
+            } else {
+                gradientInputContainer.classList.remove('hidden');
+                ppgInputContainer.classList.add('hidden');
+                const ppg = parseFloat(fluidWeightInput.value);
+                if (!isNaN(ppg)) {
+                    fluidGradientInput.value = (ppg * HYDROSTATIC_GRADIENT_CONSTANT).toFixed(3);
+                }
+            }
+        }
+
+        function drawPressureProfile(surfacePressure, bottomHolePressure, totalDepth) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const padding = { top: 30, right: 30, bottom: 40, left: 60 };
+            const chartWidth = canvas.width / dpr - padding.left - padding.right;
+            const chartHeight = canvas.height / dpr - padding.bottom - padding.top;
+            const pointRadius = 5;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const maxPressure = Math.ceil((bottomHolePressure * 1.05 + 1) / 1000) * 1000;
+
+            const mapX = (pressure) => padding.left + pointRadius + (pressure / maxPressure) * (chartWidth - pointRadius * 2);
+            const mapY = (depth) => padding.top + pointRadius + (depth / totalDepth) * (chartHeight - pointRadius * 2);
+
+            ctx.fillStyle = '#F9FAFB';
+            ctx.fillRect(padding.left, padding.top, chartWidth, chartHeight);
+            ctx.strokeStyle = '#E5E7EB';
+            ctx.lineWidth = 1;
+            ctx.font = '10px Inter';
+            ctx.fillStyle = '#6B7280';
+            
+            ctx.textAlign = 'right';
+            const yTicks = 5;
+            for (let i = 0; i <= yTicks; i++) {
+                const depthValue = (i / yTicks) * totalDepth;
+                const y = padding.top + (i / yTicks) * chartHeight;
+                ctx.beginPath();
+                ctx.moveTo(padding.left - 5, y);
+                ctx.lineTo(padding.left + chartWidth, y);
+                ctx.stroke();
+                ctx.fillText(`${depthValue.toFixed(0)} ft`, padding.left - 10, y + 3);
+            }
+            
+            ctx.textAlign = 'center';
+            const xTicks = 4;
+            for (let i = 0; i <= xTicks; i++) {
+                const pressureValue = (i / xTicks) * maxPressure;
+                const x = padding.left + (i / xTicks) * chartWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, padding.top + chartHeight + 5);
+                ctx.stroke();
+                ctx.fillText(`${(pressureValue / 1000).toFixed(1)}k`, x, padding.top + chartHeight + 20);
+            }
+
+            ctx.save();
+            ctx.fillStyle = '#374151';
+            ctx.font = '12px Inter';
+            ctx.textAlign = 'center';
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Depth', -canvas.height / (2 * dpr), padding.left - 45);
+            ctx.restore();
+            ctx.fillText('Pressure (psia)', padding.left + chartWidth / 2, padding.top + chartHeight + 35);
+            
+            ctx.beginPath();
+            ctx.moveTo(mapX(surfacePressure), mapY(0));
+            ctx.lineTo(mapX(bottomHolePressure), mapY(totalDepth));
+            ctx.strokeStyle = '#2563EB';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(mapX(surfacePressure), mapY(0), pointRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.strokeStyle = '#2563EB';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(mapX(bottomHolePressure), mapY(totalDepth), pointRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.strokeStyle = '#2563EB';
+            ctx.stroke();
+
+            ctx.fillStyle = '#1E40AF';
+            ctx.font = '11px Inter';
+            const labelOffset = pointRadius + 4;
+
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`SP: ${surfacePressure.toFixed(0)}`, mapX(surfacePressure) + labelOffset, mapY(0));
+
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`BHP: ${bottomHolePressure.toFixed(0)}`, mapX(bottomHolePressure) - labelOffset, mapY(totalDepth));
+        }
+
+        function clearCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, canvas.width/dpr, canvas.height/dpr);
+            
+            ctx.font = '14px Inter';
+            ctx.fillStyle = '#9CA3AF';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Enter valid data to generate the chart.', (canvas.width/dpr) / 2, (canvas.height/dpr) / 2);
+        }
+
+        // --- Event Listeners ---
+        calculateBtn.addEventListener('click', calculateBHP);
+        modePpgRadio.addEventListener('change', switchInputMode);
+        modeGradientRadio.addEventListener('change', switchInputMode);
+        
+        [surfacePressureInput, fluidWeightInput, fluidGradientInput, depthInput].forEach(input => {
+            input.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    calculateBHP();
+                }
+            });
+        });
+
+        window.addEventListener('load', calculateBHP);
+        window.addEventListener('resize', calculateBHP);
+    </script>
+</body>
+</html>

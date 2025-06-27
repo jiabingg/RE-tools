@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Structured IPR Calculator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for plotting -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            /* Changed: Reduced padding from 1.5rem to 1rem */
+            padding: 1rem; 
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            /* Changed: Reduced margin from 1.5rem to 1rem */
+            margin-bottom: 1rem; 
+        }
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        .input-field {
+            width: 100%;
+            /* Changed: Reduced padding from 0.75rem to 0.5rem */
+            padding: 0.5rem; 
+            border: 1px solid #cbd5e0;
+            border-radius: 0.375rem;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+        .output-value {
+            font-weight: 700;
+            /* Changed: Reduced font size from 1.5rem to 1.25rem */
+            font-size: 1.25rem; 
+            color: #1e3a8a;
+        }
+        .output-unit {
+            /* Changed: Reduced font size from 1rem to 0.875rem */
+            font-size: 0.875rem; 
+            color: #64748b;
+            margin-left: 0.5rem;
+        }
+        .error-message {
+            color: #dc2626;
+            background-color: #fef2f2;
+            border: 1px solid #fca5a5;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+        .table-container {
+            max-height: 350px; /* Reduced height */
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Changed: Reduced container padding -->
+    <div class="container mx-auto p-3 lg:p-6">
+        <!-- Changed: Reduced header margin-bottom -->
+        <header class="text-center mb-8">
+            <!-- Changed: Reduced heading font size -->
+            <h1 class="text-3xl font-bold text-gray-900">Well Productivity Analysis Tool</h1>
+            <!-- Changed: Reduced paragraph font size -->
+            <p class="mt-2 text-base text-gray-600">A structured approach to IPR calculations and visualization.</p>
+        </header>
+
+        <!-- Changed: Reduced grid gap -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+            <!-- Left Column: Inputs & Calculated Sections -->
+            <div class="lg:col-span-2">
+                <!-- Main Input Card -->
+                <div class="card">
+                    <!-- Changed: Reduced heading font size -->
+                    <h2 class="text-xl font-bold mb-4 pb-3 border-b text-gray-800">Well Test & Reservoir Data</h2>
+                    <!-- Changed: Reduced spacing between inputs -->
+                    <div id="input-form" class="space-y-3">
+                        <div>
+                            <label for="flowRate" class="input-label">Test Flow Rate (BOPD)</label>
+                            <input type="number" id="flowRate" class="input-field" value="1000">
+                        </div>
+                        <div>
+                            <label for="reservoirPressure" class="input-label">Reservoir Pressure (psia)</label>
+                            <input type="number" id="reservoirPressure" class="input-field" value="4815">
+                        </div>
+                        <div>
+                            <label for="pwf" class="input-label">Bottomhole Flowing Pressure (psia)</label>
+                            <input type="number" id="pwf" class="input-field" value="3533">
+                        </div>
+                        <div>
+                            <label for="bubblePointPressure" class="input-label">Bubble Point Pressure (psia)</label>
+                            <input type="number" id="bubblePointPressure" class="input-field" value="2398">
+                        </div>
+                    </div>
+                    <!-- Changed: Reduced button padding -->
+                    <button id="calculate-btn" class="w-full mt-5 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300">
+                        Calculate & Analyze
+                    </button>
+                    <div id="error-container" class="mt-4"></div>
+                </div>
+
+                <!-- Section A: PI Calculation -->
+                <div id="section-a" class="card">
+                    <h2 class="text-lg font-bold text-gray-700">Productivity Index (PI)</h2>
+                    <div class="text-right mt-2">
+                        <span id="pi-output" class="output-value">--</span>
+                        <span class="output-unit">BOPD/psi</span>
+                    </div>
+                </div>
+
+                <!-- Section B: Flow Rate at Bubble Point -->
+                <div id="section-b" class="card">
+                    <h2 class="text-lg font-bold text-gray-700">Oil flow Rate at bubble point (Qb, BOPD)</h2>
+                     <div class="text-right mt-2">
+                        <span id="qb-output" class="output-value">--</span>
+                        <span class="output-unit">BOPD</span>
+                    </div>
+                </div>
+
+                <!-- Section C: Qomax Calculation -->
+                <div id="section-c" class="card">
+                    <h2 class="text-lg font-bold text-gray-700">Maximum Oil Rate (Qomax, BOPD)</h2>
+                    <div class="text-right mt-2">
+                        <span id="qomax-output" class="output-value">--</span>
+                        <span class="output-unit">BOPD</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Plot & Table -->
+            <div id="section-d-e-f" class="lg:col-span-3 card">
+                <h2 class="text-xl font-bold mb-4 pb-3 border-b text-gray-800">IPR Curve & Data Table</h2>
+                
+                <!-- E. Plot -->
+                <div class="mb-6">
+                     <h3 class="text-lg font-bold text-gray-700 mb-3">IPR Plot</h3>
+                     <!-- Changed: Reduced plot height -->
+                     <div class="relative h-[300px] sm:h-[350px]">
+                        <canvas id="ipr-chart"></canvas>
+                    </div>
+                </div>
+               
+                <!-- F. Table -->
+                <div>
+                     <h3 class="text-lg font-bold text-gray-700 mb-3">IPR Data Table</h3>
+                     <div class="table-container">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-200 sticky top-0">
+                                <tr>
+                                    <!-- Changed: Reduced table cell padding -->
+                                    <th class="p-2 font-semibold">Bottomhole Flowing Pressure (psia)</th>
+                                    <th class="p-2 font-semibold">Oil Rate (BOPD)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ipr-table-body" class="divide-y">
+                                <!-- Data rows will be inserted here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Element References ---
+        const flowRateInput = document.getElementById('flowRate');
+        const reservoirPressureInput = document.getElementById('reservoirPressure');
+        const pwfInput = document.getElementById('pwf');
+        const bubblePointPressureInput = document.getElementById('bubblePointPressure');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const errorContainer = document.getElementById('error-container');
+
+        const piOutput = document.getElementById('pi-output');
+        const qbOutput = document.getElementById('qb-output');
+        const qomaxOutput = document.getElementById('qomax-output');
+
+        const chartCtx = document.getElementById('ipr-chart').getContext('2d');
+        const tableBody = document.getElementById('ipr-table-body');
+        let iprChart;
+
+        // --- Main Calculation & Display Logic ---
+        function calculateAndDisplay() {
+            errorContainer.innerHTML = ''; // Clear previous errors
+
+            // 1. Get and Validate Inputs
+            const q_test = parseFloat(flowRateInput.value);
+            const Pr = parseFloat(reservoirPressureInput.value);
+            const Pwf_test = parseFloat(pwfInput.value);
+            const Pb = parseFloat(bubblePointPressureInput.value);
+
+            if (isNaN(q_test) || isNaN(Pr) || isNaN(Pwf_test) || isNaN(Pb)) {
+                showError("All input fields must contain valid numbers.");
+                resetOutputs();
+                return;
+            }
+            if (Pr <= Pwf_test) {
+                showError("Reservoir Pressure (Pr) must be greater than Test Flowing Pressure (Pwf).");
+                resetOutputs();
+                return;
+            }
+             if (Pr < Pb) {
+                showError("Model requires Reservoir Pressure (Pr) >= Bubble Point Pressure (Pb).");
+                resetOutputs();
+                return;
+            }
+             if (Pwf_test < Pb) {
+                showError("Test Flowing Pressure (Pwf) must be >= Bubble Point (Pb) for this model.");
+                resetOutputs();
+                return;
+            }
+
+            // A. Calculate and Display PI
+            const PI = q_test / (Pr - Pwf_test);
+            piOutput.textContent = PI.toFixed(2);
+
+            // B. Calculate and Display Flow Rate at Bubble Point (Qb)
+            const Qb = PI * (Pr - Pb);
+            qbOutput.textContent = Qb.toFixed(0);
+
+            // C. Calculate and Display Max Flow Rate (Qomax)
+            const Qomax = Qb + (PI * Pb / 1.8);
+            qomaxOutput.textContent = Qomax.toFixed(0);
+            
+            // D. Generate Data for plot and table
+            const iprData = generateIprData(Pr, Pb, PI, Qb);
+
+            // E. Plot Results
+            updatePlot(iprData, Pr, Qb, Pb);
+
+            // F. List Results in Table (pass original data for high-to-low pressure display)
+            updateTable(iprData);
+        }
+        
+        // D. Generate data points for the entire curve with a 100 psi step
+        function generateIprData(Pr, Pb, PI, Qb) {
+            const data = [];
+            const pressureStep = 100; // Fixed 100 psi step as requested
+
+            // Start from Pr and step down by 100 psi
+            for (let p = Pr; p >= 0; p -= pressureStep) {
+                let q;
+                if (p >= Pb) { // Above bubble point
+                    q = PI * (Pr - p);
+                } else { // Below bubble point (Vogel)
+                    const vogelPart = (PI * Pb / 1.8) * (1 - 0.2 * (p / Pb) - 0.8 * Math.pow(p / Pb, 2));
+                    q = Qb + vogelPart;
+                }
+                data.push({ pwf: p, q: q });
+            }
+
+            // Ensure the final Pwf=0 point is included if the step missed it
+            if (data.length === 0 || data[data.length - 1].pwf > 0) {
+                const Qomax = Qb + (PI * Pb / 1.8);
+                data.push({ pwf: 0, q: Qomax });
+            }
+            return data;
+        }
+
+        // E. Update the Chart (X=Rate, Y=Pressure)
+        function updatePlot(data, Pr, Qb, Pb) {
+            if (iprChart) iprChart.destroy();
+
+            const flowRates = data.map(p => p.q);
+            const pressures = data.map(p => p.pwf);
+
+            iprChart = new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: flowRates, // X-axis data is Flow Rate
+                    datasets: [{
+                        label: 'IPR Curve',
+                        data: pressures, // Y-axis data is Pressure
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 2, // Thinner line
+                        pointRadius: 0,
+                        tension: 0.2,
+                        fill: true
+                    }, {
+                        label: 'Bubble Point',
+                        data: [{ x: Qb, y: Pb }], // x=rate, y=pressure
+                        borderColor: '#c026d3',
+                        backgroundColor: '#c026d3',
+                        pointRadius: 5, // Smaller point
+                        pointHoverRadius: 7,
+                        type: 'scatter',
+                        showLine: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { // X-axis is now Flow Rate
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'Oil Rate (BOPD)', font: { size: 12, weight: 'bold' } }, // Smaller font
+                            beginAtZero: true
+                        },
+                        y: { // Y-axis is now Pressure
+                            title: { display: true, text: 'Bottomhole Flowing Pressure (psia)', font: { size: 12, weight: 'bold' } }, // Smaller font
+                            beginAtZero: true,
+                            max: Pr * 1.05
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                             callbacks: {
+                                // Tooltip to match axes
+                                title: (items) => `Rate: ${items[0].parsed.x.toFixed(0)} BOPD`,
+                                label: (ctx) => `Pressure: ${ctx.parsed.y.toFixed(0)} psia`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // F. Update the Table
+        function updateTable(data) {
+            tableBody.innerHTML = ''; // Clear old data
+            data.forEach((point, index) => {
+                const row = document.createElement('tr');
+                row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                row.innerHTML = `
+                    <td class="p-2">${point.pwf.toFixed(0)}</td>
+                    <td class="p-2">${point.q.toFixed(0)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function showError(message) {
+             errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        function resetOutputs() {
+            piOutput.textContent = '--';
+            qbOutput.textContent = '--';
+            qomaxOutput.textContent = '--';
+            if (iprChart) iprChart.destroy();
+            tableBody.innerHTML = '';
+        }
+
+        // --- Event Listeners ---
+        calculateBtn.addEventListener('click', calculateAndDisplay);
+        
+        // Initial calculation on page load with default values
+        window.onload = calculateAndDisplay;
+
+    </script>
+</body>
+</html>
