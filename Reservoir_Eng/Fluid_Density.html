@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oil & Gas Density Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background-color: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+        .output-card {
+            background-color: #e0e7ff;
+            border: 1px solid #c7d2fe;
+        }
+        .component-row input {
+            box-shadow: none !important; /* Remove tailwind shadow on focus */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-6">Petroleum Density Calculator</h1>
+
+        <!-- Tab Navigation -->
+        <div class="mb-6 flex justify-center border-b border-gray-200">
+            <button id="oil-tab-btn" class="tab-btn active text-lg font-medium py-3 px-6 border-b-2 border-transparent focus:outline-none" onclick="switchTab('oil')">Oil Density</button>
+            <button id="gas-tab-btn" class="tab-btn text-lg font-medium py-3 px-6 border-b-2 border-transparent focus:outline-none" onclick="switchTab('gas')">Gas Density</button>
+        </div>
+
+        <!-- Oil Density Calculator -->
+        <div id="oil-calculator">
+            <div class="space-y-6">
+                <div>
+                    <label for="api-gravity" class="block text-sm font-medium text-gray-700 mb-2">API Gravity (°API)</label>
+                    <input type="number" id="api-gravity" value="69.4" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div class="flex justify-center">
+                    <button onclick="calculateOilDensity()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Calculate Oil Density
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                    <div class="output-card p-4 rounded-lg text-center">
+                        <h3 class="text-sm font-semibold text-gray-600 mb-1">Specific Gravity</h3>
+                        <p id="oil-sg" class="text-2xl font-bold text-blue-900">-</p>
+                    </div>
+                    <div class="output-card p-4 rounded-lg text-center">
+                        <h3 class="text-sm font-semibold text-gray-600 mb-1">Density (lbm/ft³)</h3>
+                        <p id="oil-density" class="text-2xl font-bold text-blue-900">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gas Density Calculator -->
+        <div id="gas-calculator" class="hidden">
+             <div class="space-y-6">
+                <!-- Gas Components Table -->
+                <div class="overflow-x-auto max-h-96">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">Abb</th>
+                                <th scope="col" class="px-4 py-3">Name</th>
+                                <th scope="col" class="px-4 py-3">Molecular Weight (g/mol)</th>
+                                <th scope="col" class="px-4 py-3">Mole Fraction (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gas-components-body">
+                            <!-- Rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="gas-error-message" class="text-center text-red-600 font-semibold pt-2"></div>
+                
+                <div class="flex justify-center pt-4">
+                    <button onclick="calculateGasDensity()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Calculate Gas Density
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                    <div class="output-card p-4 rounded-lg text-center">
+                        <h3 class="text-sm font-semibold text-gray-600 mb-1">Apparent MW (g/mol)</h3>
+                        <p id="gas-mw" class="text-2xl font-bold text-blue-900">-</p>
+                    </div>
+                    <div class="output-card p-4 rounded-lg text-center">
+                        <h3 class="text-sm font-semibold text-gray-600 mb-1">Specific Gravity</h3>
+                        <p id="gas-sg" class="text-2xl font-bold text-blue-900">-</p>
+                    </div>
+                    <div class="output-card p-4 rounded-lg text-center">
+                        <h3 class="text-sm font-semibold text-gray-600 mb-1">Density (lbm/ft³)</h3>
+                        <p id="gas-density" class="text-2xl font-bold text-blue-900">-</p>
+                    </div>
+                </div>
+
+                <div id="status" class="text-center text-gray-500 italic py-4">Density of air at standard temperature and pressure is ~0.0764 lbm/ft³</div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data ---
+        const componentData = [
+            { abb: 'C1', name: 'Methane', mw: 16.04 },
+            { abb: 'C2', name: 'Ethane', mw: 30.07 },
+            { abb: 'C3', name: 'Propane', mw: 44.10 },
+            { abb: 'C4', name: 'Butane', mw: 58.12 },
+            { abb: 'C5', name: 'Pentane', mw: 72.15 },
+            { abb: 'C6', name: 'Hexane', mw: 86.18 },
+            { abb: 'C7', name: 'Heptane', mw: 100.20 },
+            { abb: 'C8', name: 'Octane', mw: 114.23 },
+            { abb: 'C9', name: 'Nonane', mw: 128.26 },
+            { abb: 'C10', name: 'Decane', mw: 142.28 },
+            { abb: 'N2', name: 'Nitrogen', mw: 28.01 },
+            { abb: 'CO2', name: 'Carbon dioxide', mw: 44.01 },
+            { abb: 'H2S', name: 'Hydrogen sulfide', mw: 34.08 },
+            { abb: 'H2O', name: 'Water', mw: 18.02 },
+        ];
+        const mwAir = 28.96;
+
+        // --- UI Control ---
+        function switchTab(tabName) {
+            const oilCalculator = document.getElementById('oil-calculator');
+            const gasCalculator = document.getElementById('gas-calculator');
+            const oilTabBtn = document.getElementById('oil-tab-btn');
+            const gasTabBtn = document.getElementById('gas-tab-btn');
+
+            if (tabName === 'oil') {
+                oilCalculator.classList.remove('hidden');
+                gasCalculator.classList.add('hidden');
+                oilTabBtn.classList.add('active');
+                gasTabBtn.classList.remove('active');
+            } else {
+                oilCalculator.classList.add('hidden');
+                gasCalculator.classList.remove('hidden');
+                oilTabBtn.classList.remove('active');
+                gasTabBtn.classList.add('active');
+            }
+        }
+
+        // --- Oil Density Calculation ---
+        function calculateOilDensity() {
+            const apiGravity = parseFloat(document.getElementById('api-gravity').value);
+            if (isNaN(apiGravity)) {
+                console.error('Please enter a valid number for API Gravity.');
+                return;
+            }
+
+            // SG = 141.5 / (API Gravity + 131.5)
+            const specificGravity = 141.5 / (apiGravity + 131.5);
+            
+            // Density of water is approx. 62.4 lbm/ft³
+            const density = specificGravity * 62.4;
+
+            document.getElementById('oil-sg').textContent = specificGravity.toFixed(4);
+            document.getElementById('oil-density').textContent = density.toFixed(4);
+        }
+
+        // --- Gas Density Calculation ---
+        function populateGasTable() {
+            const tbody = document.getElementById('gas-components-body');
+            tbody.innerHTML = ''; // Clear any existing rows
+            componentData.forEach(comp => {
+                const row = document.createElement('tr');
+                row.className = 'component-row bg-white border-b';
+                row.dataset.mw = comp.mw;
+                row.innerHTML = `
+                    <td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">${comp.abb}</td>
+                    <td class="px-4 py-2 text-gray-600">${comp.name}</td>
+                    <td class="px-4 py-2 text-gray-700">${comp.mw.toFixed(2)}</td>
+                    <td class="px-4 py-2">
+                        <input type="number" class="mole-fraction w-full p-2 bg-gray-50 border border-gray-300 rounded-md text-sm" placeholder="0" min="0" max="100" step="any">
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function calculateGasDensity() {
+            const rows = document.querySelectorAll('#gas-components-body .component-row');
+            const errorMessage = document.getElementById('gas-error-message');
+            let apparentMW = 0;
+            let totalMolePercent = 0;
+
+            rows.forEach(row => {
+                const moleFractionInput = row.querySelector('.mole-fraction');
+                const molePercent = parseFloat(moleFractionInput.value) || 0;
+                
+                if (molePercent < 0) {
+                    moleFractionInput.value = 0;
+                    return; // or handle error
+                }
+                
+                totalMolePercent += molePercent;
+                const mw = parseFloat(row.dataset.mw);
+                
+                if (!isNaN(mw)) {
+                    apparentMW += mw * (molePercent / 100);
+                }
+            });
+
+            // Validate that the sum of mole fractions is 100%
+            if (Math.abs(totalMolePercent - 100.0) > 0.01) {
+                errorMessage.textContent = `Total mole fraction must be 100%. Current sum is ${totalMolePercent.toFixed(2)}%.`;
+                document.getElementById('gas-mw').textContent = '-';
+                document.getElementById('gas-sg').textContent = '-';
+                document.getElementById('gas-density').textContent = '-';
+                return;
+            }
+            
+            errorMessage.textContent = ''; // Clear error message
+
+            // Gas Specific Gravity = MW_gas / MW_air
+            const gasSpecificGravity = apparentMW / mwAir;
+            
+            // Ideal Gas Law: PV=nRT => P(MW) = (m/V)RT => Density(rho) = P*MW / (R*T)
+            // Density of gas = SG_gas * Density_air
+            // Using standard density of air at STP (approx 0.0764 lbm/ft³)
+            const airDensitySTP = 0.0764; 
+            const gasDensity = gasSpecificGravity * airDensitySTP;
+            
+            document.getElementById('gas-mw').textContent = apparentMW.toFixed(2);
+            document.getElementById('gas-sg').textContent = gasSpecificGravity.toFixed(2);
+            document.getElementById('gas-density').textContent = gasDensity.toFixed(3);
+        }
+
+        // --- Initial State ---
+        window.onload = function() {
+            // Populate the gas components table with the fixed list
+            populateGasTable();
+            
+            // Run initial calculation for oil to show default values
+            calculateOilDensity();
+        };
+
+    </script>
+</body>
+</html>
