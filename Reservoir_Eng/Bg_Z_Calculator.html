@@ -3,35 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dranchuk-Abou-Kassem Z-Factor Calculator</title>
+    <title>Gas Properties (Z-Factor & Bg) Calculator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
+        }
+        .katex-display {
+            margin: 0.5em 0;
         }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen py-12">
     <div class="w-full max-w-3xl bg-white rounded-xl shadow-lg p-8 space-y-6">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Gas Compressibility (Z-Factor) Calculator</h1>
-            <p class="text-gray-600 mt-2">Calculates the Z-factor using the Dranchuk-Abou-Kassem (1975) method with corrections for non-hydrocarbon components.</p>
+            <h1 class="text-3xl font-bold text-gray-800">Gas Properties Calculator</h1>
+            <p class="text-gray-600 mt-2">Calculates Z-Factor and Gas Formation Volume Factor ($B_g$) using the Dranchuk-Abou-Kassem method.</p>
         </div>
 
-        <!-- Input Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
                 <label for="sg" class="block text-sm font-medium text-gray-700 mb-1">Gas Specific Gravity</label>
-                <input type="number" id="sg" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 0.7">
+                <input type="number" id="sg" value="0.7" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 0.7">
             </div>
             <div>
                 <label for="pressure" class="block text-sm font-medium text-gray-700 mb-1">Pressure (psia)</label>
-                <input type="number" id="pressure" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 2000">
+                <input type="number" id="pressure" value="2000" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 2000">
             </div>
             <div>
                 <label for="temperature" class="block text-sm font-medium text-gray-700 mb-1">Temperature (°F)</label>
-                <input type="number" id="temperature" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 150">
+                <input type="number" id="temperature" value="150" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 150">
             </div>
             <div>
                 <label for="h2s" class="block text-sm font-medium text-gray-700 mb-1">H₂S (mole %)</label>
@@ -47,31 +53,46 @@
             </div>
         </div>
         
-        <!-- Action Button -->
         <button id="calculateBtn" class="w-full bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
-            Calculate Z-Factor
+            Calculate Properties
         </button>
 
-        <!-- Result Section -->
         <div id="result" class="hidden pt-4">
-             <div class="bg-gray-50 p-6 rounded-lg grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x">
-                <div class="text-center py-2 md:py-0">
+             <div class="bg-gray-50 p-6 rounded-lg grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4">
+                <div class="text-center p-2 border-b sm:border-b-0 sm:border-r">
                     <h3 class="text-sm font-medium text-gray-600">Pseudo-Reduced Pressure</h3>
                     <p id="pprValue" class="text-2xl font-bold text-gray-800"></p>
                 </div>
-                <div class="text-center py-2 md:py-0">
+                <div class="text-center p-2">
                      <h3 class="text-sm font-medium text-gray-600">Pseudo-Reduced Temp.</h3>
                     <p id="tprValue" class="text-2xl font-bold text-gray-800"></p>
                 </div>
-                <div class="text-center py-2 md:py-0">
+                <div class="text-center p-2 border-t pt-6 sm:border-r">
                     <h2 class="text-sm font-medium text-indigo-700">Calculated Z-Factor</h2>
                     <p id="zFactorValue" class="text-4xl font-bold text-indigo-600"></p>
                 </div>
-            </div>
+                <div class="text-center p-2 border-t pt-6">
+                    <h2 class="text-sm font-medium text-indigo-700">Gas FV Factor (rb/scf)</h2>
+                    <p id="bgValue" class="text-4xl font-bold text-indigo-600"></p>
+                </div>
+          </div>
         </div>
         
-        <!-- Message/Error Section -->
         <div id="message" class="hidden text-center text-red-600 bg-red-100 p-4 rounded-lg"></div>
+
+        <div id="formula" class="hidden pt-6 mt-6 border-t">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2 text-center">Formula Used</h3>
+            <div class="text-center text-gray-800 bg-gray-50 p-4 rounded-lg">
+                <p class="text-base mb-2">Gas Formation Volume Factor ($B_g$):</p>
+                <div class="text-2xl">$$ B_g = 0.00504 \frac{Z \cdot T}{P} $$</div>
+                <div class="text-left text-sm mt-4 space-y-1 w-2/3 mx-auto">
+                    <p><span class="font-semibold w-12 inline-block">$B_g$</span> = Gas Formation Volume Factor (rb/scf)</p>
+                    <p><span class="font-semibold w-12 inline-block">$Z$</span> = Gas Compressibility Factor</p>
+                    <p><span class="font-semibold w-12 inline-block">$T$</span> = Temperature (°R)</p>
+                    <p><span class="font-semibold w-12 inline-block">$P$</span> = Pressure (psia)</p>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -83,16 +104,18 @@
         // --- Critical Properties & SG for Non-Hydrocarbons ---
         const T_C_H2S = 672.3, P_C_H2S = 1306, SG_H2S = 1.1768; // H2S: Tc(°R), Pc(psia), SG
         const T_C_CO2 = 547.6, P_C_CO2 = 1071, SG_CO2 = 1.5197; // CO2: Tc(°R), Pc(psia), SG
-        const T_C_N2  = 227.2, P_C_N2  = 492.4,SG_N2  = 0.9672; // N2:  Tc(°R), Pc(psia), SG
+        const T_C_N2  = 227.2, P_C_N2  = 492.4, SG_N2  = 0.9672; // N2:  Tc(°R), Pc(psia), SG
 
         const calculateBtn = document.getElementById('calculateBtn');
         const resultDiv = document.getElementById('result');
         const messageDiv = document.getElementById('message');
+        const formulaDiv = document.getElementById('formula');
 
         calculateBtn.addEventListener('click', () => {
             // Hide previous results and messages
             resultDiv.classList.add('hidden');
             messageDiv.classList.add('hidden');
+            formulaDiv.classList.add('hidden');
             
             try {
                 // 1. Get and validate all inputs
@@ -108,8 +131,11 @@
                 // 4. Calculate Z-factor using DAK method
                 const z = solveForZ(ppr, tpr);
 
-                // 5. Display results
-                displayResults(ppr, tpr, z);
+                // 5. Calculate Gas Formation Volume Factor (Bg)
+                const bg = 0.00504 * z * inputs.tempR / inputs.pressure;
+
+                // 6. Display results
+                displayResults(ppr, tpr, z, bg);
 
             } catch (error) {
                 showMessage(error.message);
@@ -151,9 +177,9 @@
             const y_hc = 1.0 - y_non_hc;
 
             // Calculate specific gravity of the hydrocarbon portion
-            const sg_hc = (sg - (SG_H2S * y_h2s) - (SG_CO2 * y_co2) - (SG_N2 * y_n2)) / y_hc;
+            const sg_hc = y_hc > 0 ? (sg - (SG_H2S * y_h2s) - (SG_CO2 * y_co2) - (SG_N2 * y_n2)) / y_hc : 0;
             
-            if (sg_hc <= 0) {
+            if (sg_hc <= 0 && y_hc > 0) {
                 throw new Error("Invalid gas composition. The calculated hydrocarbon specific gravity is negative or zero.");
             }
             
@@ -168,11 +194,13 @@
             return { tpc_mix, ppc_mix };
         }
 
-        function displayResults(ppr, tpr, z) {
+        function displayResults(ppr, tpr, z, bg) {
             document.getElementById('pprValue').textContent = ppr.toFixed(4);
             document.getElementById('tprValue').textContent = tpr.toFixed(4);
             document.getElementById('zFactorValue').textContent = z.toFixed(5);
+            document.getElementById('bgValue').textContent = bg.toFixed(6);
             resultDiv.classList.remove('hidden');
+            formulaDiv.classList.remove('hidden');
         }
 
         function showMessage(msg) {
@@ -237,7 +265,6 @@
 
             return { func_val, deriv_val };
         }
-
     </script>
 </body>
 </html>
