@@ -3,227 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radial Flow Oil Production Rate Calculator</title>
+    <title>Engineering Toolbox</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Custom scrollbar for webkit browsers */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        /* Basic font styling */
         body {
             font-family: 'Inter', sans-serif;
         }
-        .input-group {
-            margin-bottom: 1rem;
+        /* Hide all content sections by default */
+        .content-section {
+            display: none;
         }
-        .input-label {
+        /* Show the active content section */
+        .content-section.active {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #4a5568;
-            font-weight: 500;
-        }
-        .input-field {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d2d6dc;
-            border-radius: 0.375rem;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: #4c51bf;
-            box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.3);
-        }
-        .unit {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #718096;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen py-8">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Radial Flow Oil Production Calculator</h1>
+<body class="bg-gray-900 text-gray-200">
 
-        <!-- Radial Flow Form -->
-        <div id="radial-form">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="input-group">
-                    <label for="k-radial" class="input-label">Permeability (k)</label>
-                    <div class="relative">
-                        <input type="number" id="k-radial" class="input-field pr-12" value="100">
-                        <span class="unit">md</span>
+    <!-- Dark Theme Banner Section -->
+    <section class="relative text-white py-20 px-2 sm:px-6 lg:px-8 rounded-lg shadow-xl m-4
+                    bg-[url('./resources/Knowledge_Is_Human_small.gif')] bg-cover bg-center bg-no-repeat">
+    </section>
+
+    <div class="flex h-screen">
+        <!-- Left Navigation Pane -->
+        <nav id="sidebar" class="w-55 bg-gray-800 border-r border-gray-700 flex-shrink-0 custom-scrollbar overflow-y-auto">
+            <div class="p-4">
+                <h1 class="text-2xl font-bold text-gray-100">Bin Jia, P.E.</h1>
+            </div>
+            <ul class="mt-4">
+                <li><a href="#Res_Eng" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">Reservoir Eng</a></li>
+                <li><a href="#Prod_Eng" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">Production Eng</a></li>
+                <li><a href="#Petrophysics" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">Petrophysics</a></li>
+                <li><a href="#UIC" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">UIC</a></li>
+                <li><a href="#References" class="nav-link block py-2.5 px-4 text-gray-400 hover:bg-gray-700 hover:text-white rounded-r-lg transition duration-200">References</a></li>
+            </ul>
+        </nav>
+
+        <!-- Right Main Content Panel -->
+        <main class="flex-1 p-6 sm:p-8 md:p-10 custom-scrollbar overflow-y-auto">
+            
+            <!-- Welcome Section (Default) -->
+            <div id="welcome" class="content-section">
+                 <h2 class="text-3xl font-bold border-b border-gray-700 pb-2 mb-6">Welcome to the Toolbox</h2>
+                 <p class="text-lg">Select a category from the left to display relevant engineering tools and resources.</p>
+            </div>
+
+            <!-- Reservoir Engineering Section -->
+            <div id="Res_Eng" class="content-section">
+                <h2 class="text-3xl font-bold text-blue-300 border-b-2 border-blue-500 pb-2 mb-8">Reservoir Engineering</h2>
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-semibold text-blue-300 mb-4">Fluid & Rock Properties</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <a href="Reservoir_Eng/steam_table.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">Steam Properties</a>
+                            <a href="Reservoir_Eng/Bg_Z_Calculator.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">Z & Bg Calculator</a>
+                            <a href="Reservoir_Eng/Fluid_Density.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">Oil & Gas Density</a>
+                        </div>
+                        <br>
+
+                        <h3 class="text-2xl font-semibold text-blue-300 mb-4">Decline Curve & Rate Forecasing</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <a href="Reservoir_Eng/Decline_Curve_Analysis.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">Decline Curve Analysis</a>
+                            <a href="Reservoir_Eng/Darcy.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">Darcy Radial Flow</a>
+                        </div>
+                        <br>
+
+                        <h3 class="text-2xl font-semibold text-blue-300 mb-4">IOR, EOR & Pressure Analysis</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <a href="Reservoir_Eng/marx_langenheim.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">Marx & Langenheim</a>
+                            <a href="Reservoir_Eng/BHP_Survey.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">BHP Survey</a>
+                            <a href="Reservoir_Eng/BHP_Calculator.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">BHP Calculator</a>
+                        </div>
+                        <br>
+
+                        <h3 class="text-2xl font-semibold text-blue-300 mb-4">Volumetrics & Reserves</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <a href="Reservoir_Eng/OOIP.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-blue-500 transition-colors">OOIP Calculator</a>
+                        </div>
+                        <br>
+
+                        <h3 class="text-2xl font-semibold text-blue-300 mb-4">Well Testing & Pressure Transient Analysis</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        </div>
                     </div>
-                </div>
-                <div class="input-group">
-                    <label for="h-radial" class="input-label">Reservoir Thickness (h)</label>
-                     <div class="relative">
-                        <input type="number" id="h-radial" class="input-field pr-12" value="50">
-                        <span class="unit">ft</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="pe-radial" class="input-label">Reservoir Pressure (Pe)</label>
-                    <div class="relative">
-                        <input type="number" id="pe-radial" class="input-field pr-12" value="3000">
-                        <span class="unit">psi</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="pw-radial" class="input-label">Wellbore Pressure (Pw)</label>
-                    <div class="relative">
-                        <input type="number" id="pw-radial" class="input-field pr-12" value="2000">
-                        <span class="unit">psi</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="mu-radial" class="input-label">Oil Viscosity (μ)</label>
-                     <div class="relative">
-                        <input type="number" id="mu-radial" class="input-field pr-12" value="1.5">
-                        <span class="unit">cp</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="Bo-radial" class="input-label">Oil FVF (Bo)</label>
-                     <div class="relative">
-                        <input type="number" id="Bo-radial" class="input-field pr-12" value="1.2">
-                        <span class="unit">rb/STB</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="re-radial" class="input-label">Drainage Radius (re)</label>
-                    <div class="relative">
-                        <input type="number" id="re-radial" class="input-field pr-12" value="660">
-                        <span class="unit">ft</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="rw-radial" class="input-label">Wellbore Radius (rw)</label>
-                    <div class="relative">
-                        <input type="number" id="rw-radial" class="input-field pr-12" value="0.25">
-                        <span class="unit">ft</span>
-                    </div>
-                </div>
-                <div class="input-group md:col-span-2">
-                    <label for="s-radial" class="input-label">Skin Factor (s)</label>
-                    <div class="relative">
-                        <input type="number" id="s-radial" class="input-field" value="2">
+            </div>
+
+            <!-- Production Engineering Section -->
+            <div id="Prod_Eng" class="content-section">
+                <h2 class="text-3xl font-bold text-red-400 border-b-2 border-red-500 pb-2 mb-8">Production Engineering</h2>
+                 <div class="mb-10">
+                    <h3 class="text-2xl font-semibold text-red-400 mb-4">Production</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="Production_Eng/IPR.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-red-500 transition-colors">IPR Calculation</a>
+                        <a href="#" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-red-500 transition-colors">P2</a>
                     </div>
                 </div>
             </div>
-            <div class="mt-6 text-center">
-                <button id="calculate-radial" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-300">
-                    Calculate
-                </button>
+            
+            <!-- Petrophysics Section -->
+            <div id="Petrophysics" class="content-section">
+                <h2 class="text-3xl font-bold text-purple-400 border-b-2 border-purple-500 pb-2 mb-8">Statics & Mechanics</h2>
+                <div class="mb-10">
+                    <h3 class="text-2xl font-semibold text-purple-400 mb-4">Placeholder</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="#" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-purple-500 transition-colors">P1</a>
+                        <a href="#" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-purple-500 transition-colors">P2</a>
+                    </div>
+                </div>
             </div>
-            <div id="result-radial" class="mt-6 text-center text-xl font-semibold text-gray-800"></div>
-            <!-- Radial Flow Formula and Variables -->
-            <div class="mt-8 border-t pt-6">
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">Radial Flow Formula</h3>
-                <p class="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded-md mb-4 text-center break-words">q = (0.00708 * k * h * (Pe - Pw)) / (μ * Bo * (ln(re / rw) + s))</p>
-                <h4 class="font-semibold text-gray-700 mb-2">Variables:</h4>
-                <ul class="text-sm text-gray-700 space-y-1">
-                    <li><b>q</b>: Production Rate (STB/day)</li>
-                    <li><b>k</b>: Permeability (md)</li>
-                    <li><b>h</b>: Reservoir Thickness (ft)</li>
-                    <li><b>Pe</b>: Reservoir Pressure (psi)</li>
-                    <li><b>Pw</b>: Wellbore Pressure (psi)</li>
-                    <li><b>μ</b>: Oil Viscosity (cp)</li>
-                    <li><b>Bo</b>: Oil Formation Volume Factor (rb/STB)</li>
-                    <li><b>re</b>: Drainage Radius (ft)</li>
-                    <li><b>rw</b>: Wellbore Radius (ft)</li>
-                    <li><b>s</b>: Skin Factor (dimensionless)</li>
-                    <li><b>ln</b>: Natural Logarithm</li>
-                </ul>
+
+            <!-- UIC Section -->
+            <div id="UIC" class="content-section">
+                <h2 class="text-3xl font-bold text-green-400 border-b-2 border-green-500 pb-2 mb-8">UIC Tools</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="UIC/WBD_search.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-green-500 transition-colors">WBD Search</a>
+                    </div>
             </div>
-        </div>
-        
-        <!-- Error Message Box -->
-        <div id="error-box" class="hidden mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            <p id="error-message"></p>
-        </div>
+
+             <!-- References Section -->
+            <div id="References" class="content-section">
+                <h2 class="text-3xl font-bold text-yellow-300 border-b-2 border-yellow-500 pb-2 mb-8">References</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="References/PE_Cheatsheet.html" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">My Cheatsheet</a>
+                    <a href="https://static.squarespace.com/static/549dcda5e4b0a47d0ae1db1e/54a06d6ee4b0d158ed95f696/54a06d6fe4b0d158ed96019e/1323808738753/Cheatsheet_petroleum.pdf" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Petroleum Basics</a>
+                    <a href="https://static.squarespace.com/static/549dcda5e4b0a47d0ae1db1e/54a06d6ee4b0d158ed95f696/54a06d70e4b0d158ed96045b/1312942315607/Cheatsheet_Petrophysics.pdf" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Wireline Logging</a>
+                    <a href="https://csee.engr.utexas.edu/images/pdfs/Reservoir_Engineering.pdf" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Reservoir Engineering</a>
+                    <a href="https://csee.engr.utexas.edu/images/pdfs/Drilling_and_Production.pdf" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Drilling and Production</a>
+                    <a href="https://csee.engr.utexas.edu/images/pdfs/Petrophysics.pdf" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Petrophysics</a>
+                    <a href="https://csee.engr.utexas.edu/images/pdfs/Thermo-Fluids.pdf" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Fluid Properties</a>
+
+                    
+                </div> 
+                <br>
+
+                <h2 class="text-3xl font-bold text-yellow-300 border-b-2 border-yellow-500 pb-2 mb-8">Videos</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="https://youtu.be/f47X2ZjFm_A?si=M1FKjtzMIVkB-UVq" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Review of Reservoir Engineering 1</a>
+                    <a href="https://youtu.be/YzA2W8b5E7o?si=UzPuze66HE-Sy6eC" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Review of Reservoir Engineering 2</a>
+                    <a href="https://www.youtube.com/watch?v=cAqdVuD1GFc" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Review of Fluid Properties</a>
+                    <a href="https://www.youtube.com/watch?v=ZiMq88rmhsI" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Review of Petrophysics</a>
+                </div> 
+                <br>
+                
+                <h2 class="text-3xl font-bold text-yellow-300 border-b-2 border-yellow-500 pb-2 mb-8">Cheatsheets</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="https://cheatography.com/nataliemoore/cheat-sheets/project-management/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Project Management</a>
+                    <a href="https://cheatography.com/psx/cheat-sheets/the-basics-of-accounting/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Accounting Basics</a>
+                    <a href="https://cheatography.com/spaceduck/cheat-sheets/coffee-drinks-and-machines/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Coffee Drinks</a>
+                    <a href="https://cheatography.com/spaceduck/cheat-sheets/holidays-vacations/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Holidays and Vacations</a>
+                    <a href="https://cheatography.com/spaceduck/cheat-sheets/kitchen-reminders/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Kitchen</a>
+                    <a href="https://cheatography.com/deleted-21583/cheat-sheets/household-chores/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Chores</a>
+                    <a href="https://cheatography.com/chi/cheat-sheets/diy-toolbox/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">DIY Toolbox</a>
+                    <a href="https://cheatography.com/davechild/cheat-sheets/poker/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Poker</a>
+                    <a href="https://cheatography.com/davechild/cheat-sheets/settlers-of-catan/" target="_blank" class="block p-4 bg-gray-800 border border-gray-700 rounded-lg hover:border-yellow-500 transition-colors">Catan</a>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Get references to DOM elements
-            const calculateRadialBtn = document.getElementById('calculate-radial');
-            const resultRadialDiv = document.getElementById('result-radial');
-            const errorBox = document.getElementById('error-box');
-            const errorMessage = document.getElementById('error-message');
-
-            // --- Event Listeners ---
-
-            // Add click listener for the radial calculation button
-            calculateRadialBtn.addEventListener('click', calculateRadialFlow);
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const welcomeSection = document.getElementById('welcome');
             
-            // --- Calculation Functions ---
+            // Function to set the active state
+            function setActive(link, section) {
+                 // Remove active class from all links and sections
+                navLinks.forEach(l => {
+                    l.style.backgroundColor = '';
+                    l.style.fontWeight = 'normal';
+                    l.style.color = '#9ca3af'; // Tailwind gray-400
+                });
+                contentSections.forEach(s => s.classList.remove('active'));
 
-            /**
-             * Calculates the oil production rate for radial flow including skin factor.
-             * q = (0.00708 * k * h * (pe - pw)) / (μ * Bo * (ln(re / rw) + s))
-             */
-            function calculateRadialFlow() {
-                try {
-                    // Get input values from the radial form
-                    const k = parseFloat(document.getElementById('k-radial').value);
-                    const h = parseFloat(document.getElementById('h-radial').value);
-                    const pe = parseFloat(document.getElementById('pe-radial').value);
-                    const pw = parseFloat(document.getElementById('pw-radial').value);
-                    const mu = parseFloat(document.getElementById('mu-radial').value);
-                    const Bo = parseFloat(document.getElementById('Bo-radial').value);
-                    const re = parseFloat(document.getElementById('re-radial').value);
-                    const rw = parseFloat(document.getElementById('rw-radial').value);
-                    const s = parseFloat(document.getElementById('s-radial').value);
-
-
-                    // Validate all inputs
-                    if ([k, h, pe, pw, mu, Bo, re, rw, s].some(isNaN)) {
-                        throw new Error('All input fields must be filled with valid numbers.');
-                    }
-                    if (pe <= pw) {
-                        throw new Error('Reservoir pressure (Pe) must be greater than wellbore pressure (Pw).');
-                    }
-                    if (re <= rw) {
-                        throw new Error('Drainage radius (re) must be greater than wellbore radius (rw).');
-                    }
-                     if ([k, h, mu, Bo, re, rw].some(v => v <= 0)) {
-                        throw new Error('Permeability, thickness, viscosity, FVF, drainage radius, and wellbore radius must be positive.');
-                    }
-
-
-                    // Perform the calculation
-                    const numerator = 0.00708 * k * h * (pe - pw);
-                    const denominator = mu * Bo * (Math.log(re / rw) + s);
-                    
-                    if (denominator === 0) {
-                        throw new Error('Calculation resulted in division by zero. Check input parameters.');
-                    }
-
-                    const flowRate = numerator / denominator;
-                    
-                    // Display the result
-                    resultRadialDiv.innerHTML = `Production Rate (q): <span class="text-indigo-600">${flowRate.toFixed(2)} STB/day</span>`;
-                    hideError();
-                } catch (error) {
-                    showError(error.message);
-                    resultRadialDiv.innerHTML = '';
-                }
-            }
-            
-            /**
-             * Shows the error message box with a specific message.
-             * @param {string} message The error message to display.
-             */
-            function showError(message) {
-                errorMessage.textContent = message;
-                errorBox.classList.remove('hidden');
+                // Add active class to the clicked link and corresponding section
+                link.style.backgroundColor = '#374151'; // Tailwind gray-700
+                link.style.fontWeight = '600'; // semibold
+                link.style.color = '#ffffff'; // white
+                section.classList.add('active');
             }
 
-            /**
-             * Hides the error message box.
-             */
-            function hideError() {
-                errorBox.classList.add('hidden');
+            // Set default view to "Welcome" on page load
+             welcomeSection.classList.add('active');
+
+            // Add click event listeners to navigation links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        setActive(this, targetSection);
+                    }
+                });
+            });
+
+            // Optional: Set "Basics" as the default active link visually
+            if (navLinks.length > 0) {
+                 // Initially show the content for the first link, not the welcome message
+                 const firstLink = navLinks[0];
+                 firstLink.click();
             }
         });
     </script>

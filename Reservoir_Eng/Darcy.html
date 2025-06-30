@@ -3,18 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oil Production Rate Calculator</title>
+    <title>Radial Flow Oil Production Rate Calculator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-        }
-        .form-container {
-            display: none;
-        }
-        .active {
-            display: block;
         }
         .input-group {
             margin-bottom: 1rem;
@@ -48,26 +42,10 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen py-8">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Oil Production Rate Calculator</h1>
-
-        <!-- Flow Type Selection -->
-        <div class="mb-6">
-            <p class="input-label text-center">Select Flow Type</p>
-            <div class="flex justify-center space-x-4">
-                <label class="flex items-center space-x-2 cursor-pointer">
-                    <input type="radio" name="flowType" value="radial" class="form-radio text-indigo-600" checked>
-                    <span class="text-gray-700">Radial Flow</span>
-                </label>
-                <label class="flex items-center space-x-2 cursor-pointer">
-                    <input type="radio" name="flowType" value="linear" class="form-radio text-indigo-600">
-                    <span class="text-gray-700">Linear Flow</span>
-                </label>
-            </div>
-        </div>
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Radial Flow Oil Production Calculator</h1>
 
         <!-- Radial Flow Form -->
-        <div id="radial-form" class="form-container active">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Radial Flow Inputs</h2>
+        <div id="radial-form">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="input-group">
                     <label for="k-radial" class="input-label">Permeability (k)</label>
@@ -158,92 +136,6 @@
                 </ul>
             </div>
         </div>
-
-        <!-- Linear Flow Form -->
-        <div id="linear-form" class="form-container">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">Linear Flow Inputs</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="input-group">
-                    <label for="k-linear" class="input-label">Permeability (k)</label>
-                    <div class="relative">
-                        <input type="number" id="k-linear" class="input-field pr-12" value="50">
-                        <span class="unit">md</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="W-linear" class="input-label">Width (W)</label>
-                    <div class="relative">
-                        <input type="number" id="W-linear" class="input-field pr-12" value="500">
-                        <span class="unit">ft</span>
-                    </div>
-                </div>
-                 <div class="input-group">
-                    <label for="h-linear" class="input-label">Reservoir Thickness (h)</label>
-                    <div class="relative">
-                        <input type="number" id="h-linear" class="input-field pr-12" value="50">
-                        <span class="unit">ft</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="pe-linear" class="input-label">Reservoir Pressure (Pe)</label>
-                    <div class="relative">
-                        <input type="number" id="pe-linear" class="input-field pr-12" value="3000">
-                        <span class="unit">psi</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="pw-linear" class="input-label">Wellbore Pressure (Pw)</label>
-                     <div class="relative">
-                        <input type="number" id="pw-linear" class="input-field pr-12" value="2000">
-                        <span class="unit">psi</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="mu-linear" class="input-label">Oil Viscosity (μ)</label>
-                    <div class="relative">
-                        <input type="number" id="mu-linear" class="input-field pr-12" value="1.5">
-                        <span class="unit">cp</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="Bo-linear" class="input-label">Oil FVF (Bo)</label>
-                    <div class="relative">
-                        <input type="number" id="Bo-linear" class="input-field pr-12" value="1.2">
-                        <span class="unit">rb/STB</span>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="L-linear" class="input-label">Length (L)</label>
-                    <div class="relative">
-                        <input type="number" id="L-linear" class="input-field pr-12" value="1000">
-                        <span class="unit">ft</span>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <button id="calculate-linear" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-300">
-                    Calculate
-                </button>
-            </div>
-            <div id="result-linear" class="mt-6 text-center text-xl font-semibold text-gray-800"></div>
-            <!-- Linear Flow Formula and Variables -->
-            <div class="mt-8 border-t pt-6">
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">Linear Flow Formula</h3>
-                <p class="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded-md mb-4 text-center break-words">q = (0.001127 * k * W * h * (Pe - Pw)) / (μ * Bo * L)</p>
-                <h4 class="font-semibold text-gray-700 mb-2">Variables:</h4>
-                <ul class="text-sm text-gray-700 space-y-1">
-                     <li><b>q</b>: Production Rate (STB/day)</li>
-                    <li><b>k</b>: Permeability (md)</li>
-                    <li><b>W</b>: Width (ft)</li>
-                    <li><b>h</b>: Reservoir Thickness (ft)</li>
-                    <li><b>Pe</b>: Reservoir Pressure (psi)</li>
-                    <li><b>Pw</b>: Wellbore Pressure (psi)</li>
-                    <li><b>μ</b>: Oil Viscosity (cp)</li>
-                    <li><b>Bo</b>: Oil Formation Volume Factor (rb/STB)</li>
-                    <li><b>L</b>: Length (ft)</li>
-                </ul>
-            </div>
-        </div>
         
         <!-- Error Message Box -->
         <div id="error-box" class="hidden mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
@@ -254,40 +146,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Get references to DOM elements
-            const flowTypeRadios = document.querySelectorAll('input[name="flowType"]');
-            const radialForm = document.getElementById('radial-form');
-            const linearForm = document.getElementById('linear-form');
             const calculateRadialBtn = document.getElementById('calculate-radial');
-            const calculateLinearBtn = document.getElementById('calculate-linear');
             const resultRadialDiv = document.getElementById('result-radial');
-            const resultLinearDiv = document.getElementById('result-linear');
             const errorBox = document.getElementById('error-box');
             const errorMessage = document.getElementById('error-message');
 
             // --- Event Listeners ---
 
-            // Switch between forms based on radio button selection
-            flowTypeRadios.forEach(radio => {
-                radio.addEventListener('change', function () {
-                    if (this.value === 'radial') {
-                        radialForm.classList.add('active');
-                        linearForm.classList.remove('active');
-                    } else {
-                        radialForm.classList.remove('active');
-                        linearForm.classList.add('active');
-                    }
-                    // Clear results and errors when switching
-                    resultRadialDiv.innerHTML = '';
-                    resultLinearDiv.innerHTML = '';
-                    hideError();
-                });
-            });
-
             // Add click listener for the radial calculation button
             calculateRadialBtn.addEventListener('click', calculateRadialFlow);
-            
-            // Add click listener for the linear calculation button
-            calculateLinearBtn.addEventListener('click', calculateLinearFlow);
             
             // --- Calculation Functions ---
 
@@ -340,52 +207,6 @@
                 } catch (error) {
                     showError(error.message);
                     resultRadialDiv.innerHTML = '';
-                }
-            }
-
-            /**
-             * Calculates the oil production rate for linear flow.
-             * q = (0.001127 * k * W * h * (pe - pw)) / (μ * Bo * L)
-             */
-            function calculateLinearFlow() {
-                try {
-                    // Get input values from the linear form
-                    const k = parseFloat(document.getElementById('k-linear').value);
-                    const W = parseFloat(document.getElementById('W-linear').value);
-                    const h = parseFloat(document.getElementById('h-linear').value);
-                    const pe = parseFloat(document.getElementById('pe-linear').value);
-                    const pw = parseFloat(document.getElementById('pw-linear').value);
-                    const mu = parseFloat(document.getElementById('mu-linear').value);
-                    const Bo = parseFloat(document.getElementById('Bo-linear').value);
-                    const L = parseFloat(document.getElementById('L-linear').value);
-
-                    // Validate all inputs
-                    if ([k, W, h, pe, pw, mu, Bo, L].some(isNaN)) {
-                        throw new Error('All input fields must be filled with valid numbers.');
-                    }
-                    if (pe <= pw) {
-                        throw new Error('Reservoir pressure (Pe) must be greater than wellbore pressure (Pw).');
-                    }
-                    if ([k, W, h, mu, Bo, L].some(v => v <= 0)) {
-                        throw new Error('Permeability, width, thickness, viscosity, FVF, and length must be positive.');
-                    }
-
-                    // Perform the calculation
-                    const numerator = 0.001127 * k * W * h * (pe - pw);
-                    const denominator = mu * Bo * L;
-                    
-                    if (denominator === 0) {
-                        throw new Error('Calculation resulted in division by zero. Check viscosity, Bo, and length.');
-                    }
-
-                    const flowRate = numerator / denominator;
-
-                    // Display the result
-                    resultLinearDiv.innerHTML = `Production Rate (q): <span class="text-indigo-600">${flowRate.toFixed(2)} STB/day</span>`;
-                    hideError();
-                } catch (error) {
-                    showError(error.message);
-                    resultLinearDiv.innerHTML = '';
                 }
             }
             
