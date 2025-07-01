@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Injection Volumetrics Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -19,10 +20,11 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        h2 {
+        h2, h3 {
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
+            margin-top: 30px;
         }
         .input-section, .notes-section {
             margin-bottom: 20px;
@@ -87,6 +89,20 @@
         .notes-section li {
             margin-bottom: 5px;
         }
+        .chart-container {
+            margin-top: 20px;
+        }
+        .chart-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .chart-controls label {
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
@@ -129,11 +145,19 @@
                     <th>Radius (ft)</th>
                 </tr>
             </thead>
-            <tbody>
-                </tbody>
+            <tbody></tbody>
         </table>
     </div>
     
+    <div class="chart-section">
+        <h3>Radius vs. Time Visualization</h3>
+        <div class="chart-controls" id="chartControls">
+            </div>
+        <div class="chart-container">
+            <canvas id="radiusChart"></canvas>
+        </div>
+    </div>
+
     <div class="notes-section">
         <h3>Notes</h3>
         <ul>
@@ -145,47 +169,44 @@
 </div>
 
 <script>
+    let chartInstance;
+    let fullChartData = {
+        labels: [],
+        data: []
+    };
+
     function calculateVolumetrics() {
-        // --- Get User Inputs ---
         const injectionRate = parseFloat(document.getElementById('injectionRate').value);
         const initialCumulative = parseFloat(document.getElementById('initialCumulative').value);
         const netThickness = parseFloat(document.getElementById('netThickness').value);
         const porosity = parseFloat(document.getElementById('porosity').value);
 
-        // --- Check for valid inputs ---
         if (isNaN(injectionRate) || isNaN(initialCumulative) || isNaN(netThickness) || isNaN(porosity) || netThickness <= 0 || porosity <= 0) {
             alert("Please enter valid positive numbers for all parameters. Thickness and Porosity cannot be zero.");
             return;
         }
 
         const tableBody = document.querySelector("#resultsTable tbody");
-        tableBody.innerHTML = ''; // Clear previous results
+        const chartControls = document.getElementById('chartControls');
+        tableBody.innerHTML = '';
+        chartControls.innerHTML = ''; 
+        fullChartData.labels = [];
+        fullChartData.data = [];
 
         const timeIntervals = [0, 3, 5, 10, 20, 30];
         const BBL_TO_CUBIC_FEET = 5.615;
         const ACRE_TO_SQ_FEET = 43560;
 
-        // --- Perform and Display Calculations for each time interval ---
         timeIntervals.forEach(years => {
-            // 1. Calculate Cumulative Barrels
             const cumulativeBarrels = (injectionRate * years * 365) + initialCumulative;
-
-            let areaFt2 = 0;
-            let radiusFt = 0;
-            let bulkVolumeAcreFt = 0;
+            let areaFt2 = 0, radiusFt = 0, bulkVolumeAcreFt = 0;
 
             if (cumulativeBarrels > 0) {
-                 // 2. Calculate Area in square feet
                 areaFt2 = (cumulativeBarrels * BBL_TO_CUBIC_FEET) / (netThickness * porosity);
-                
-                // 3. Calculate Radius in feet
                 radiusFt = Math.sqrt(areaFt2 / Math.PI);
-
-                // 4. Calculate Bulk Volume in acre-feet
                 bulkVolumeAcreFt = (areaFt2 * netThickness) / ACRE_TO_SQ_FEET;
             }
 
-            // Create and append the new row to the table
             const row = `<tr>
                 <td>${years}</td>
                 <td>${cumulativeBarrels.toFixed(0)}</td>
@@ -194,10 +215,78 @@
                 <td>${radiusFt.toFixed(2)}</td>
             </tr>`;
             tableBody.innerHTML += row;
+
+            fullChartData.labels.push(`${years} yrs`);
+            fullChartData.data.push(radiusFt);
+
+            const control = document.createElement('label');
+            control.innerHTML = `<input type="checkbox" value="${years}" onchange="updateChart()" checked> ${years} yrs`;
+            chartControls.appendChild(control);
+        });
+
+        updateChart();
+    }
+
+    function updateChart() {
+        const checkboxes = document.querySelectorAll('#chartControls input[type="checkbox"]');
+        const displayLabels = [];
+        const displayData = [];
+
+        checkboxes.forEach((checkbox, index) => {
+            if (checkbox.checked) {
+                displayLabels.push(fullChartData.labels[index]);
+                displayData.push(fullChartData.data[index]);
+            }
+        });
+
+        const ctx = document.getElementById('radiusChart').getContext('2d');
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: displayLabels,
+                datasets: [{
+                    label: 'Radius (ft)',
+                    data: displayData,
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(41, 128, 185, 1)',
+                    pointRadius: 5,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    title: {
+                        display: true,
+                        text: 'Injection Radius Growth Over Time'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Radius (ft)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (yrs)'
+                        }
+                    }
+                }
+            }
         });
     }
 
-    // Run calculation on page load with default values
     window.onload = calculateVolumetrics;
 </script>
 
