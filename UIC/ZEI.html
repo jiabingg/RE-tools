@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Injection Volumetrics Calculator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .input-section, .notes-section {
+            margin-bottom: 20px;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: right;
+        }
+        th {
+            background-color: #ecf0f1;
+            color: #344958;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .notes-section ul {
+            padding-left: 20px;
+        }
+        .notes-section li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Injection Volumetrics Calculator</h2>
+
+    <div class="input-section">
+        <h3>Injection Parameters</h3>
+        <div class="input-grid">
+            <div class="input-group">
+                <label for="injectionRate">Injection Rate (bwpd)</label>
+                <input type="number" id="injectionRate" value="100">
+            </div>
+            <div class="input-group">
+                <label for="initialCumulative">Initial Cumulative Injection (bbl)</label>
+                <input type="number" id="initialCumulative" value="0">
+            </div>
+            <div class="input-group">
+                <label for="netThickness">Net Sand Thickness (ft)</label>
+                <input type="number" id="netThickness" value="44">
+            </div>
+            <div class="input-group">
+                <label for="porosity">Porosity (decimal)</label>
+                <input type="number" id="porosity" value="0.25" step="0.01">
+            </div>
+        </div>
+        <button onclick="calculateVolumetrics()">Calculate</button>
+    </div>
+
+    <div class="results-section">
+        <h3>Calculations</h3>
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Time (yrs)</th>
+                    <th>Cum. BBls</th>
+                    <th>Bulk Volume (acre-ft)</th>
+                    <th>Area (ft²)</th>
+                    <th>Radius (ft)</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+    
+    <div class="notes-section">
+        <h3>Notes</h3>
+        <ul>
+            <li>Formation Volume Factor (Bw) is assumed to be 1 for this calculation.</li>
+            <li>The conversion factor from barrels to cubic feet is taken as 5.615.</li>
+            <li>Calculations assume uniform radial flow and complete displacement of the pore volume.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function calculateVolumetrics() {
+        // --- Get User Inputs ---
+        const injectionRate = parseFloat(document.getElementById('injectionRate').value);
+        const initialCumulative = parseFloat(document.getElementById('initialCumulative').value);
+        const netThickness = parseFloat(document.getElementById('netThickness').value);
+        const porosity = parseFloat(document.getElementById('porosity').value);
+
+        // --- Check for valid inputs ---
+        if (isNaN(injectionRate) || isNaN(initialCumulative) || isNaN(netThickness) || isNaN(porosity) || netThickness <= 0 || porosity <= 0) {
+            alert("Please enter valid positive numbers for all parameters. Thickness and Porosity cannot be zero.");
+            return;
+        }
+
+        const tableBody = document.querySelector("#resultsTable tbody");
+        tableBody.innerHTML = ''; // Clear previous results
+
+        const timeIntervals = [0, 3, 5, 10, 20, 30];
+        const BBL_TO_CUBIC_FEET = 5.615;
+        const ACRE_TO_SQ_FEET = 43560;
+
+        // --- Perform and Display Calculations for each time interval ---
+        timeIntervals.forEach(years => {
+            // 1. Calculate Cumulative Barrels
+            const cumulativeBarrels = (injectionRate * years * 365) + initialCumulative;
+
+            let areaFt2 = 0;
+            let radiusFt = 0;
+            let bulkVolumeAcreFt = 0;
+
+            if (cumulativeBarrels > 0) {
+                 // 2. Calculate Area in square feet
+                areaFt2 = (cumulativeBarrels * BBL_TO_CUBIC_FEET) / (netThickness * porosity);
+                
+                // 3. Calculate Radius in feet
+                radiusFt = Math.sqrt(areaFt2 / Math.PI);
+
+                // 4. Calculate Bulk Volume in acre-feet
+                bulkVolumeAcreFt = (areaFt2 * netThickness) / ACRE_TO_SQ_FEET;
+            }
+
+            // Create and append the new row to the table
+            const row = `<tr>
+                <td>${years}</td>
+                <td>${cumulativeBarrels.toFixed(0)}</td>
+                <td>${bulkVolumeAcreFt.toFixed(2)}</td>
+                <td>${areaFt2.toFixed(2)}</td>
+                <td>${radiusFt.toFixed(2)}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    // Run calculation on page load with default values
+    window.onload = calculateVolumetrics;
+</script>
+
+</body>
+</html>
