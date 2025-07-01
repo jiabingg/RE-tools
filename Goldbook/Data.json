@@ -1,0 +1,1073 @@
+[
+  {
+    "fieldName": "Elk Hills Oil Field",
+    "county": "KERN",
+    "reservoirs": [
+      {
+        "name": "Tulare",
+        "poolData": {
+          "Discovery date": "March 1975",
+          "Initial production rates Oil (bbl/day)": "on pump",
+          "Initial production rates Gas (Mcf/day)": "340**",
+          "Initial production rates Flow pressure (psi)": "91",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "1,400",
+          "Reservoir temperature (°F)": "110",
+          "Initial oil content (STB/ac.-ft.)": "109",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Tulare",
+          "Geologic age": "Pleistocene",
+          "Average depth (ft.)": "1,120",
+          "Average net thickness (ft.)": "50",
+          "Maximum productive area (acres)": "30"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "30-40 (33*)",
+          "Soi (%)": "55**",
+          "Swi (%)": "45**",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "2-8,100 (2,050)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "10",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "20**",
+          "Initial oil FVF (RB/STB)": "1.02**",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air1.0)": "0.45**",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "3,596",
+          "Water T.D.S. (ppm)": "4,560",
+          "Water Rw (ohm/m) (77°F)": "1.50"
+        }
+      },
+      {
+        "name": "Scalez C",
+        "poolData": {
+          "Discovery date": "May 1919",
+          "Initial production rates Oil (bbl/day)": "33,000",
+          "Initial production rates Gas (Mcf/day)": "1,440",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "-",
+          "Reservoir temperature (°F)": "-",
+          "Initial oil content (STB/ac.-ft.)": "1,000",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "San Joaquin",
+          "Geologic age": "Pliocene",
+          "Average depth (ft.)": "2,400",
+          "Average net thickness (ft.)": "80",
+          "Maximum productive area (acres)": "13,080"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "30-47 (36)",
+          "Soi (%)": "6-43 (34*)",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "4-31,650 (1,428*)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "18",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "18 @ 132",
+          "Gas Specific gravity (air1.0)": "0.65-0.70",
+          "Gas Heating value (Btu/cu. ft.)": "1,020",
+          "Water Salinity, NaCl (ppm)": "21,700",
+          "Water T.D.S. (ppm)": "24,300",
+          "Water Rw (ohm/m) (77°F)": "0.24"
+        }
+      },
+      {
+        "name": "Mya Gas",
+        "poolData": {
+          "Discovery date": "-",
+          "Initial production rates Oil (bbl/day)": "-",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "1.300**",
+          "Reservoir temperature (°F)": "124",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "San Joaquin",
+          "Geologic age": "Pliocene",
+          "Average depth (ft.)": "2,300",
+          "Average net thickness (ft.)": "50",
+          "Maximum productive area (acres)": "10,260"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "12-46 (34*)",
+          "Soi (%)": "-",
+          "Swi (%)": "33",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "50-11,400 (1,275)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "21",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "20 @ 135",
+          "Gas Specific gravity (air1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "20,000",
+          "Water T.D.S. (ppm)": "33,400",
+          "Water Rw (ohm/m) (77°F)": "0.20"
+        }
+      },
+      {
+        "name": "Mulinia",
+        "poolData": {
+          "Discovery date": "-",
+          "Initial production rates Oil (bbl/day)": "-",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "1,400**",
+          "Reservoir temperature (°F)": "130**",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Etchegoin",
+          "Geologic age": "Pliocene",
+          "Average depth (ft.)": "2,700",
+          "Average net thickness (ft.)": "55",
+          "Maximum productive area (acres)": "14,420"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "33",
+          "Soi (%)": "-",
+          "Swi (%)": "45",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "3-22,340 (990)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "-",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "20,000",
+          "Water T.D.S. (ppm)": "32,400",
+          "Water Rw (ohm/m) (77°F)": "0.20"
+        }
+      },
+      {
+        "name": "Bittium",
+        "poolData": {
+          "Discovery date": "-",
+          "Initial production rates Oil (bbl/day)": "-",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "-",
+          "Reservoir temperature (°F)": "-",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Etchegoin",
+          "Geologic age": "Pliocene",
+          "Average depth (ft.)": "2,850",
+          "Average net thickness (ft.)": "20",
+          "Maximum productive area (acres)": "3,230"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "-",
+          "Soi (%)": "-",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "440*"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "-",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "-",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw (ohm/m) (77°F)": "-"
+        }
+      },
+      {
+        "name": "Wilhelm",
+        "poolData": {
+          "Discovery date": "-",
+          "Initial production rates Oil (bbl/day)": "-",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "1.500**",
+          "Reservoir temperature (°F)": "137",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Etchegoin",
+          "Geologic age": "Pliocene",
+          "Average depth (ft.)": "3,000",
+          "Average net thickness (ft.)": "60",
+          "Maximum productive area (acres)": "5,040"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "17-44 (32)",
+          "Soi (%)": "51",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "1-3,050 (82)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "-",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "40 @ 131",
+          "Gas Specific gravity (air1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "20,500",
+          "Water T.D.S. (ppm)": "32,300",
+          "Water Rw (ohm/m) (77°F)": "0.20"
+        }
+      },
+      {
+        "name": "Gusher C",
+        "poolData": {
+          "Discovery date": "-",
+          "Initial production rates Oil (bbl/day)": "-",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "1.500**",
+          "Reservoir temperature (°F)": "137",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Etchegoin",
+          "Geologic age": "Pliocene",
+          "Average depth (ft.)": "3,200",
+          "Average net thickness (ft.)": "60",
+          "Maximum productive area (acres)": "2,760"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "20-47 (33)",
+          "Soi (%)": "58",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "3-4,920 (190)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "-",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "40",
+          "Gas Specific gravity (air1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "16,500",
+          "Water T.D.S. (ppm)": "26,000",
+          "Water Rw (ohm/m) (77°F)": "-"
+        }
+      },
+      {
+        "name": "Calitroleum C",
+        "poolData": {
+          "Discovery date": "June 1911",
+          "Initial production rates Oil (bbl/day)": "15",
+          "Initial production rates Gas (Mcf/day)": "1.600**",
+          "Initial production rates Flow pressure (psi)": "140",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "-",
+          "Reservoir temperature (°F)": "-",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Etchegoin",
+          "Geologic age": "Pliocene",
+          "Average depth (ft.)": "3,200",
+          "Average net thickness (ft.)": "22",
+          "Maximum productive area (acres)": "2,080"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "25-38 (32)",
+          "Soi (%)": "43",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "1-140 (17*)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "-",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "16,300",
+          "Water T.D.S. (ppm)": "32,900",
+          "Water Rw (ohm/m) (77°F)": "0.22"
+        }
+      },
+      {
+        "name": "Olig C",
+        "poolData": {
+          "Discovery date": "September 1950",
+          "Initial production rates Oil (bbl/day)": "7,500",
+          "Initial production rates Gas (Mcf/day)": "JFT",
+          "Initial production rates Flow pressure (psi)": "1/2",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "2.500**",
+          "Reservoir temperature (°F)": "165",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Reef Ridge",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "5,000",
+          "Average net thickness (ft.)": "15",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "8-30 (21)",
+          "Soi (%)": "46",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "1-230 (40)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "-",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "-",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw (ohm/m) (77°F)": "-"
+        }
+      },
+      {
+        "name": "Stevens",
+        "poolData": {
+          "Discovery date": "August 1941",
+          "Initial production rates Oil (bbl/day)": "1,284",
+          "Initial production rates Gas (Mcf/day)": "1,039",
+          "Initial production rates Flow pressure (psi)": "75/500",
+          "Initial production rates Bean size (in).": "32/64",
+          "Initial reservoir pressure (psi)": "3,150-3,800",
+          "Reservoir temperature (°F)": "182-206",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Monterey",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "5,900-7,100",
+          "Average net thickness (ft.)": "150-400",
+          "Maximum productive area (acres)": "21,170"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "4-35 (21)",
+          "Soi (%)": "13-36",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "1-4,750 (150)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "34-38",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "1.7 207",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "11,000-16,000",
+          "Water T.D.S. (ppm)": "22,000-29,000",
+          "Water Rw (ohm/m) (77°F)": "0.25-0.31"
+        }
+      },
+      {
+        "name": "Northwest Stevens",
+        "poolData": {
+          "Discovery date": "September 1973",
+          "Initial production rates Oil (bbl/day)": "2,300",
+          "Initial production rates Gas (Mcf/day)": "1,100",
+          "Initial production rates Flow pressure (psi)": "1,200/1,100",
+          "Initial production rates Bean size (in).": "16/64",
+          "Initial reservoir pressure (psi)": "4.175",
+          "Reservoir temperature (°F)": "250",
+          "Initial oil content (STB/ac.-ft.)": "15-38 (25*)",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Monterey",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "8.900",
+          "Average net thickness (ft.)": "200",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "19",
+          "Soi (%)": "-",
+          "Swi (%)": "25-30",
+          "Sg (%)": "25**",
+          "Permeability to air (md)": "100-300"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "50",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "7,500",
+          "Initial oil FVF (RB/STB)": "1.33",
+          "Bubble point press. (psia)": "3,200",
+          "Viscosity (cp) @F)": "-",
+          "Gas Specific gravity (air=1.0)": "0.68-0.76",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "15,000-28,000",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw(ohm/m)@77°F": "0.30-0.50"
+        }
+      },
+      {
+        "name": "Carneros",
+        "poolData": {
+          "Discovery date": "January 1952",
+          "Initial production rates Oil (bbl/day)": "230",
+          "Initial production rates Gas (Mcf/day)": "1,716",
+          "Initial production rates Flow pressure (psi)": "160/pkr",
+          "Initial production rates Bean size (in).": "64/64",
+          "Initial reservoir pressure (psi)": "7.500**",
+          "Reservoir temperature (°F)": "252",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Temblor",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "9,300",
+          "Average net thickness (ft.)": "170",
+          "Maximum productive area (acres)": "1,000"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "-",
+          "Soi (%)": "-",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "1-25 (6*)"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "37",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "9.000",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F)": "-",
+          "Gas Specific gravity (air=1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "12,000",
+          "Water T.D.S. (ppm)": "21,000",
+          "Water Rw(ohm/m)@77°F": "0.37"
+        }
+      },
+      {
+        "name": "Agua",
+        "poolData": {
+          "Discovery date": "April 1977",
+          "Initial production rates Oil (bbl/day)": "203",
+          "Initial production rates Gas (Mcf/day)": "1.885",
+          "Initial production rates Flow pressure (psi)": "2,055/2,400",
+          "Initial production rates Bean size (in).": "8/64",
+          "Initial reservoir pressure (psi)": "6.935",
+          "Reservoir temperature (°F)": "224",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Temblor",
+          "Geologic age": "Oligocene",
+          "Average depth (ft.)": "9,500",
+          "Average net thickness (ft.)": "480",
+          "Maximum productive area (acres)": "40"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "11-18 (15)",
+          "Soi (%)": "-",
+          "Swi (%)": "25-30",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "-"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "-",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "535",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F)": "-",
+          "Gas Specific gravity (air=1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "-",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw(ohm/m)@77°F": "-"
+        }
+      }
+    ]
+  },
+  {
+    "fieldName": "South Belridge Oil Field",
+    "county": "KERN",
+    "reservoirs": [
+      {
+        "name": "Tulare",
+        "poolData": {
+          "Discovery date": "April 1911",
+          "Initial production rates Oil (bbl/day)": "100",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "on pump",
+          "Initial reservoir pressure (psi)": "200",
+          "Reservoir temperature (°F)": "87-95",
+          "Initial oil content (STB/ac.-ft.)": "2,050",
+          "Initial gas content (MSCF/ac.ft-.)": "340",
+          "Formation": "Tulare",
+          "Geologic age": "Pleistocene",
+          "Average depth (ft.)": "400",
+          "Average net thickness (ft.)": "400",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "35",
+          "Soi (%)": "77",
+          "Swi (%)": "20",
+          "Sg (%)": "3",
+          "Permeability to air (md)": "3,070.0"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "11-14",
+          "Sulfur content (% by wt.)": "0.23",
+          "Initial solution GOR (SCF/STB)": "35",
+          "Initial oil FVF (RB/STB)": "1.02",
+          "Bubble point press. (psia)": "350**",
+          "Viscosity (cp) @F": "5,500 @ 70",
+          "Gas Specific gravity (air=1.0)": "0.600",
+          "Gas Heating value (Btu/cu. ft.)": "1,090",
+          "Water Salinity, NaCl (ppm)": "10,700",
+          "Water T.D.S. (ppm)": "13.900",
+          "Water Rw(ohm/m)@77°F": "0.73"
+        }
+      },
+      {
+        "name": "Etchegoin",
+        "poolData": {
+          "Discovery date": "May 1943",
+          "Initial production rates Oil (bbl/day)": "171",
+          "Initial production rates Gas (Mcf/day)": "",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "on pump",
+          "Initial reservoir pressure (psi)": "350",
+          "Reservoir temperature (°F)": "105",
+          "Initial oil content (STB/ac.-ft.)": "2,050",
+          "Initial gas content (MSCF/ac.ft-.)": "340",
+          "Formation": "Etchegoin",
+          "Geologic age": "Pliocene",
+          "Average depth (ft.)": "1,500",
+          "Average net thickness (ft.)": "50",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "30",
+          "Soi (%)": "-",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "100.0"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "13",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "35",
+          "Initial oil FVF (RB/STB)": "1.00",
+          "Bubble point press. (psia)": "100**",
+          "Viscosity (cp) @F": "5,500 @ 70",
+          "Gas Specific gravity (air=1.0)": "0.700",
+          "Gas Heating value (Btu/cu. ft.)": "1,250",
+          "Water Salinity, NaCl (ppm)": "24,800",
+          "Water T.D.S. (ppm)": "25,600",
+          "Water Rw(ohm/m)@77°F": "0.23"
+        }
+      },
+      {
+        "name": "Diatomite",
+        "poolData": {
+          "Discovery date": "April 1911",
+          "Initial production rates Oil (bbl/day)": "-",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "962",
+          "Reservoir temperature (°F)": "128",
+          "Initial oil content (STB/ac.-ft.)": "1,455",
+          "Initial gas content (MSCF/ac.ft-.)": "532",
+          "Formation": "Etchegoin-Reef Ridge-Upper Monterey",
+          "Geologic age": "Plio-Miocene",
+          "Average depth (ft.)": "1,000",
+          "Average net thickness (ft.)": "500",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "50",
+          "Soi (%)": "45",
+          "Swi (%)": "55",
+          "Sg (%)": "0",
+          "Permeability to air (md)": "1.5"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "25-30",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "366",
+          "Initial oil FVF (RB/STB)": "1.20",
+          "Bubble point press. (psia)": "958",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air=1.0)": "0.876",
+          "Gas Heating value (Btu/cu. ft.)": "1,033",
+          "Water Salinity, NaCl (ppm)": "26,000",
+          "Water T.D.S. (ppm)": "38,900",
+          "Water Rw(ohm/m)@77°F": "0.28"
+        }
+      },
+      {
+        "name": "Antelope Shale",
+        "poolData": {
+          "Discovery date": "March 1983",
+          "Initial production rates Oil (bbl/day)": "180",
+          "Initial production rates Gas (Mcf/day)": "1,658",
+          "Initial production rates Flow pressure (psi)": "210",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "2.000",
+          "Reservoir temperature (°F)": "165",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Monterey",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "4,000",
+          "Average net thickness (ft.)": "1,000",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "41",
+          "Soi (%)": "20",
+          "Swi (%)": "70",
+          "Sg (%)": "10",
+          "Permeability to air (md)": "19.0-29.0"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "26-32",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "3,500",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air=1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "31,000",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw(ohm/m)@77°F": "-"
+        }
+      },
+      {
+        "name": "McDonald",
+        "poolData": {
+          "Discovery date": "February 1982",
+          "Initial production rates Oil (bbl/day)": "89",
+          "Initial production rates Gas (Mcf/day)": "299",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "190**",
+          "Reservoir temperature (°F)": "-",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Monterey",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "6,700",
+          "Average net thickness (ft.)": "346",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "-",
+          "Soi (%)": "-",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "-"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "37",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "20",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air=1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "-",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw(ohm/m)@77°F": "-"
+        }
+      },
+      {
+        "name": "Devilwater-Gould",
+        "poolData": {
+          "Discovery date": "July 1980",
+          "Initial production rates Oil (bbl/day)": "130",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "4,750",
+          "Reservoir temperature (°F)": "240",
+          "Initial oil content (STB/ac.-ft.)": "565",
+          "Initial gas content (MSCF/ac.ft-.)": "1,200**",
+          "Formation": "Monterey",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "8,200",
+          "Average net thickness (ft.)": "300",
+          "Maximum productive area (acres)": "10"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "24",
+          "Soi (%)": "50",
+          "Swi (%)": "50",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "110**"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "37",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "2,000",
+          "Initial oil FVF (RB/STB)": "1.65",
+          "Bubble point press. (psia)": "4,750",
+          "Viscosity (cp) @F": "0.30 @ 240",
+          "Gas Specific gravity (air=1.0)": "0.7",
+          "Gas Heating value (Btu/cu. ft.)": "1,250",
+          "Water Salinity, NaCl (ppm)": "40,000",
+          "Water T.D.S. (ppm)": "40.000",
+          "Water Rw(ohm/m)@77°F": "0.16"
+        }
+      }
+    ]
+  },
+  {
+    "fieldName": "North Belridge Oil Field",
+    "county": "KERN",
+    "reservoirs": [
+      {
+        "name": "Tulare-Etchegoin",
+        "poolData": {
+          "Discovery date": "September 1917",
+          "Initial production rates Oil (bbl/day)": "10",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "0-200",
+          "Reservoir temperature (°F)": "100",
+          "Initial oil content (STB/ac.-ft.)": "1500-2000**",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "Tulare-Etchegoin",
+          "Geologic age": "Pleisto.-Pliocene",
+          "Average depth (ft.)": "600",
+          "Average net thickness (ft.)": "100",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "35-39",
+          "Soi (%)": "56-80",
+          "Swi (%)": "20-44",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "2,500"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "13",
+          "Sulfur content (% by wt.)": "1.14",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "1.02**",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "1,081.0 @ 100",
+          "Gas Specific gravity (air=1.0)": "0.70",
+          "Gas Heating value (Btu/cu. ft.)": "1,250",
+          "Water Salinity, NaCl (ppm)": "20,500",
+          "Water T.D.S. (ppm)": "21,400",
+          "Water Rw(ohm/m)@77°F": "0.42"
+        }
+      },
+      {
+        "name": "Diatomite",
+        "poolData": {
+          "Discovery date": "July 1978 c/",
+          "Initial production rates Oil (bbl/day)": "258",
+          "Initial production rates Gas (Mcf/day)": "48",
+          "Initial production rates Flow pressure (psi)": "145/145",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "500-600",
+          "Reservoir temperature (°F)": "104",
+          "Initial oil content (STB/ac.-ft.)": "600-2,400*",
+          "Initial gas content (MSCF/ac.ft-.)": "70-260**",
+          "Formation": "Etch.-Reef Ridge",
+          "Geologic age": "Pliocene-Miocene",
+          "Average depth (ft.)": "2200",
+          "Average net thickness (ft.)": "1,320",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "45**",
+          "Soi (%)": "22-78",
+          "Swi (%)": "22-80",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "16-2,400"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "24-31",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "110**",
+          "Initial oil FVF (RB/STB)": "1.06",
+          "Bubble point press. (psia)": "550-620**",
+          "Viscosity (cp) @F": "8.0 @ 104",
+          "Gas Specific gravity (air=1.0)": "0.79",
+          "Gas Heating value (Btu/cu. ft.)": "1,102",
+          "Water Salinity, NaCl (ppm)": "28,600",
+          "Water T.D.S. (ppm)": "37,800",
+          "Water Rw(ohm/m)@77°F": "0.20"
+        }
+      },
+      {
+        "name": "Fractured Shale",
+        "poolData": {
+          "Discovery date": "1912",
+          "Initial production rates Oil (bbl/day)": "-",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "1100**",
+          "Reservoir temperature (°F)": "150",
+          "Initial oil content (STB/ac.-ft.)": "-",
+          "Initial gas content (MSCF/ac.ft-.)": "-",
+          "Formation": "R. Ridge-Monterey",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "3,500",
+          "Average net thickness (ft.)": "400",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "-",
+          "Soi (%)": "-",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "-"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "10-32",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "-",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "-",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air=1.0)": "-",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "-",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw(ohm/m)@77°F": "-"
+        }
+      },
+      {
+        "name": "Temblor Sand",
+        "poolData": {
+          "Discovery date": "October 1930",
+          "Initial production rates Oil (bbl/day)": "3,014",
+          "Initial production rates Gas (Mcf/day)": "50,000",
+          "Initial production rates Flow pressure (psi)": "800/1,600",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "2,650",
+          "Reservoir temperature (°F)": "205",
+          "Initial oil content (STB/ac.-ft.)": "1,087",
+          "Initial gas content (MSCF/ac.ft-.)": "1,450",
+          "Formation": "Monterey-Temblor",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "5,000",
+          "Average net thickness (ft.)": "500",
+          "Maximum productive area (acres)": "600"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "25",
+          "Soi (%)": "71",
+          "Swi (%)": "26",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "1100**"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "40",
+          "Sulfur content (% by wt.)": "0.69",
+          "Initial solution GOR (SCF/STB)": "500",
+          "Initial oil FVF (RB/STB)": "1.32",
+          "Bubble point press. (psia)": "2,650",
+          "Viscosity (cp) @F": "0.4 @ 205",
+          "Gas Specific gravity (air=1.0)": "0.65",
+          "Gas Heating value (Btu/cu. ft.)": "1,160",
+          "Water Salinity, NaCl (ppm)": "40,000",
+          "Water T.D.S. (ppm)": "42,000",
+          "Water Rw(ohm/m)@77°F": "0.15"
+        }
+      },
+      {
+        "name": "Carneros",
+        "poolData": {
+          "Discovery date": "June 1960",
+          "Initial production rates Oil (bbl/day)": "668",
+          "Initial production rates Gas (Mcf/day)": "2,160",
+          "Initial production rates Flow pressure (psi)": "710/1215",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "3,300**",
+          "Reservoir temperature (°F)": "230",
+          "Initial oil content (STB/ac.-ft.)": "400**",
+          "Initial gas content (MSCF/ac.ft-.)": "750**",
+          "Formation": "Temblor",
+          "Geologic age": "Miocene",
+          "Average depth (ft.)": "6,700",
+          "Average net thickness (ft.)": "80",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "17**",
+          "Soi (%)": "55**",
+          "Swi (%)": "45**",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "30**"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "39",
+          "Sulfur content (% by wt.)": "-",
+          "Initial solution GOR (SCF/STB)": "1,060**",
+          "Initial oil FVF (RB/STB)": "1.65**",
+          "Bubble point press. (psia)": "3,600**",
+          "Viscosity (cp) @F": "-",
+          "Gas Specific gravity (air=1.0)": "0.88**",
+          "Gas Heating value (Btu/cu. ft.)": "-",
+          "Water Salinity, NaCl (ppm)": "-",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw(ohm/m)@77°F": "-"
+        }
+      },
+      {
+        "name": "R Sand (Agua)",
+        "poolData": {
+          "Discovery date": "September 1939",
+          "Initial production rates Oil (bbl/day)": "-",
+          "Initial production rates Gas (Mcf/day)": "-",
+          "Initial production rates Flow pressure (psi)": "-",
+          "Initial production rates Bean size (in).": "-",
+          "Initial reservoir pressure (psi)": "3,600",
+          "Reservoir temperature (°F)": "252",
+          "Initial oil content (STB/ac.-ft.)": "450",
+          "Initial gas content (MSCF/ac.ft-.)": "700**",
+          "Formation": "Temblor",
+          "Geologic age": "Oligocene",
+          "Average depth (ft.)": "7,100",
+          "Average net thickness (ft.)": "150",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "16",
+          "Soi (%)": "-",
+          "Swi (%)": "-",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "250**"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "52",
+          "Sulfur content (% by wt.)": "0.17",
+          "Initial solution GOR (SCF/STB)": "140,000",
+          "Initial oil FVF (RB/STB)": "-",
+          "Bubble point press. (psia)": "3,600",
+          "Viscosity (cp) @F": "0.2 @ 252",
+          "Gas Specific gravity (air=1.0)": "0.65",
+          "Gas Heating value (Btu/cu. ft.)": "1,160",
+          "Water Salinity, NaCl (ppm)": "21,200",
+          "Water T.D.S. (ppm)": "-",
+          "Water Rw(ohm/m)@77°F": "8.00"
+        }
+      },
+      {
+        "name": "Bloemer, Belridge 64, and Gibson",
+        "poolData": {
+          "Discovery date": "June 1932",
+          "Initial production rates Oil (bbl/day)": "1173",
+          "Initial production rates Gas (Mcf/day)": "75,000",
+          "Initial production rates Flow pressure (psi)": "2,000/3,150",
+          "Initial production rates Bean size (in).": "96/64",
+          "Initial reservoir pressure (psi)": "4,173",
+          "Reservoir temperature (°F)": "235",
+          "Initial oil content (STB/ac.-ft.)": "3,005",
+          "Initial gas content (MSCF/ac.ft-.)": "5,752",
+          "Formation": "Temblor",
+          "Geologic age": "Oligocene",
+          "Average depth (ft.)": "7,700",
+          "Average net thickness (ft.)": "400",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "14",
+          "Soi (%)": "39",
+          "Swi (%)": "19",
+          "Sg (%)": "42",
+          "Permeability to air (md)": "75"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "30-50",
+          "Sulfur content (% by wt.)": "0.17",
+          "Initial solution GOR (SCF/STB)": "600",
+          "Initial oil FVF (RB/STB)": "1.50",
+          "Bubble point press. (psia)": "4,125",
+          "Viscosity (cp) @F": "0.4 @ 235",
+          "Gas Specific gravity (air=1.0)": "0.73",
+          "Gas Heating value (Btu/cu. ft.)": "1,290",
+          "Water Salinity, NaCl (ppm)": "18,000-21,500",
+          "Water T.D.S. (ppm)": "18,600-24,000",
+          "Water Rw(ohm/m)@77°F": "-"
+        }
+      },
+      {
+        "name": "Y Sand",
+        "poolData": {
+          "Discovery date": "May 1942",
+          "Initial production rates Oil (bbl/day)": "1,068",
+          "Initial production rates Gas (Mcf/day)": "789",
+          "Initial production rates Flow pressure (psi)": "150/950",
+          "Initial production rates Bean size (in).": "96/64",
+          "Initial reservoir pressure (psi)": "3,925",
+          "Reservoir temperature (°F)": "220",
+          "Initial oil content (STB/ac.-ft.)": "500",
+          "Initial gas content (MSCF/ac.ft-.)": "800**",
+          "Formation": "Tumey",
+          "Geologic age": "Eocene",
+          "Average depth (ft.)": "8,550",
+          "Average net thickness (ft.)": "75",
+          "Maximum productive area (acres)": "-"
+        },
+        "reservoirRockProperties": {
+          "Porosity (%)": "15",
+          "Soi (%)": "64",
+          "Swi (%)": "36",
+          "Sg (%)": "-",
+          "Permeability to air (md)": "30"
+        },
+        "reservoirFluidProperties": {
+          "Oil gravity (API)": "32",
+          "Sulfur content (% by wt.)": "0.28",
+          "Initial solution GOR (SCF/STB)": "700",
+          "Initial oil FVF (RB/STB)": "1.49",
+          "Bubble point press. (psia)": "3,700**",
+          "Viscosity (cp) @F": "7.2 @ 100",
+          "Gas Specific gravity (air=1.0)": "0.65",
+          "Gas Heating value (Btu/cu. ft.)": "1,160",
+          "Water Salinity, NaCl (ppm)": "8,400",
+          "Water T.D.S. (ppm)": "10,100",
+          "Water Rw(ohm/m)@77°F": "0.49"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oil Field Reservoir Data</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f4f9; color: #333; }
+        h1, h2 { color: #2c3e50; text-align: center; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 1em; margin-bottom: 2em; padding: 1em; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-wrap: wrap; }
+        .controls label { font-weight: bold; }
+        .controls select, .controls input { padding: 0.5em; border: 1px solid #ccc; border-radius: 4px; min-width: 200px; }
+        .container { max-width: 95%; margin: auto; }
+        .field { margin-bottom: 3em; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; min-width: 150px; }
+        thead th { background-color: #34495e; color: white; position: sticky; top: 0; z-index: 2; }
+        tbody th { font-weight: bold; background-color: #f2f2f2; position: sticky; left: 0; z-index: 1; }
+        td { background-color: #fff; }
+        .table-title { font-weight: bold; font-size: 1.2em; margin-top: 1.5em; color: #34495e; padding: 0.5em; background-color: #eaf2f8; }
+        .hidden-row { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Oil Field Reservoir Data Viewer</h1>
+
+        <div class="controls">
+            <div>
+                <label for="field-filter">Filter by Field:</label>
+                <select id="field-filter"></select>
+            </div>
+            <div>
+                <label for="property-search">Search Properties in Table:</label>
+                <input type="text" id="property-search" placeholder="e.g., Porosity (%)">
+            </div>
+        </div>
+
+        <div id="data-display"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fieldFilter = document.getElementById('field-filter');
+            const propertySearchInput = document.getElementById('property-search');
+            const dataDisplay = document.getElementById('data-display');
+            
+            let oilFieldData = [];
+
+            // Fetch and load the JSON data
+            fetch('Data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    oilFieldData = data;
+                    populateFilters(data);
+                    renderFilteredData(); 
+                })
+                .catch(e => {
+                    console.error('Error fetching or parsing data:', e);
+                    dataDisplay.innerHTML = `<p style="color: red; text-align: center;">Error: Could not load data. Please ensure 'Data.json' is in the same directory and is a valid JSON file.</p>`;
+                });
+            
+            function populateFilters(data) {
+                const fieldNames = ['All', ...new Set(data.map(field => field.fieldName))];
+                fieldFilter.innerHTML = fieldNames.map(name => `<option value="${name}">${name}</option>`).join('');
+            }
+            
+            function createGroupedTable(title, reservoirs, dataKey) {
+                const properties = Object.keys(reservoirs[0]?.[dataKey] || {});
+                if (properties.length === 0) return '';
+                
+                let tableHTML = `<tr class="table-title-row"><th class="table-title" colspan="${reservoirs.length + 1}">${title}</th></tr>`;
+                properties.forEach(prop => {
+                    tableHTML += `<tr class="data-row"><th class="property-name">${prop}</th>`;
+                    reservoirs.forEach(res => {
+                        const value = res[dataKey]?.[prop];
+                        tableHTML += `<td>${value !== null && value !== undefined ? value : 'N/A'}</td>`;
+                    });
+                    tableHTML += `</tr>`;
+                });
+                return tableHTML;
+            }
+
+            function renderData(data) {
+                let html = '';
+                data.forEach(field => {
+                    if (field.reservoirs.length === 0) return;
+                    html += `<div class="field"><h2>${field.fieldName} (${field.county})</h2><div class="table-container"><table>`;
+                    html += `<thead><tr><th>Property</th>`;
+                    field.reservoirs.forEach(reservoir => {
+                        html += `<th>${reservoir.name}</th>`;
+                    });
+                    html += `</tr></thead><tbody>`;
+
+                    html += createGroupedTable('Pool Data', field.reservoirs, 'poolData');
+                    html += createGroupedTable('Reservoir Rock Properties', field.reservoirs, 'reservoirRockProperties');
+                    html += createGroupedTable('Reservoir Fluid Properties', field.reservoirs, 'reservoirFluidProperties');
+
+                    html += `</tbody></table></div></div>`;
+                });
+                dataDisplay.innerHTML = html;
+            }
+
+            function renderFilteredData() {
+                const selectedField = fieldFilter.value;
+                let filteredData = JSON.parse(JSON.stringify(oilFieldData)); 
+                if (selectedField !== 'All') {
+                    filteredData = filteredData.filter(field => field.fieldName === selectedField);
+                }
+                renderData(filteredData);
+                // After rendering, apply the text search to the new table
+                filterTableRows();
+            }
+
+            function filterTableRows() {
+                const query = propertySearchInput.value.toLowerCase().trim();
+                const rows = document.querySelectorAll('tr.data-row');
+                
+                rows.forEach(row => {
+                    const propertyName = row.querySelector('th.property-name').textContent.toLowerCase();
+                    if (propertyName.includes(query)) {
+                        row.classList.remove('hidden-row');
+                    } else {
+                        row.classList.add('hidden-row');
+                    }
+                });
+            }
+            
+            // --- Dynamic Event Listeners ---
+            fieldFilter.addEventListener('change', renderFilteredData);
+            propertySearchInput.addEventListener('input', filterTableRows);
+        });
+    </script>
+
+</body>
+</html>
