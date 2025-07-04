@@ -19,7 +19,7 @@
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
         <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">File Search Engine v2</h1>
 
@@ -35,21 +35,10 @@
                 <label class="flex items-center"><input type="radio" name="match-type" value="all" class="form-radio text-blue-500"><span class="ml-2 text-gray-700">Match All Keywords</span></label>
             </div>
 
-            <!-- Filters and Results -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <!-- Filter Sidebar -->
-                <div id="filter-sidebar" class="md:col-span-1 bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-bold mb-3">Filter by File Type</h3>
-                    <div id="file-type-filters" class="space-y-2">
-                        <!-- Filters are now populated by JS with categories -->
-                    </div>
-                </div>
-
-                <!-- Results Area -->
-                <div class="md:col-span-3">
-                    <div id="status-area" class="text-center my-4"></div>
-                    <div id="results-area" class="space-y-3"></div>
-                </div>
+            <!-- Results Area -->
+            <div>
+                <div id="status-area" class="text-center my-4"></div>
+                <div id="results-area" class="space-y-3"></div>
             </div>
         </div>
     </div>
@@ -60,21 +49,8 @@
             const searchBtn = document.getElementById('search-btn');
             const resultsArea = document.getElementById('results-area');
             const statusArea = document.getElementById('status-area');
-            const fileTypeFiltersContainer = document.getElementById('file-type-filters');
 
             let fileIndex = [];
-            let currentResults = [];
-
-            const FILE_CATEGORIES = {
-                'Documents': ['.pdf', '.docx', '.doc', '.txt', '.rtf', '.odt'],
-                'Spreadsheets': ['.xlsx', '.xls', '.csv', '.ods'],
-                'Presentations': ['.pptx', '.ppt', '.odp'],
-                'Images': ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg', '.tiff'],
-                'Audio': ['.mp3', '.wav', '.aac', '.flac'],
-                'Video': ['.mp4', '.mov', '.avi', '.mkv', '.wmv'],
-                'Archives': ['.zip', '.rar', '.7z', '.tar', '.gz'],
-                'Other': [] // This will be populated with any types not in other categories
-            };
 
             function loadIndex() {
                 statusArea.innerHTML = `<p class="text-gray-500">Loading file index...</p>`;
@@ -86,40 +62,21 @@
                     .then(data => {
                         fileIndex = data;
                         statusArea.innerHTML = `<p class="text-green-600">Index loaded. Ready to search ${fileIndex.length} files.</p>`;
-                        populateFileTypeFilters(fileIndex);
                     })
                     .catch(error => {
                         statusArea.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${error.message}</p>`;
                     });
             }
-
-            function populateFileTypeFilters(data) {
-                const allTypesInIndex = new Set(data.map(item => item.type));
-                const knownTypes = new Set(Object.values(FILE_CATEGORIES).flat());
-                const otherTypes = [...allTypesInIndex].filter(type => !knownTypes.has(type));
-                FILE_CATEGORIES['Other'] = otherTypes;
-
-                let html = '<label class="flex items-center"><input type="radio" name="filter-type" class="file-type-filter" value="all" checked><span class="ml-2 font-semibold">All Types</span></label>';
-                for (const category in FILE_CATEGORIES) {
-                    if (FILE_CATEGORIES[category].length > 0) {
-                        html += `<label class="flex items-center"><input type="radio" name="filter-type" class="file-type-filter" value="${category}"><span class="ml-2">${category}</span></label>`;
-                    }
-                }
-                fileTypeFiltersContainer.innerHTML = html;
-
-                document.querySelectorAll('.file-type-filter').forEach(radio => {
-                    radio.addEventListener('change', applyFiltersAndDisplay);
-                });
-            }
             
             function performSearch() {
                 const keywords = searchInput.value.trim().toLowerCase().split(' ').filter(k => k);
                 const matchType = document.querySelector('input[name="match-type"]:checked').value;
+                let results = [];
 
                 if (keywords.length === 0) {
-                    currentResults = fileIndex; // Show all files if search is empty
+                    results = fileIndex; // Show all files if search is empty
                 } else {
-                    currentResults = fileIndex.filter(item => {
+                    results = fileIndex.filter(item => {
                         const filenameLower = item.name.toLowerCase();
                         if (matchType === 'all') {
                             return keywords.every(keyword => filenameLower.includes(keyword));
@@ -129,21 +86,7 @@
                     });
                 }
                 
-                applyFiltersAndDisplay();
-            }
-
-            function applyFiltersAndDisplay() {
-                const selectedCategory = document.querySelector('input[name="filter-type"]:checked').value;
-                const keywords = searchInput.value.trim().toLowerCase().split(' ').filter(k => k);
-
-                let filteredResults = currentResults;
-
-                if (selectedCategory !== 'all') {
-                    const typesInCategory = FILE_CATEGORIES[selectedCategory];
-                    filteredResults = currentResults.filter(item => typesInCategory.includes(item.type));
-                }
-                
-                displayResults(filteredResults, keywords);
+                displayResults(results, keywords);
             }
 
             function displayResults(results, keywords) {
@@ -184,7 +127,6 @@
                 if (button) {
                     const path = button.dataset.path;
                     
-                    // Use the Clipboard API for modern browsers, with a fallback
                     navigator.clipboard.writeText(path).then(() => {
                         button.textContent = 'COPIED!';
                         button.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
