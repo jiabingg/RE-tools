@@ -3,60 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Search Engine</title>
+    <title>File Search Engine v2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+        .highlight { background-color: #fde047; font-weight: bold; }
+        .copy-btn {
+            opacity: 0.5;
+            transition: opacity 0.2s;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .result-item:hover .copy-btn {
+            opacity: 1;
         }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
         <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
-            <div class="mb-6">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">File Search Engine</h1>
-                <p class="text-gray-500 mt-1">
-                    To update the file list, run the `create_index.py` script on your computer.
-                </p>
-            </div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">File Search Engine v2</h1>
 
             <!-- Search Controls -->
-            <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                <input type="text" id="search-input" class="flex-grow w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter keywords...">
-                <button id="search-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Search</button>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <input type="text" id="search-input" class="md:col-span-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter keywords...">
+                <button id="search-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Search</button>
             </div>
             
             <!-- Match Options -->
             <div class="flex items-center space-x-4 mb-6">
-                <label class="flex items-center">
-                    <input type="radio" name="match-type" value="any" class="form-radio text-blue-500" checked>
-                    <span class="ml-2 text-gray-700">Match Any Keyword</span>
-                </label>
-                <label class="flex items-center">
-                    <input type="radio" name="match-type" value="all" class="form-radio text-blue-500">
-                    <span class="ml-2 text-gray-700">Match All Keywords</span>
-                </label>
+                <label class="flex items-center"><input type="radio" name="match-type" value="any" class="form-radio text-blue-500" checked><span class="ml-2 text-gray-700">Match Any</span></label>
+                <label class="flex items-center"><input type="radio" name="match-type" value="all" class="form-radio text-blue-500"><span class="ml-2 text-gray-700">Match All</span></label>
             </div>
 
-            <!-- Status & Results -->
-            <div id="status-area" class="text-center my-4"></div>
-            <div id="results-area"></div>
+            <!-- Filters and Results -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- Filter Sidebar -->
+                <div id="filter-sidebar" class="md:col-span-1 bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-bold mb-2">Filter by File Type</h3>
+                    <div id="file-type-filters" class="space-y-2 max-h-96 overflow-y-auto">
+                        <!-- Filters will be populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Results Area -->
+                <div class="md:col-span-3">
+                    <div id="status-area" class="text-center my-4"></div>
+                    <div id="results-area" class="space-y-3"></div>
+                </div>
+            </div>
         </div>
-        <footer class="text-center text-gray-500 mt-6 text-sm">
-            <p>A standalone HTML search interface.</p>
-        </footer>
     </div>
 
     <script>
@@ -65,96 +60,126 @@
             const searchBtn = document.getElementById('search-btn');
             const resultsArea = document.getElementById('results-area');
             const statusArea = document.getElementById('status-area');
-            
-            // This will hold the file index data once loaded
-            let fileIndex = [];
-            let isIndexLoaded = false;
+            const fileTypeFiltersContainer = document.getElementById('file-type-filters');
 
-            // --- Pre-load the index file ---
+            let fileIndex = [];
+            let currentResults = [];
+
             function loadIndex() {
-                statusArea.innerHTML = '<div class="flex justify-center items-center"><div class="loader mr-3"></div><p>Loading file index...</p></div>';
+                statusArea.innerHTML = `<p class="text-gray-500">Loading file index...</p>`;
                 fetch('index.json')
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Could not load index.json. Please run the Python script first and place the index.json file in the same directory as this HTML file.');
-                        }
+                        if (!response.ok) throw new Error('Could not load index.json.');
                         return response.json();
                     })
                     .then(data => {
                         fileIndex = data;
-                        isIndexLoaded = true;
-                        statusArea.innerHTML = `<p class="text-green-600">File index loaded. Ready to search ${fileIndex.length} files.</p>`;
+                        statusArea.innerHTML = `<p class="text-green-600">Index loaded. Ready to search ${fileIndex.length} files.</p>`;
+                        populateFileTypeFilters(fileIndex);
                     })
                     .catch(error => {
-                        console.error('Error loading index:', error);
                         statusArea.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${error.message}</p>`;
                     });
             }
 
-            // --- Event Listeners ---
-            searchBtn.addEventListener('click', performSearch);
-            searchInput.addEventListener('keyup', (event) => {
-                if (event.key === 'Enter') {
-                    performSearch();
-                }
-            });
+            function populateFileTypeFilters(data) {
+                const types = [...new Set(data.map(item => item.type))].sort();
+                let html = '<label class="flex items-center"><input type="checkbox" class="file-type-filter" value="all" checked><span class="ml-2 font-semibold">All Types</span></label>';
+                types.forEach(type => {
+                    html += `<label class="flex items-center"><input type="checkbox" class="file-type-filter" value="${type}"><span class="ml-2">${type}</span></label>`;
+                });
+                fileTypeFiltersContainer.innerHTML = html;
 
-            // --- Search Function ---
+                document.querySelectorAll('.file-type-filter').forEach(checkbox => {
+                    checkbox.addEventListener('change', applyFiltersAndDisplay);
+                });
+            }
+            
             function performSearch() {
-                if (!isIndexLoaded) {
-                    statusArea.innerHTML = `<p class="text-red-500"><strong>Error:</strong> File index is not loaded yet. Please wait or check the console for errors.</p>`;
-                    return;
-                }
-
                 const keywords = searchInput.value.trim().toLowerCase().split(' ').filter(k => k);
                 const matchType = document.querySelector('input[name="match-type"]:checked').value;
 
                 if (keywords.length === 0) {
-                    resultsArea.innerHTML = '';
-                    statusArea.innerHTML = '<p class="text-gray-500">Please enter keywords to search.</p>';
+                    currentResults = [];
+                    applyFiltersAndDisplay();
                     return;
                 }
-
-                statusArea.innerHTML = `<p class="text-gray-600">Searching...</p>`;
                 
-                // Perform search logic on the loaded index
-                const results = fileIndex.filter(item => {
+                currentResults = fileIndex.filter(item => {
                     const filenameLower = item.name.toLowerCase();
-                    
                     if (matchType === 'all') {
-                        // All keywords must be in the filename
                         return keywords.every(keyword => filenameLower.includes(keyword));
-                    } else { // 'any'
-                        // Any keyword can be in the filename
+                    } else {
                         return keywords.some(keyword => filenameLower.includes(keyword));
                     }
                 });
                 
-                statusArea.innerHTML = `<p class="text-gray-600">Found ${results.length} results.</p>`;
-                displayResults(results);
+                applyFiltersAndDisplay();
             }
 
-            // --- Display Results Function ---
-            function displayResults(results) {
+            function applyFiltersAndDisplay() {
+                const selectedTypes = Array.from(document.querySelectorAll('.file-type-filter:checked')).map(cb => cb.value);
+                const keywords = searchInput.value.trim().toLowerCase().split(' ').filter(k => k);
+
+                let filteredResults = currentResults;
+
+                if (!selectedTypes.includes('all')) {
+                    filteredResults = currentResults.filter(item => selectedTypes.includes(item.type));
+                }
+                
+                displayResults(filteredResults, keywords);
+            }
+
+            function displayResults(results, keywords) {
                 if (results.length === 0) {
-                    resultsArea.innerHTML = '<p class="text-center text-gray-500">No matching files found.</p>';
+                    resultsArea.innerHTML = '<p class="text-center text-gray-500 py-8">No matching files found.</p>';
+                    statusArea.innerHTML = `<p class="text-gray-600">Found 0 results.</p>`;
                     return;
                 }
 
-                let html = '<div class="space-y-3">';
+                statusArea.innerHTML = `<p class="text-gray-600">Displaying ${results.length} results.</p>`;
+                
+                let html = '';
                 results.forEach(item => {
+                    let highlightedName = item.name;
+                    if (keywords.length > 0) {
+                        keywords.forEach(keyword => {
+                            const regex = new RegExp(keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+                            highlightedName = highlightedName.replace(regex, `<span class="highlight">$&</span>`);
+                        });
+                    }
+
                     html += `
-                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:bg-gray-100 transition">
-                            <p class="font-semibold text-gray-800">${item.name}</p>
-                            <p class="text-sm text-gray-500 break-all">${item.path}</p>
+                        <div class="result-item bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center justify-between gap-4">
+                            <div class="flex-grow overflow-hidden">
+                                <p class="font-semibold text-gray-800 truncate">${highlightedName}</p>
+                                <p class="text-sm text-gray-500 break-all">${item.path}</p>
+                            </div>
+                            <button class="copy-btn flex-shrink-0 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded text-xs" data-path="${item.path}">COPY</button>
                         </div>
                     `;
                 });
-                html += '</div>';
                 resultsArea.innerHTML = html;
             }
+            
+            resultsArea.addEventListener('click', function(e) {
+                if (e.target.classList.contains('copy-btn')) {
+                    const path = e.target.dataset.path;
+                    const tempInput = document.createElement('input');
+                    document.body.appendChild(tempInput);
+                    tempInput.value = path;
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    
+                    e.target.textContent = 'COPIED!';
+                    setTimeout(() => { e.target.textContent = 'COPY'; }, 1500);
+                }
+            });
 
-            // --- Initial Load ---
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', e => e.key === 'Enter' && performSearch());
+            
             loadIndex();
         });
     </script>
