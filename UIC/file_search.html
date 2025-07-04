@@ -33,6 +33,7 @@
             <div class="flex items-center space-x-4 mb-6">
                 <label class="flex items-center"><input type="radio" name="match-type" value="any" class="form-radio text-blue-500" checked><span class="ml-2 text-gray-700">Match Any Keyword</span></label>
                 <label class="flex items-center"><input type="radio" name="match-type" value="all" class="form-radio text-blue-500"><span class="ml-2 text-gray-700">Match All Keywords</span></label>
+                <label class="flex items-center ml-auto"><input type="checkbox" id="search-full-path" class="form-checkbox text-blue-500 rounded"><span class="ml-2 text-gray-700">Search in full path</span></label>
             </div>
 
             <!-- Results Area -->
@@ -49,6 +50,7 @@
             const searchBtn = document.getElementById('search-btn');
             const resultsArea = document.getElementById('results-area');
             const statusArea = document.getElementById('status-area');
+            const searchFullPathCheckbox = document.getElementById('search-full-path');
 
             let fileIndex = [];
 
@@ -71,17 +73,18 @@
             function performSearch() {
                 const keywords = searchInput.value.trim().toLowerCase().split(' ').filter(k => k);
                 const matchType = document.querySelector('input[name="match-type"]:checked').value;
+                const searchFullPath = searchFullPathCheckbox.checked;
                 let results = [];
 
                 if (keywords.length === 0) {
                     results = fileIndex; // Show all files if search is empty
                 } else {
                     results = fileIndex.filter(item => {
-                        const filenameLower = item.name.toLowerCase();
+                        const textToSearch = searchFullPath ? item.path.toLowerCase() : item.name.toLowerCase();
                         if (matchType === 'all') {
-                            return keywords.every(keyword => filenameLower.includes(keyword));
+                            return keywords.every(keyword => textToSearch.includes(keyword));
                         } else {
-                            return keywords.some(keyword => filenameLower.includes(keyword));
+                            return keywords.some(keyword => textToSearch.includes(keyword));
                         }
                     });
                 }
@@ -101,11 +104,14 @@
                 let html = '';
                 results.forEach(item => {
                     let highlightedName = item.name;
+                    let highlightedPath = item.path;
+
                     if (keywords.length > 0) {
                         const uniqueKeywords = [...new Set(keywords)];
                         uniqueKeywords.forEach(keyword => {
                             const regex = new RegExp(keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
                             highlightedName = highlightedName.replace(regex, `<span class="highlight">$&</span>`);
+                            highlightedPath = highlightedPath.replace(regex, `<span class="highlight">$&</span>`);
                         });
                     }
 
@@ -113,7 +119,7 @@
                         <div class="result-item bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center justify-between gap-4">
                             <div class="flex-grow overflow-hidden">
                                 <p class="font-semibold text-gray-800 truncate">${highlightedName}</p>
-                                <p class="text-sm text-gray-500 break-all">${item.path}</p>
+                                <p class="text-sm text-gray-500 break-all">${highlightedPath}</p>
                             </div>
                             <button class="copy-btn flex-shrink-0 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded text-xs" data-path="${item.path}">COPY</button>
                         </div>
@@ -164,6 +170,8 @@
                     performSearch();
                 }
             });
+            // Trigger search when checkbox is toggled
+            searchFullPathCheckbox.addEventListener('change', performSearch);
             
             loadIndex();
         });
