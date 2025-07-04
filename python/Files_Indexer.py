@@ -41,7 +41,8 @@ def create_index(folder_paths, output_file, status_callback, progress_callback):
             for filename in files:
                 try:
                     full_path = os.path.join(root, filename)
-                    paths_found.add(full_path)
+                    path_for_html = full_path.replace('/', '\\')
+                    paths_found.add(path_for_html)
                     
                     # Get file metadata
                     mtime = os.path.getmtime(full_path)
