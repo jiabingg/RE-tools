@@ -11,7 +11,7 @@
         .highlight { background-color: #fde047; font-weight: bold; }
         .copy-btn {
             opacity: 0.5;
-            transition: opacity 0.2s;
+            transition: all 0.2s ease-in-out;
         }
         .result-item:hover .copy-btn {
             opacity: 1;
@@ -31,17 +31,17 @@
             
             <!-- Match Options -->
             <div class="flex items-center space-x-4 mb-6">
-                <label class="flex items-center"><input type="radio" name="match-type" value="any" class="form-radio text-blue-500" checked><span class="ml-2 text-gray-700">Match Any</span></label>
-                <label class="flex items-center"><input type="radio" name="match-type" value="all" class="form-radio text-blue-500"><span class="ml-2 text-gray-700">Match All</span></label>
+                <label class="flex items-center"><input type="radio" name="match-type" value="any" class="form-radio text-blue-500" checked><span class="ml-2 text-gray-700">Match Any Keyword</span></label>
+                <label class="flex items-center"><input type="radio" name="match-type" value="all" class="form-radio text-blue-500"><span class="ml-2 text-gray-700">Match All Keywords</span></label>
             </div>
 
             <!-- Filters and Results -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <!-- Filter Sidebar -->
                 <div id="filter-sidebar" class="md:col-span-1 bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-bold mb-2">Filter by File Type</h3>
-                    <div id="file-type-filters" class="space-y-2 max-h-96 overflow-y-auto">
-                        <!-- Filters will be populated by JS -->
+                    <h3 class="font-bold mb-3">Filter by File Type</h3>
+                    <div id="file-type-filters" class="space-y-2">
+                        <!-- Filters are now populated by JS with categories -->
                     </div>
                 </div>
 
@@ -65,11 +65,22 @@
             let fileIndex = [];
             let currentResults = [];
 
+            const FILE_CATEGORIES = {
+                'Documents': ['.pdf', '.docx', '.doc', '.txt', '.rtf', '.odt'],
+                'Spreadsheets': ['.xlsx', '.xls', '.csv', '.ods'],
+                'Presentations': ['.pptx', '.ppt', '.odp'],
+                'Images': ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg', '.tiff'],
+                'Audio': ['.mp3', '.wav', '.aac', '.flac'],
+                'Video': ['.mp4', '.mov', '.avi', '.mkv', '.wmv'],
+                'Archives': ['.zip', '.rar', '.7z', '.tar', '.gz'],
+                'Other': [] // This will be populated with any types not in other categories
+            };
+
             function loadIndex() {
                 statusArea.innerHTML = `<p class="text-gray-500">Loading file index...</p>`;
                 fetch('index.json')
                     .then(response => {
-                        if (!response.ok) throw new Error('Could not load index.json.');
+                        if (!response.ok) throw new Error('Could not load index.json. Make sure it is in the same directory as this HTML file.');
                         return response.json();
                     })
                     .then(data => {
@@ -83,15 +94,21 @@
             }
 
             function populateFileTypeFilters(data) {
-                const types = [...new Set(data.map(item => item.type))].sort();
-                let html = '<label class="flex items-center"><input type="checkbox" class="file-type-filter" value="all" checked><span class="ml-2 font-semibold">All Types</span></label>';
-                types.forEach(type => {
-                    html += `<label class="flex items-center"><input type="checkbox" class="file-type-filter" value="${type}"><span class="ml-2">${type}</span></label>`;
-                });
+                const allTypesInIndex = new Set(data.map(item => item.type));
+                const knownTypes = new Set(Object.values(FILE_CATEGORIES).flat());
+                const otherTypes = [...allTypesInIndex].filter(type => !knownTypes.has(type));
+                FILE_CATEGORIES['Other'] = otherTypes;
+
+                let html = '<label class="flex items-center"><input type="radio" name="filter-type" class="file-type-filter" value="all" checked><span class="ml-2 font-semibold">All Types</span></label>';
+                for (const category in FILE_CATEGORIES) {
+                    if (FILE_CATEGORIES[category].length > 0) {
+                        html += `<label class="flex items-center"><input type="radio" name="filter-type" class="file-type-filter" value="${category}"><span class="ml-2">${category}</span></label>`;
+                    }
+                }
                 fileTypeFiltersContainer.innerHTML = html;
 
-                document.querySelectorAll('.file-type-filter').forEach(checkbox => {
-                    checkbox.addEventListener('change', applyFiltersAndDisplay);
+                document.querySelectorAll('.file-type-filter').forEach(radio => {
+                    radio.addEventListener('change', applyFiltersAndDisplay);
                 });
             }
             
@@ -100,31 +117,30 @@
                 const matchType = document.querySelector('input[name="match-type"]:checked').value;
 
                 if (keywords.length === 0) {
-                    currentResults = [];
-                    applyFiltersAndDisplay();
-                    return;
+                    currentResults = fileIndex; // Show all files if search is empty
+                } else {
+                    currentResults = fileIndex.filter(item => {
+                        const filenameLower = item.name.toLowerCase();
+                        if (matchType === 'all') {
+                            return keywords.every(keyword => filenameLower.includes(keyword));
+                        } else {
+                            return keywords.some(keyword => filenameLower.includes(keyword));
+                        }
+                    });
                 }
-                
-                currentResults = fileIndex.filter(item => {
-                    const filenameLower = item.name.toLowerCase();
-                    if (matchType === 'all') {
-                        return keywords.every(keyword => filenameLower.includes(keyword));
-                    } else {
-                        return keywords.some(keyword => filenameLower.includes(keyword));
-                    }
-                });
                 
                 applyFiltersAndDisplay();
             }
 
             function applyFiltersAndDisplay() {
-                const selectedTypes = Array.from(document.querySelectorAll('.file-type-filter:checked')).map(cb => cb.value);
+                const selectedCategory = document.querySelector('input[name="filter-type"]:checked').value;
                 const keywords = searchInput.value.trim().toLowerCase().split(' ').filter(k => k);
 
                 let filteredResults = currentResults;
 
-                if (!selectedTypes.includes('all')) {
-                    filteredResults = currentResults.filter(item => selectedTypes.includes(item.type));
+                if (selectedCategory !== 'all') {
+                    const typesInCategory = FILE_CATEGORIES[selectedCategory];
+                    filteredResults = currentResults.filter(item => typesInCategory.includes(item.type));
                 }
                 
                 displayResults(filteredResults, keywords);
@@ -143,7 +159,8 @@
                 results.forEach(item => {
                     let highlightedName = item.name;
                     if (keywords.length > 0) {
-                        keywords.forEach(keyword => {
+                        const uniqueKeywords = [...new Set(keywords)];
+                        uniqueKeywords.forEach(keyword => {
                             const regex = new RegExp(keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
                             highlightedName = highlightedName.replace(regex, `<span class="highlight">$&</span>`);
                         });
@@ -163,22 +180,48 @@
             }
             
             resultsArea.addEventListener('click', function(e) {
-                if (e.target.classList.contains('copy-btn')) {
-                    const path = e.target.dataset.path;
-                    const tempInput = document.createElement('input');
-                    document.body.appendChild(tempInput);
-                    tempInput.value = path;
-                    tempInput.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(tempInput);
+                const button = e.target.closest('.copy-btn');
+                if (button) {
+                    const path = button.dataset.path;
                     
-                    e.target.textContent = 'COPIED!';
-                    setTimeout(() => { e.target.textContent = 'COPY'; }, 1500);
+                    // Use the Clipboard API for modern browsers, with a fallback
+                    navigator.clipboard.writeText(path).then(() => {
+                        button.textContent = 'COPIED!';
+                        button.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+                        button.classList.add('bg-green-500', 'text-white');
+                        setTimeout(() => { 
+                            button.textContent = 'COPY';
+                            button.classList.remove('bg-green-500', 'text-white');
+                            button.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+                        }, 1500);
+                    }).catch(err => {
+                        console.error('Failed to copy path: ', err);
+                        // Fallback for older browsers or insecure contexts
+                        const tempInput = document.createElement('textarea');
+                        tempInput.value = path;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+                        
+                        button.textContent = 'COPIED!';
+                        button.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+                        button.classList.add('bg-green-500', 'text-white');
+                        setTimeout(() => { 
+                            button.textContent = 'COPY';
+                            button.classList.remove('bg-green-500', 'text-white');
+                            button.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+                        }, 1500);
+                    });
                 }
             });
 
             searchBtn.addEventListener('click', performSearch);
-            searchInput.addEventListener('keyup', e => e.key === 'Enter' && performSearch());
+            searchInput.addEventListener('keyup', e => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
             
             loadIndex();
         });
