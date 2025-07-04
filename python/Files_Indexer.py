@@ -42,7 +42,7 @@ def create_index(folder_paths, output_file, status_callback, progress_callback):
                 try:
                     full_path = os.path.join(root, filename)
                     path_for_html = full_path.replace('/', '\\')
-                    paths_found.add(path_for_html)
+                    paths_found.add(full_path)
                     
                     # Get file metadata
                     mtime = os.path.getmtime(full_path)
@@ -58,7 +58,7 @@ def create_index(folder_paths, output_file, status_callback, progress_callback):
                     
                     new_index.append({
                         'name': filename,
-                        'path': full_path,
+                        'path': path_for_html,
                         'size': file_stat.st_size,
                         'mtime': file_stat.st_mtime,
                         'type': extension.lower() if extension else '.file'
