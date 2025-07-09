@@ -61,7 +61,7 @@ class WellAPIInputPage(Page):
         self.create_widgets()
 
     def create_widgets(self):
-        label = tb.Label(self, text="Enter Well APIs (one per line, optional for next page's query):", font=("Helvetica", 14))
+        label = tb.Label(self, text="Enter Well APIs (one per line):", font=("Helvetica", 14))
         label.pack(pady=10)
 
         self.well_api_text = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=50, height=15, font=("Courier New", 10))
@@ -83,24 +83,55 @@ class WellAPIInputPage(Page):
         self.controller.shared_data["well_apis"] = well_apis
         self.controller.show_page(EngineeringStringPage)
 
-# Page 2: SQL Query Input and Results Display
+# Page 2: Field Selection and Results Display
 class EngineeringStringPage(Page):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
+        self.available_fields = [
+            "San Ardo", "Belridge", "Wilmington", "Coalinga", "Huntington Beach",
+            "Elk Hills", "Lost Hills", "Arco Misc.", "Ventura", "Santa Maria",
+            "Beta", "Midway Sunset", "Brea - Yorba Linda"
+        ]
         self.create_widgets()
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
 
     def create_widgets(self):
-        query_frame = tb.LabelFrame(self, text="Enter SQL Query", bootstyle="primary")
-        query_frame.pack(pady=10, padx=20, fill="x", expand=False)
+        # Field Selection Frame
+        field_selection_frame = tb.LabelFrame(self, text="Select Fields", bootstyle="primary")
+        field_selection_frame.pack(pady=10, padx=20, fill="x", expand=False)
 
-        self.sql_query_text = scrolledtext.ScrolledText(query_frame, wrap=tk.WORD, width=80, height=15, font=("Courier New", 10))
-        self.sql_query_text.pack(pady=5, padx=5, fill="both", expand=True)
+        field_list_label = tb.Label(field_selection_frame, text="Available Fields:")
+        field_list_label.pack(pady=(5,0), padx=5, anchor="w")
 
-        execute_button = tb.Button(self, text="Execute Query", command=self.execute_sql_query, bootstyle="info")
+        listbox_frame = tb.Frame(field_selection_frame)
+        listbox_frame.pack(pady=5, padx=5, fill="both", expand=True)
+
+        self.field_listbox = tk.Listbox(listbox_frame, selectmode=tk.MULTIPLE, height=len(self.available_fields), font=("TkDefaultFont", 10))
+        self.field_listbox.pack(side="left", fill="both", expand=True)
+
+        field_list_scrollbar = tb.Scrollbar(listbox_frame, orient="vertical", command=self.field_listbox.yview)
+        field_list_scrollbar.pack(side="right", fill="y")
+        self.field_listbox.config(yscrollcommand=field_list_scrollbar.set)
+
+        for field in self.available_fields:
+            self.field_listbox.insert(tk.END, field)
+
+        # Select/Clear All Buttons
+        field_buttons_frame = tb.Frame(field_selection_frame)
+        field_buttons_frame.pack(pady=(0,5), padx=5)
+
+        select_all_btn = tb.Button(field_buttons_frame, text="Select All", command=self.select_all_fields, bootstyle="secondary")
+        select_all_btn.grid(row=0, column=0, padx=5)
+
+        clear_all_btn = tb.Button(field_buttons_frame, text="Clear All", command=self.clear_all_fields, bootstyle="secondary")
+        clear_all_btn.grid(row=0, column=1, padx=5)
+
+        # Query Execution Button
+        execute_button = tb.Button(self, text="Run Query for Selected Fields", command=self.execute_field_query, bootstyle="info")
         execute_button.pack(pady=10)
 
+        # Results Display (Treeview)
         self.tree_frame = tb.Frame(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
@@ -116,21 +147,52 @@ class EngineeringStringPage(Page):
         self.tree_scroll_y.config(command=self.result_tree.yview)
         self.tree_scroll_x.config(command=self.result_tree.xview)
 
+        # Button to copy results to clipboard
         copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
         copy_button.pack(pady=10)
 
+        # Navigation Buttons
         nav_frame = tb.Frame(self)
         nav_frame.pack(pady=10)
 
         back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(WellAPIInputPage), bootstyle="warning")
         back_button.grid(row=0, column=0, padx=10)
 
-    def execute_sql_query(self):
-        sql_query = self.sql_query_text.get("1.0", tk.END).strip()
+    def select_all_fields(self):
+        """Selects all items in the field listbox."""
+        self.field_listbox.selection_set(0, tk.END)
 
-        if not sql_query:
-            messagebox.showwarning("Input Error", "Please enter an SQL query.")
+    def clear_all_fields(self):
+        """Clears all selections in the field listbox."""
+        self.field_listbox.selection_clear(0, tk.END)
+
+    def execute_field_query(self):
+        """Constructs and executes the query based on selected fields."""
+        selected_indices = self.field_listbox.curselection()
+        if not selected_indices:
+            messagebox.showwarning("Input Error", "Please select at least one field from the list.")
             return
+
+        selected_fields = [self.field_listbox.get(i) for i in selected_indices]
+        # Format field names for SQL IN clause: "'Field1', 'Field2', ..."
+        formatted_fields = ', '.join([f"'{field}'" for field in selected_fields])
+
+        # Define the base SQL query with a placeholder for the field names
+        sql_query = f"""
+        with T as
+        (
+        select cd.cmpl_nme,cd.cmpl_fac_id, well_api_nbr, engr_strg_nme,max(cf.eftv_Dttm) as last_inj_dte from cmpl_dmn cd
+        join cmpl_mnly_fact cf
+        on cd.cmpl_fac_id = cf.cmpl_fac_id
+        where actv_indc = 'Y' and cd.fncl_fld_nme in ({formatted_fields}) and prim_purp_type_cde = 'INJ' and cmpl_state_type_cde in ('OPNL', 'TA')
+        group by cd.cmpl_nme,cd.cmpl_fac_id,well_api_nbr,engr_strg_nme
+        )
+
+        select t.well_api_nbr,t.cmpl_nme,t.engr_strg_nme,opg.top_perf,opg.btm_perf
+        from T
+        join CURR_TOP_BTM_ACTL_WLBR_OPG opg
+        on T.cmpl_fac_id = opg.cmpl_fac_id
+        """
 
         try:
             conn = self.conn_manager.get_connection('odw')
@@ -142,7 +204,7 @@ class EngineeringStringPage(Page):
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
 
-                # --- NEW FILTERING LOGIC ---
+                # --- Existing WELL_API_NBR FILTERING LOGIC ---
                 well_apis_to_filter = self.controller.shared_data.get("well_apis", [])
                 if well_apis_to_filter:
                     if 'WELL_API_NBR' in df.columns:
@@ -157,7 +219,7 @@ class EngineeringStringPage(Page):
                     else:
                         messagebox.showwarning("Filtering Warning",
                                                 "Could not filter by Well API: 'WELL_API_NBR' column not found in query results.")
-                # --- END NEW FILTERING LOGIC ---
+                # --- END WELL_API_NBR FILTERING LOGIC ---
 
                 self.display_results(df)
                 self.current_data = df
@@ -233,8 +295,10 @@ class EngineeringStringPage(Page):
 class MainApplication(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
-        self.title("Oracle SQL Query Runner")
-        self.geometry("1000x800")
+        # --- INCREASED GUI SIZE ---
+        self.title("Oracle Field Data Puller")
+        self.geometry("1200x1200") # Increased size
+        # --- END INCREASED GUI SIZE ---
 
         self.container = tb.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
