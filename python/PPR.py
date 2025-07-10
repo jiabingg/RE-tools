@@ -11,11 +11,13 @@ from datetime import datetime, date, timedelta
 # Oracle Connection Manager
 class OracleConnectionManager:
     def __init__(self):
+        # Define connection configurations.
+        # Uses os.getenv to allow environment variables to override defaults for security.
         self._connections = {
             "odw": {
                 "user": os.getenv("DB_USER_ODW", "rptguser"),
                 "password": os.getenv("DB_PASSWORD_ODW", "allusers"),
-                "dsn": "odw"
+                "dsn": "odw"  # lower-case for cx_Oracle compatibility
             },
             "sandbox": {
                 "user": os.getenv("DB_USER_SANDBOX", "engsb"),
@@ -30,6 +32,10 @@ class OracleConnectionManager:
         }
 
     def get_connection(self, name):
+        """
+        Returns a live Oracle connection for the given configuration name.
+        Raises ConnectionError if connection fails.
+        """
         if name not in self._connections:
             raise ValueError(f"Unknown DB connection name: {name}")
         config = self._connections[name]
@@ -44,6 +50,7 @@ class OracleConnectionManager:
             raise ConnectionError(f"Failed to connect to Oracle DB '{name}': {error_obj.message}") from e
 
     def available_connections(self):
+        """Returns a list of available connection names."""
         return list(self._connections.keys())
 
 # Abstract Base Class for Application Pages
@@ -53,6 +60,7 @@ class Page(tk.Frame):
         self.controller = controller
 
     def show_page_frame(self):
+        """Brings this specific page frame to the front."""
         self.tkraise()
 
     # --- Common Display, Clear, Copy Methods for all pages with Treeviews ---
@@ -235,7 +243,7 @@ class WellBasicDataPage(Page):
         # Format Well APIs for SQL IN clause
         formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
 
-        # --- UPDATED SQL QUERY for WellBasicDataPage (removes wd.* and specific joins/conditions) ---
+        # --- UPDATED SQL QUERY for WellBasicDataPage (re-added cd.CMPL_SEQ_NBR is not null) ---
         sql_query = f"""
         select wd.well_nme,wd.well_api_nbr,wd.fld_nme,
         cd.prim_purp_type_cde,
@@ -244,8 +252,8 @@ class WellBasicDataPage(Page):
         join cmpl_dmn cd
         on wd.well_fac_id = cd.well_fac_id
         where cd.actv_indc= 'Y' and wd.actv_indc = 'Y' and cd.cmpl_state_type_cde not in ('PRPO','FUTR')
-        and cd.CMPL_SEQ_NBR is not null
         and wd.well_api_nbr in ({formatted_well_apis})
+        and cd.CMPL_SEQ_NBR is not null -- Re-added this condition
         """
         # --- END UPDATED SQL QUERY ---
 
@@ -773,10 +781,9 @@ class MainApplication(tb.Window):
         self.title("Oracle Field Data Puller")
         self.geometry("1400x1100") # Increased height to 1100
 
-        # --- FIX: Configure ttk.Button font globally ---
+        # Configure ttk.Button font globally
         s = ttk.Style()
         s.configure("TButton", font=("Helvetica", 12, "bold"))
-        # --- END FIX ---
 
         self.container = tb.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
