@@ -243,7 +243,6 @@ class WellBasicDataPage(Page):
         # Format Well APIs for SQL IN clause
         formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
 
-        # --- UPDATED SQL QUERY for WellBasicDataPage (re-added cd.CMPL_SEQ_NBR is not null) ---
         sql_query = f"""
         select wd.well_nme,wd.well_api_nbr,wd.fld_nme,
         cd.prim_purp_type_cde,
@@ -253,9 +252,8 @@ class WellBasicDataPage(Page):
         on wd.well_fac_id = cd.well_fac_id
         where cd.actv_indc= 'Y' and wd.actv_indc = 'Y' and cd.cmpl_state_type_cde not in ('PRPO','FUTR')
         and wd.well_api_nbr in ({formatted_well_apis})
-        and cd.CMPL_SEQ_NBR is not null -- Re-added this condition
+        and cd.CMPL_SEQ_NBR is not null
         """
-        # --- END UPDATED SQL QUERY ---
 
         try:
             conn = self.conn_manager.get_connection('odw')
@@ -307,41 +305,45 @@ class EngineeringStringPage(Page):
         self.create_widgets()
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
-        self.last_selected_fields = [] # Store selected fields for the next page
+        # self.last_selected_fields is no longer used for DB filtering, but kept for shared_data if needed
+        self.last_selected_fields = []
 
     def create_widgets(self):
-        field_selection_frame = tb.LabelFrame(self, text="Select Fields", bootstyle="primary")
-        field_selection_frame.pack(pady=10, padx=20, fill="x", expand=False)
+        # --- REMOVED FIELD SELECTION UI ---
+        # field_selection_frame = tb.LabelFrame(self, text="Select Fields", bootstyle="primary")
+        # field_selection_frame.pack(pady=10, padx=20, fill="x", expand=False)
+        #
+        # field_list_label = tb.Label(field_selection_frame, text="Available Fields:")
+        # field_list_label.pack(pady=(5,0), padx=5, anchor="w")
+        #
+        # listbox_frame = tb.Frame(field_selection_frame)
+        # listbox_frame.pack(pady=5, padx=5, fill="both", expand=True)
+        #
+        # self.field_listbox = tk.Listbox(listbox_frame, selectmode=tk.MULTIPLE, height=len(self.available_fields), font=("TkDefaultFont", 10))
+        # self.field_listbox.pack(side="left", fill="both", expand=True)
+        #
+        # field_list_scrollbar = tb.Scrollbar(listbox_frame, orient="vertical", command=self.field_listbox.yview)
+        # field_list_scrollbar.pack(side="right", fill="y")
+        # self.field_listbox.config(yscrollcommand=field_list_scrollbar.set)
+        #
+        # for field in self.available_fields:
+        #     self.field_listbox.insert(tk.END, field)
+        #
+        # field_buttons_frame = tb.Frame(field_selection_frame)
+        # field_buttons_frame.pack(pady=(0,5), padx=5)
+        #
+        # select_all_btn = tb.Button(field_buttons_frame, text="Select All", command=self.select_all_fields, bootstyle="secondary")
+        # select_all_btn.grid(row=0, column=0, padx=5)
+        #
+        # clear_all_btn = tb.Button(field_buttons_frame, text="Clear All", command=self.clear_all_fields, bootstyle="secondary")
+        # clear_all_btn.grid(row=0, column=1, padx=5)
+        # --- END REMOVED FIELD SELECTION UI ---
 
-        field_list_label = tb.Label(field_selection_frame, text="Available Fields:")
-        field_list_label.pack(pady=(5,0), padx=5, anchor="w")
-
-        listbox_frame = tb.Frame(field_selection_frame)
-        listbox_frame.pack(pady=5, padx=5, fill="both", expand=True)
-
-        self.field_listbox = tk.Listbox(listbox_frame, selectmode=tk.MULTIPLE, height=len(self.available_fields), font=("TkDefaultFont", 10))
-        self.field_listbox.pack(side="left", fill="both", expand=True)
-
-        field_list_scrollbar = tb.Scrollbar(listbox_frame, orient="vertical", command=self.field_listbox.yview)
-        field_list_scrollbar.pack(side="right", fill="y")
-        self.field_listbox.config(yscrollcommand=field_list_scrollbar.set)
-
-        for field in self.available_fields:
-            self.field_listbox.insert(tk.END, field)
-
-        field_buttons_frame = tb.Frame(field_selection_frame)
-        field_buttons_frame.pack(pady=(0,5), padx=5)
-
+        # --- Adjusted layout after removing field selection UI ---
+        # The execute button and treeview will now be closer to the top
+        # No need for a separate frame for selection, directly pack the button and tree
         # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
-        select_all_btn = tb.Button(field_buttons_frame, text="Select All", command=self.select_all_fields, bootstyle="secondary")
-        select_all_btn.grid(row=0, column=0, padx=5)
-
-        clear_all_btn = tb.Button(field_buttons_frame, text="Clear All", command=self.clear_all_fields, bootstyle="secondary")
-        clear_all_btn.grid(row=0, column=1, padx=5)
-        # --- END BUTTON FONT SIZE CHANGE ---
-
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
-        execute_button = tb.Button(self, text="Run Top Perf Query for Selected Fields", command=self.execute_field_query, bootstyle="info")
+        execute_button = tb.Button(self, text="Run Top Perf Query", command=self.execute_field_query, bootstyle="info")
         execute_button.pack(pady=10)
         # --- END BUTTON FONT SIZE CHANGE ---
 
@@ -376,20 +378,18 @@ class EngineeringStringPage(Page):
         next_button.grid(row=0, column=1, padx=10)
         # --- END BUTTON FONT SIZE CHANGE ---
 
-    def select_all_fields(self):
-        self.field_listbox.selection_set(0, tk.END)
-
-    def clear_all_fields(self):
-        self.field_listbox.selection_clear(0, tk.END)
+    # Removed select_all_fields and clear_all_fields methods as UI is gone
+    # def select_all_fields(self):
+    #     self.field_listbox.selection_set(0, tk.END)
+    #
+    # def clear_all_fields(self):
+    #     self.field_listbox.selection_clear(0, tk.END)
 
     def go_to_summary_page(self):
-        selected_indices = self.field_listbox.curselection()
-        self.last_selected_fields = [self.field_listbox.get(i) for i in selected_indices]
-        if not self.last_selected_fields:
-            messagebox.showwarning("Selection Required", "Please select at least one field before proceeding to the summary page.")
-            return
-
-        self.controller.shared_data["selected_fields"] = self.last_selected_fields
+        # Since field selection UI is removed, pass an empty list or None for selected_fields
+        # as it's no longer sourced from this page's UI.
+        # The PerformanceSummaryPage will now rely solely on WELL_API_NBR for DB filtering.
+        self.controller.shared_data["selected_fields"] = [] # Pass empty list
         self.controller.show_page(PerformanceSummaryPage)
 
     def execute_field_query(self):
@@ -402,11 +402,9 @@ class EngineeringStringPage(Page):
         formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
         # --- End WELL_API_NBR filtering setup ---
 
-        # selected_fields from this page are still collected but not used for database query filtering here.
-        selected_indices = self.field_listbox.curselection()
-        selected_fields = [self.field_listbox.get(i) for i in selected_indices]
-        self.last_selected_fields = selected_fields
-        self.controller.shared_data["selected_fields"] = selected_fields # Still store for Page 4 if needed for other purposes
+        # selected_fields from this page are no longer collected from UI for DB query filtering.
+        # The `self.last_selected_fields` and `self.controller.shared_data["selected_fields"]`
+        # are now handled by `go_to_summary_page` to pass an empty list if needed.
 
         # Corrected SQL Query structure for EngineeringStringPage.execute_field_query
         # This query now joins well_dmn (wd) to cmpl_dmn (cd) inside the CTE
@@ -414,7 +412,7 @@ class EngineeringStringPage(Page):
         sql_query = f"""
         with T as
         (
-        select cd.cmpl_nme, cd.cmpl_fac_id, cd.well_api_nbr as well_api_nbr_from_cd, engr_strg_nme, max(cf.eftv_Dttm) as last_inj_dte
+        select cd.cmpl_nme, cd.cmpl_fac_id, wd.well_api_nbr, engr_strg_nme, max(cf.eftv_Dttm) as last_inj_dte
         from cmpl_dmn cd
         join cmpl_mnly_fact cf on cd.cmpl_fac_id = cf.cmpl_fac_id
         join well_dmn wd on cd.well_fac_id = wd.well_fac_id -- Join well_dmn here to filter by well_api_nbr
@@ -422,10 +420,10 @@ class EngineeringStringPage(Page):
         and wd.actv_indc = 'Y' -- Ensure the well is active as well
         and wd.well_api_nbr in ({formatted_well_apis}) -- Filter by WELL_API_NBR
         and prim_purp_type_cde = 'INJ' and cmpl_state_type_cde in ('OPNL', 'TA')
-        group by cd.cmpl_nme, cd.cmpl_fac_id, cd.well_api_nbr, engr_strg_nme
+        group by cd.cmpl_nme, cd.cmpl_fac_id, wd.well_api_nbr, engr_strg_nme
         )
 
-        select t.well_api_nbr_from_cd as WELL_API_NBR, t.cmpl_nme, t.engr_strg_nme, opg.top_perf, opg.btm_perf
+        select t.well_api_nbr, t.cmpl_nme, t.engr_strg_nme, opg.top_perf, opg.btm_perf
         from T
         join CURR_TOP_BTM_ACTL_WLBR_OPG opg
         on T.cmpl_fac_id = opg.cmpl_fac_id
@@ -440,27 +438,6 @@ class EngineeringStringPage(Page):
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
-                # Rename the column if needed for consistency with global sort/filter
-                if 'WELL_API_NBR_FROM_CD' in df.columns:
-                    df.rename(columns={'WELL_API_NBR_FROM_CD': 'WELL_API_NBR'}, inplace=True)
-
-                # This post-query filtering is now fully redundant as the DB query already uses well_api_nbr.
-                # Keeping it commented out for clarity that it's no longer necessary.
-                # well_apis_to_filter_post_query = self.controller.shared_data.get("well_apis", [])
-                # if well_apis_to_filter_post_query:
-                #     if 'WELL_API_NBR' in df.columns:
-                #         original_rows = len(df)
-                #         df = df[df['WELL_API_NBR'].isin(well_apis_to_filter_post_query)]
-                #         if len(df) < original_rows:
-                #             messagebox.showinfo("Post-Query Filtering Applied",
-                #                                 f"Filtered results to show only {len(df)} rows with Well APIs from the previous page (post-query).")
-                #         if df.empty:
-                #             messagebox.showinfo("No Results After Post-Query Filtering",
-                #                                 "No rows found matching the entered Well APIs after applying the filter.")
-                #     else:
-                #         messagebox.showwarning("Post-Query Filtering Warning",
-                #                                 "'WELL_API_NBR' column not found for post-query filtering.")
-
 
                 self.display_results(df) # Call common display method which includes sorting
                 self.current_data = df
@@ -595,10 +572,9 @@ class PerformanceSummaryPage(Page):
         # --- End WELL_API_NBR filtering setup ---
 
         # selected_fields from Page 3 are still gathered but not used for database query filtering here.
-        selected_fields_from_page3 = self.controller.shared_data.get("selected_fields", [])
-        # You could optionally use `selected_fields_from_page3` for post-query pandas filtering here
-        # if the user's intent was that field selection narrows results *after* API filtering.
-        # But the request implies the DB query itself should use WELL_API_NBR for filtering.
+        # The `selected_fields` list is no longer used in the SQL query for Page 4.
+        # selected_fields_from_page3 = self.controller.shared_data.get("selected_fields", [])
+
 
         sql_query = f"""
         WITH T1 AS (
@@ -629,14 +605,13 @@ class PerformanceSummaryPage(Page):
         JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
         LEFT JOIN cmpl_non_ver_dmn cnd ON cd.cmpl_fac_id = cnd.cmpl_fac_id
         LEFT JOIN curr_cmpl_opnl_stat os ON cd.cmpl_fac_id = os.cmpl_fac_id
-        -- REMOVED: JOIN cmpl_mnly_cum_fact ccf ON (cd.cmpl_fac_id = ccf.cmpl_fac_id AND eftv_dttm = TRUNC(SYSDATE, 'mm'))
         LEFT JOIN T1 ON cd.cmpl_fac_id = T1.cmpl_fac_id
         LEFT JOIN T2 ON cd.cmpl_fac_id = T2.cmpl_fac_id
         WHERE
             cd.actv_indc = 'Y'
             AND wd.actv_indc = 'Y'
             AND wd.well_api_nbr IN ({formatted_well_apis}) -- Filter by WELL_API_NBR
-            AND cd.prim_purp_type_cde IN ('PROD', 'INJ') -- NEW FILTER
+            --AND cd.prim_purp_type_cde IN ('PROD', 'INJ', ')
         """
 
         try:
