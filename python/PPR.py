@@ -393,28 +393,39 @@ class EngineeringStringPage(Page):
         self.controller.show_page(PerformanceSummaryPage)
 
     def execute_field_query(self):
-        selected_indices = self.field_listbox.curselection()
-        if not selected_indices:
-            messagebox.showwarning("Input Error", "Please select at least one field from the list.")
+        # --- Filtering by WELL_API_NBR from Page 1 instead of selected fields ---
+        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
+        if not well_apis_to_query:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
+            self.clear_results()
             return
+        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+        # --- End WELL_API_NBR filtering setup ---
 
+        # selected_fields from this page are still collected but not used for database query filtering here.
+        selected_indices = self.field_listbox.curselection()
         selected_fields = [self.field_listbox.get(i) for i in selected_indices]
         self.last_selected_fields = selected_fields
-        self.controller.shared_data["selected_fields"] = selected_fields
+        self.controller.shared_data["selected_fields"] = selected_fields # Still store for Page 4 if needed for other purposes
 
-        formatted_fields = ', '.join([f"'{field}'" for field in selected_fields])
-
+        # Corrected SQL Query structure for EngineeringStringPage.execute_field_query
+        # This query now joins well_dmn (wd) to cmpl_dmn (cd) inside the CTE
+        # to enable filtering by wd.well_api_nbr.
         sql_query = f"""
         with T as
         (
-        select cd.cmpl_nme,cd.cmpl_fac_id, well_api_nbr, engr_strg_nme,max(cf.eftv_Dttm) as last_inj_dte from cmpl_dmn cd
-        join cmpl_mnly_fact cf
-        on cd.cmpl_fac_id = cf.cmpl_fac_id
-        where actv_indc = 'Y' and cd.fncl_fld_nme in ({formatted_fields}) and prim_purp_type_cde = 'INJ' and cmpl_state_type_cde in ('OPNL', 'TA')
-        group by cd.cmpl_nme,cd.cmpl_fac_id,well_api_nbr,engr_strg_nme
+        select cd.cmpl_nme, cd.cmpl_fac_id, cd.well_api_nbr as well_api_nbr_from_cd, engr_strg_nme, max(cf.eftv_Dttm) as last_inj_dte
+        from cmpl_dmn cd
+        join cmpl_mnly_fact cf on cd.cmpl_fac_id = cf.cmpl_fac_id
+        join well_dmn wd on cd.well_fac_id = wd.well_fac_id -- Join well_dmn here to filter by well_api_nbr
+        where cd.actv_indc = 'Y'
+        and wd.actv_indc = 'Y' -- Ensure the well is active as well
+        and wd.well_api_nbr in ({formatted_well_apis}) -- Filter by WELL_API_NBR
+        and prim_purp_type_cde = 'INJ' and cmpl_state_type_cde in ('OPNL', 'TA')
+        group by cd.cmpl_nme, cd.cmpl_fac_id, cd.well_api_nbr, engr_strg_nme
         )
 
-        select t.well_api_nbr,t.cmpl_nme,t.engr_strg_nme,opg.top_perf,opg.btm_perf
+        select t.well_api_nbr_from_cd as WELL_API_NBR, t.cmpl_nme, t.engr_strg_nme, opg.top_perf, opg.btm_perf
         from T
         join CURR_TOP_BTM_ACTL_WLBR_OPG opg
         on T.cmpl_fac_id = opg.cmpl_fac_id
@@ -429,21 +440,27 @@ class EngineeringStringPage(Page):
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
+                # Rename the column if needed for consistency with global sort/filter
+                if 'WELL_API_NBR_FROM_CD' in df.columns:
+                    df.rename(columns={'WELL_API_NBR_FROM_CD': 'WELL_API_NBR'}, inplace=True)
 
-                well_apis_to_filter = self.controller.shared_data.get("well_apis", [])
-                if well_apis_to_filter:
-                    if 'WELL_API_NBR' in df.columns:
-                        original_rows = len(df)
-                        df = df[df['WELL_API_NBR'].isin(well_apis_to_filter)]
-                        if len(df) < original_rows:
-                            messagebox.showinfo("Filtering Applied",
-                                                f"Filtered results to show only {len(df)} rows with Well APIs from the previous page.")
-                        if df.empty:
-                            messagebox.showinfo("No Results After Filtering",
-                                                "No rows found matching the entered Well APIs after applying the filter.")
-                    else:
-                        messagebox.showwarning("Filtering Warning",
-                                                "Could not filter by Well API: 'WELL_API_NBR' column not found in query results.")
+                # This post-query filtering is now fully redundant as the DB query already uses well_api_nbr.
+                # Keeping it commented out for clarity that it's no longer necessary.
+                # well_apis_to_filter_post_query = self.controller.shared_data.get("well_apis", [])
+                # if well_apis_to_filter_post_query:
+                #     if 'WELL_API_NBR' in df.columns:
+                #         original_rows = len(df)
+                #         df = df[df['WELL_API_NBR'].isin(well_apis_to_filter_post_query)]
+                #         if len(df) < original_rows:
+                #             messagebox.showinfo("Post-Query Filtering Applied",
+                #                                 f"Filtered results to show only {len(df)} rows with Well APIs from the previous page (post-query).")
+                #         if df.empty:
+                #             messagebox.showinfo("No Results After Post-Query Filtering",
+                #                                 "No rows found matching the entered Well APIs after applying the filter.")
+                #     else:
+                #         messagebox.showwarning("Post-Query Filtering Warning",
+                #                                 "'WELL_API_NBR' column not found for post-query filtering.")
+
 
                 self.display_results(df) # Call common display method which includes sorting
                 self.current_data = df
@@ -568,13 +585,20 @@ class PerformanceSummaryPage(Page):
 
     def pull_summary_data(self):
         """Pulls data using the specific summary query based on selected fields and filters."""
-        selected_fields = self.controller.shared_data.get("selected_fields", [])
-        if not selected_fields:
-            messagebox.showwarning("Missing Selection", "Please go back to the previous page and select fields first.")
+        # --- Filtering by WELL_API_NBR from Page 1 instead of selected fields ---
+        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
+        if not well_apis_to_query:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
             self.clear_calculations()
             return
+        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+        # --- End WELL_API_NBR filtering setup ---
 
-        formatted_fields = ', '.join([f"'{field}'" for field in selected_fields])
+        # selected_fields from Page 3 are still gathered but not used for database query filtering here.
+        selected_fields_from_page3 = self.controller.shared_data.get("selected_fields", [])
+        # You could optionally use `selected_fields_from_page3` for post-query pandas filtering here
+        # if the user's intent was that field selection narrows results *after* API filtering.
+        # But the request implies the DB query itself should use WELL_API_NBR for filtering.
 
         sql_query = f"""
         WITH T1 AS (
@@ -605,11 +629,14 @@ class PerformanceSummaryPage(Page):
         JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
         LEFT JOIN cmpl_non_ver_dmn cnd ON cd.cmpl_fac_id = cnd.cmpl_fac_id
         LEFT JOIN curr_cmpl_opnl_stat os ON cd.cmpl_fac_id = os.cmpl_fac_id
-        JOIN cmpl_mnly_cum_fact ccf ON (cd.cmpl_fac_id = ccf.cmpl_fac_id AND eftv_dttm = TRUNC(SYSDATE, 'mm'))
+        -- REMOVED: JOIN cmpl_mnly_cum_fact ccf ON (cd.cmpl_fac_id = ccf.cmpl_fac_id AND eftv_dttm = TRUNC(SYSDATE, 'mm'))
         LEFT JOIN T1 ON cd.cmpl_fac_id = T1.cmpl_fac_id
         LEFT JOIN T2 ON cd.cmpl_fac_id = T2.cmpl_fac_id
-        WHERE cd.actv_indc = 'Y' AND wd.actv_indc = 'Y'
-        AND cd.fncl_fld_nme IN ({formatted_fields})
+        WHERE
+            cd.actv_indc = 'Y'
+            AND wd.actv_indc = 'Y'
+            AND wd.well_api_nbr IN ({formatted_well_apis}) -- Filter by WELL_API_NBR
+            AND cd.prim_purp_type_cde IN ('PROD', 'INJ') -- NEW FILTER
         """
 
         try:
@@ -628,20 +655,17 @@ class PerformanceSummaryPage(Page):
                         df[col] = pd.to_datetime(df[col], errors='coerce')
 
 
-                well_apis_to_filter = self.controller.shared_data.get("well_apis", [])
-                if well_apis_to_filter:
-                    if 'WELL_API_NBR' in df.columns:
-                        original_rows_before_api_filter = len(df)
-                        df = df[df['WELL_API_NBR'].isin(well_apis_to_filter)]
-                        if len(df) < original_rows_before_api_filter:
-                            messagebox.showinfo("Well API Filtering Applied",
-                                                f"Filtered summary results to show only {len(df)} rows matching Well APIs from Page 1.")
-                        if df.empty:
-                            messagebox.showinfo("No Results After Well API Filtering",
-                                                "No summary rows found matching the entered Well APIs after applying the filter.")
-                    else:
-                        messagebox.showwarning("Well API Filtering Warning",
-                                                "Could not filter by Well API: 'WELL_API_NBR' column not found in summary query results.")
+                # The filtering below is redundant as the query already filters by WELL_API_NBR
+                # It is removed to avoid confusion and unnecessary processing.
+                # well_apis_to_filter_post_query = self.controller.shared_data.get("well_apis", [])
+                # if well_apis_to_filter_post_query:
+                #    if 'WELL_API_NBR' in df.columns:
+                #        df = df[df['WELL_API_NBR'].isin(well_apis_to_filter_post_query)]
+                #        if df.empty:
+                #            messagebox.showinfo("No Results After Post-Query Filtering", "No rows found matching the entered Well APIs after applying the filter.")
+                #    else:
+                #        messagebox.showwarning("Post-Query Filtering Warning", "'WELL_API_NBR' column not found for post-query filtering.")
+
 
                 self.display_results(df) # Call common display method which includes sorting
                 self.current_data = df # Store the filtered DF for calculations and copy
