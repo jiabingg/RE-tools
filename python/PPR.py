@@ -228,7 +228,7 @@ class WellBasicDataPage(Page):
         back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(WellAPIInputPage), bootstyle="warning")
         back_button.grid(row=0, column=0, padx=10)
 
-        next_button = tb.Button(nav_frame, text="Next (Field Selection)", command=lambda: self.controller.show_page(EngineeringStringPage), bootstyle="primary")
+        next_button = tb.Button(nav_frame, text="Next (Top Perf)", command=lambda: self.controller.show_page(EngineeringStringPage), bootstyle="primary")
         next_button.grid(row=0, column=1, padx=10)
         # --- END BUTTON FONT SIZE CHANGE ---
 
@@ -293,11 +293,11 @@ class WellBasicDataPage(Page):
             messagebox.showerror("Error", f"An unexpected error occurred: {e}")
             self.clear_results()
 
-# Page 3: Field Selection and Results Display (Top Perf) - Formerly Page 2
+# Page 3: Top Perf Data - Formerly Page 2 (Field Selection Removed)
 class EngineeringStringPage(Page):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
-        self.available_fields = [
+        self.available_fields = [ # Kept for consistency of attribute, but not used in UI or query filtering
             "San Ardo", "Belridge", "Wilmington", "Coalinga", "Huntington Beach",
             "Elk Hills", "Lost Hills", "Arco Misc.", "Ventura", "Santa Maria",
             "Beta", "Midway Sunset", "Brea - Yorba Linda"
@@ -305,47 +305,15 @@ class EngineeringStringPage(Page):
         self.create_widgets()
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
-        # self.last_selected_fields is no longer used for DB filtering, but kept for shared_data if needed
-        self.last_selected_fields = []
 
     def create_widgets(self):
         # --- REMOVED FIELD SELECTION UI ---
-        # field_selection_frame = tb.LabelFrame(self, text="Select Fields", bootstyle="primary")
-        # field_selection_frame.pack(pady=10, padx=20, fill="x", expand=False)
-        #
-        # field_list_label = tb.Label(field_selection_frame, text="Available Fields:")
-        # field_list_label.pack(pady=(5,0), padx=5, anchor="w")
-        #
-        # listbox_frame = tb.Frame(field_selection_frame)
-        # listbox_frame.pack(pady=5, padx=5, fill="both", expand=True)
-        #
-        # self.field_listbox = tk.Listbox(listbox_frame, selectmode=tk.MULTIPLE, height=len(self.available_fields), font=("TkDefaultFont", 10))
-        # self.field_listbox.pack(side="left", fill="both", expand=True)
-        #
-        # field_list_scrollbar = tb.Scrollbar(listbox_frame, orient="vertical", command=self.field_listbox.yview)
-        # field_list_scrollbar.pack(side="right", fill="y")
-        # self.field_listbox.config(yscrollcommand=field_list_scrollbar.set)
-        #
-        # for field in self.available_fields:
-        #     self.field_listbox.insert(tk.END, field)
-        #
-        # field_buttons_frame = tb.Frame(field_selection_frame)
-        # field_buttons_frame.pack(pady=(0,5), padx=5)
-        #
-        # select_all_btn = tb.Button(field_buttons_frame, text="Select All", command=self.select_all_fields, bootstyle="secondary")
-        # select_all_btn.grid(row=0, column=0, padx=5)
-        #
-        # clear_all_btn = tb.Button(field_buttons_frame, text="Clear All", command=self.clear_all_fields, bootstyle="secondary")
-        # clear_all_btn.grid(row=0, column=1, padx=5)
+        # No more field selection UI as per request
         # --- END REMOVED FIELD SELECTION UI ---
 
-        # --- Adjusted layout after removing field selection UI ---
         # The execute button and treeview will now be closer to the top
-        # No need for a separate frame for selection, directly pack the button and tree
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
         execute_button = tb.Button(self, text="Run Top Perf Query", command=self.execute_field_query, bootstyle="info")
         execute_button.pack(pady=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
 
         self.tree_frame = tb.Frame(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
@@ -362,38 +330,32 @@ class EngineeringStringPage(Page):
         self.tree_scroll_y.config(command=self.result_tree.yview)
         self.tree_scroll_x.config(command=self.result_tree.xview)
 
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
         copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
         copy_button.pack(pady=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
 
         nav_frame = tb.Frame(self)
         nav_frame.pack(pady=10)
 
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
         back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(WellBasicDataPage), bootstyle="warning")
         back_button.grid(row=0, column=0, padx=10)
 
         next_button = tb.Button(nav_frame, text="Next (Summary Data)", command=self.go_to_summary_page, bootstyle="primary")
         next_button.grid(row=0, column=1, padx=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
 
     # Removed select_all_fields and clear_all_fields methods as UI is gone
-    # def select_all_fields(self):
-    #     self.field_listbox.selection_set(0, tk.END)
-    #
-    # def clear_all_fields(self):
-    #     self.field_listbox.selection_clear(0, tk.END)
+    # def select_all_fields(self): ...
+    # def clear_all_fields(self): ...
 
     def go_to_summary_page(self):
-        # Since field selection UI is removed, pass an empty list or None for selected_fields
-        # as it's no longer sourced from this page's UI.
-        # The PerformanceSummaryPage will now rely solely on WELL_API_NBR for DB filtering.
-        self.controller.shared_data["selected_fields"] = [] # Pass empty list
+        # Since field selection UI is removed, pass an empty list for selected_fields
+        # as it's no longer sourced from this page's UI. This prevents issues if
+        # PerformanceSummaryPage still expects this key in shared_data.
+        # PerformanceSummaryPage will now rely solely on WELL_API_NBR for DB filtering.
+        self.controller.shared_data["selected_fields"] = [] # Pass empty list, as no fields are selected here anymore
         self.controller.show_page(PerformanceSummaryPage)
 
     def execute_field_query(self):
-        # --- Filtering by WELL_API_NBR from Page 1 instead of selected fields ---
+        # --- Filtering by WELL_API_NBR from Page 1 ---
         well_apis_to_query = self.controller.shared_data.get("well_apis", [])
         if not well_apis_to_query:
             messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
@@ -546,18 +508,19 @@ class PerformanceSummaryPage(Page):
         self.tree_scroll_y.config(command=self.result_tree.yview)
         self.tree_scroll_x.config(command=self.result_tree.xview)
 
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
         copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
         copy_button.pack(pady=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
 
         nav_frame = tb.Frame(self)
         nav_frame.pack(pady=10)
 
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
         back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(EngineeringStringPage), bootstyle="warning")
         back_button.grid(row=0, column=0, padx=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
+        
+        # --- ADDED NEXT BUTTON ---
+        next_button = tb.Button(nav_frame, text="Next (Tubing Pressure)", command=lambda: self.controller.show_page(TubingPressurePage), bootstyle="primary")
+        next_button.grid(row=0, column=1, padx=10) # Corrected typo: padx=1=10 to padx=10
+        # --- END ADDED NEXT BUTTON ---
 
 
     def pull_summary_data(self):
@@ -571,7 +534,7 @@ class PerformanceSummaryPage(Page):
         formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
         # --- End WELL_API_NBR filtering setup ---
 
-        # selected_fields from Page 3 are still gathered but not used for database query filtering here.
+        # selected_fields from Page 3 are no longer collected from UI for DB query filtering here.
         # The `selected_fields` list is no longer used in the SQL query for Page 4.
         # selected_fields_from_page3 = self.controller.shared_data.get("selected_fields", [])
 
@@ -596,7 +559,7 @@ class PerformanceSummaryPage(Page):
             ) WHERE rnk = 1
         )
 
-        SELECT wd.well_nme, wd.well_api_nbr, wd.fld_nme,
+        SELECT wd.well_nme, cd.cmpl_dmn_key, wd.well_api_nbr, wd.fld_nme,
                cd.init_prod_dte, cd.init_inj_dte, cd.prim_purp_type_cde,
                cd.ENGR_STRG_NME,
                t1.last_inj_dte, t2.last_prod_dte,
@@ -611,7 +574,7 @@ class PerformanceSummaryPage(Page):
             cd.actv_indc = 'Y'
             AND wd.actv_indc = 'Y'
             AND wd.well_api_nbr IN ({formatted_well_apis}) -- Filter by WELL_API_NBR
-            --AND cd.prim_purp_type_cde IN ('PROD', 'INJ', ')
+            AND cd.prim_purp_type_cde IN ('PROD', 'INJ') -- NEW FILTER
         """
 
         try:
@@ -773,12 +736,161 @@ class PerformanceSummaryPage(Page):
         super().copy_to_clipboard()
 
 
+# New Page 5: Tubing Pressure Data
+class TubingPressurePage(Page):
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
+        self.create_widgets()
+        self.conn_manager = OracleConnectionManager()
+        self.current_data = None
+        self.avg_pressure_label = None # Label to display average pressure
+
+    def create_widgets(self):
+        header_label = tb.Label(self, text="Tubing Pressure Data", font=("Helvetica", 16, "bold"))
+        header_label.pack(pady=10)
+
+        # Frame for controls and average pressure display
+        control_frame = tb.Frame(self)
+        control_frame.pack(pady=10, padx=20, fill="x", expand=False)
+        control_frame.columnconfigure(0, weight=1) # For button
+        control_frame.columnconfigure(1, weight=1) # For label
+
+        # Pull Data Button
+        pull_data_btn = tb.Button(control_frame, text="Pull Tubing Pressure Data", command=self.pull_tubing_pressure_data, bootstyle="info")
+        pull_data_btn.grid(row=0, column=0, padx=5, sticky="w")
+
+        # Average Pressure Display Label
+        avg_pressure_frame = tb.Frame(control_frame)
+        avg_pressure_frame.grid(row=0, column=1, padx=5, sticky="e")
+        tb.Label(avg_pressure_frame, text="Average Tubing Pressure:").pack(side="left", padx=5)
+        self.avg_pressure_label = tb.Label(avg_pressure_frame, text="N/A", bootstyle="success", font=("TkDefaultFont", 10, "bold"))
+        self.avg_pressure_label.pack(side="left", padx=5)
+
+
+        # Treeview for results
+        self.tree_frame = tb.Frame(self)
+        self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
+
+        self.tree_scroll_y = tb.Scrollbar(self.tree_frame, orient="vertical")
+        self.tree_scroll_y.pack(side="right", fill="y")
+        self.tree_scroll_x = tb.Scrollbar(self.tree_frame, orient="horizontal")
+        self.tree_scroll_x.pack(side="bottom", fill="x")
+
+        self.result_tree = ttk.Treeview(self.tree_frame, show="headings",
+                                        yscrollcommand=self.tree_scroll_y.set,
+                                        xscrollcommand=self.tree_scroll_x.set)
+        self.result_tree.pack(fill="both", expand=True)
+        self.tree_scroll_y.config(command=self.result_tree.yview)
+        self.tree_scroll_x.config(command=self.result_tree.xview)
+
+        # Copy to Clipboard Button
+        copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
+        copy_button.pack(pady=10)
+
+        # Navigation Buttons
+        nav_frame = tb.Frame(self)
+        nav_frame.pack(pady=10)
+
+        back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(PerformanceSummaryPage), bootstyle="warning")
+        back_button.grid(row=0, column=0, padx=10)
+
+
+    def pull_tubing_pressure_data(self):
+        """Pulls tubing pressure data based on Well APIs from Page 1."""
+        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
+        if not well_apis_to_query:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
+            self.clear_results()
+            self.clear_average_pressure()
+            return
+        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+
+        sql_query = f"""
+        select wd.well_nme, wd.well_api_nbr, cd.prim_purp_type_cde,
+        round(avg(case when cf.wlhd_tbg_prsr_qty > 0 then cf.wlhd_tbg_prsr_qty end ),1) as avg_wlhd_tbg_prsr
+        from
+        well_dmn wd
+        join
+        cmpl_dmn cd
+        on wd.well_fac_id = cd.well_fac_id
+        join cmpl_dly_fact cf
+        on cd.cmpl_fac_id = cf.cmpl_fac_id
+        where wd.actv_indc = 'Y' and cd.actv_indc = 'Y' and cf.eftv_Dttm >= trunc(sysdate)-90
+        and wd.well_api_nbr in ({formatted_well_apis}) and cd.prim_purp_type_cde = 'INJ'
+        group by wd.well_nme, wd.well_api_nbr,cd.prim_purp_type_cde
+        """
+
+        try:
+            conn = self.conn_manager.get_connection('odw')
+            cursor = conn.cursor()
+            cursor.execute(sql_query)
+
+            if cursor.description:
+                rows = cursor.fetchall()
+                columns = [col[0] for col in cursor.description]
+                df = pd.DataFrame(rows, columns=columns)
+
+                self.display_results(df) # Uses common display method (includes sorting)
+                self.current_data = df # Store for clipboard copy
+
+                self.calculate_average_pressure(df) # Perform the specific calculation
+            else:
+                conn.commit()
+                messagebox.showinfo("Query Executed", "SQL query executed successfully. No results to display.")
+                self.clear_results()
+                self.clear_average_pressure()
+                self.current_data = None
+
+            cursor.close()
+            conn.close()
+
+        except ConnectionError as e:
+            messagebox.showerror("Connection Error", str(e))
+            self.clear_results()
+            self.clear_average_pressure()
+        except cx_Oracle.Error as e:
+            error_obj, = e.args
+            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
+            self.clear_results()
+            self.clear_average_pressure()
+        except Exception as e:
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
+            self.clear_results()
+            self.clear_average_pressure()
+
+    def calculate_average_pressure(self, df):
+        """Calculates and displays the average tubing pressure."""
+        # Add a check to ensure avg_pressure_label is initialized before use
+        if self.avg_pressure_label is None:
+            print("Error: self.avg_pressure_label was not initialized. Cannot calculate average pressure.")
+            return
+
+        if 'AVG_WLHD_TBG_PRSR' in df.columns:
+            # Convert to numeric, coercing errors to NaN, then drop NaNs for average
+            pressures = pd.to_numeric(df['AVG_WLHD_TBG_PRSR'], errors='coerce').dropna()
+            if not pressures.empty:
+                avg_pressure = pressures.mean()
+                self.avg_pressure_label.config(text=f"{avg_pressure:.1f}")
+            else:
+                self.avg_pressure_label.config(text="No valid pressure data")
+        else:
+            self.avg_pressure_label.config(text="Column not found")
+            messagebox.showwarning("Calculation Warning", "AVG_WLHD_TBG_PRSR column not found for average calculation.")
+
+    def clear_average_pressure(self):
+        """Resets the average pressure label."""
+        if self.avg_pressure_label: # This check is good
+            self.avg_pressure_label.config(text="N/A")
+
+    # display_results, clear_results, copy_to_clipboard are inherited from Page class
+
+
 # Main Application Class
 class MainApplication(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
         self.title("Oracle Field Data Puller")
-        self.geometry("1400x1100") # Increased height to 1100
+        self.geometry("1200x900") # Changed height to 900
 
         # Configure ttk.Button font globally
         s = ttk.Style()
@@ -791,7 +903,8 @@ class MainApplication(tb.Window):
 
         self.frames = {}
         # List all pages to be created in order of appearance
-        for F in (WellAPIInputPage, WellBasicDataPage, EngineeringStringPage, PerformanceSummaryPage):
+        # TubingPressurePage is defined before MainApplication, so it can be referenced.
+        for F in (WellAPIInputPage, WellBasicDataPage, EngineeringStringPage, PerformanceSummaryPage, TubingPressurePage):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
             self.frames[page_name] = frame
