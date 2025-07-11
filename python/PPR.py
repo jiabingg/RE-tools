@@ -64,7 +64,7 @@ class Page(tk.Frame):
         self.tkraise()
 
     # --- Common Display, Clear, Copy Methods for all pages with Treeviews ---
-    def display_results(self, df):
+    def display_results(self, df, apply_global_sort=True): # Added apply_global_sort parameter
         """Displays DataFrame results in the Treeview widget with common sorting."""
         # Clear existing Treeview data
         for i in self.result_tree.get_children():
@@ -75,21 +75,21 @@ class Page(tk.Frame):
             self.result_tree["columns"] = [] # Clear columns if no data
             return
 
-        # --- GLOBAL SORTING LOGIC ---
-        # Ensure sorting columns exist before attempting to sort
-        sort_columns = ['PRIM_PURP_TYPE_CDE', 'WELL_API_NBR']
-        available_sort_columns = [col for col in sort_columns if col in df.columns]
+        # --- GLOBAL SORTING LOGIC (now conditional) ---
+        if apply_global_sort:
+            sort_columns = ['PRIM_PURP_TYPE_CDE', 'WELL_API_NBR']
+            available_sort_columns = [col for col in sort_columns if col in df.columns]
 
-        if len(available_sort_columns) > 0:
-            try:
-                # Convert WELL_API_NBR to string type to avoid numerical sorting issues if mixed types
-                if 'WELL_API_NBR' in df.columns:
-                    df['WELL_API_NBR'] = df['WELL_API_NBR'].astype(str)
-                df.sort_values(by=available_sort_columns, inplace=True)
-            except Exception as e:
-                messagebox.showwarning("Sorting Warning", f"Error during sorting: {e}. Displaying unsorted data.")
-        else:
-            messagebox.showwarning("Sorting Warning", "Could not sort data: 'PRIM_PURP_TYPE_CDE' or 'WELL_API_NBR' column(s) not found.")
+            if len(available_sort_columns) > 0:
+                try:
+                    # Convert WELL_API_NBR to string type to avoid numerical sorting issues if mixed types
+                    if 'WELL_API_NBR' in df.columns:
+                        df['WELL_API_NBR'] = df['WELL_API_NBR'].astype(str)
+                    df.sort_values(by=available_sort_columns, inplace=True)
+                except Exception as e:
+                    messagebox.showwarning("Sorting Warning", f"Error during sorting: {e}. Displaying unsorted data.")
+            else:
+                messagebox.showwarning("Sorting Warning", "Could not sort data: 'PRIM_PURP_TYPE_CDE' or 'WELL_API_NBR' column(s) not found.")
         # --- END GLOBAL SORTING LOGIC ---
 
 
@@ -517,10 +517,8 @@ class PerformanceSummaryPage(Page):
         back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(EngineeringStringPage), bootstyle="warning")
         back_button.grid(row=0, column=0, padx=10)
         
-        # --- ADDED NEXT BUTTON ---
         next_button = tb.Button(nav_frame, text="Next (Tubing Pressure)", command=lambda: self.controller.show_page(TubingPressurePage), bootstyle="primary")
-        next_button.grid(row=0, column=1, padx=10) # Corrected typo: padx=1=10 to padx=10
-        # --- END ADDED NEXT BUTTON ---
+        next_button.grid(row=0, column=1, padx=10)
 
 
     def pull_summary_data(self):
@@ -793,6 +791,9 @@ class TubingPressurePage(Page):
 
         back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(PerformanceSummaryPage), bootstyle="warning")
         back_button.grid(row=0, column=0, padx=10)
+        
+        next_button = tb.Button(nav_frame, text="Next (Prod/Inj Data)", command=lambda: self.controller.show_page(ProductionInjectionPage), bootstyle="primary")
+        next_button.grid(row=0, column=1, padx=10)
 
 
     def pull_tubing_pressure_data(self):
@@ -885,6 +886,123 @@ class TubingPressurePage(Page):
     # display_results, clear_results, copy_to_clipboard are inherited from Page class
 
 
+# New Page 6: Production and Injection Data
+class ProductionInjectionPage(Page):
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
+        self.create_widgets()
+        self.conn_manager = OracleConnectionManager()
+        self.current_data = None
+
+    def create_widgets(self):
+        header_label = tb.Label(self, text="Production and Injection Data", font=("Helvetica", 16, "bold"))
+        header_label.pack(pady=10)
+
+        # Pull Data Button
+        pull_data_btn = tb.Button(self, text="Pull Production/Injection Data", command=self.pull_data, bootstyle="info")
+        pull_data_btn.pack(pady=10)
+
+        # Treeview for results
+        self.tree_frame = tb.Frame(self)
+        self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
+
+        self.tree_scroll_y = tb.Scrollbar(self.tree_frame, orient="vertical")
+        self.tree_scroll_y.pack(side="right", fill="y")
+        self.tree_scroll_x = tb.Scrollbar(self.tree_frame, orient="horizontal")
+        self.tree_scroll_x.pack(side="bottom", fill="x")
+
+        self.result_tree = ttk.Treeview(self.tree_frame, show="headings",
+                                        yscrollcommand=self.tree_scroll_y.set,
+                                        xscrollcommand=self.tree_scroll_x.set)
+        self.result_tree.pack(fill="both", expand=True)
+        self.tree_scroll_y.config(command=self.result_tree.yview)
+        self.tree_scroll_x.config(command=self.result_tree.xview)
+
+        # Copy to Clipboard Button
+        copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
+        copy_button.pack(pady=10)
+
+        # Navigation Buttons
+        nav_frame = tb.Frame(self)
+        nav_frame.pack(pady=10)
+
+        back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(TubingPressurePage), bootstyle="warning")
+        back_button.grid(row=0, column=0, padx=10)
+
+    def pull_data(self):
+        """Pulls production and injection data based on Well APIs from Page 1."""
+        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
+        if not well_apis_to_query:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
+            self.clear_results()
+            return
+        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+
+        sql_query = f"""
+        SELECT
+            wd.well_nme AS "WELL NAME",
+            wd.well_api_nbr AS "WELL API",
+            cf.eftv_dttm AS "DATE",
+            cf.aloc_oil_prod_dly_rte_qty AS "OIL PROD BOPD",
+            cf.aloc_wtr_prod_dly_rte_qty AS "WATER PROD BWPD",
+            cf.aloc_gas_prod_dly_rte_qty AS "GAS PROD MCFD",
+            cf.aloc_stm_inj_dly_rte_qty AS "STEAM INJ Per Day",
+            cf.aloc_wtr_inj_on_days_rte_qty AS "WATER INJ Per Day"
+        FROM
+            well_dmn wd
+            JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+            JOIN cmpl_mnly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+        WHERE
+            cd.actv_indc = 'Y'
+            AND wd.actv_indc = 'Y'
+            AND wd.well_api_nbr IN ({formatted_well_apis})
+            AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -24)
+            AND cf.eftv_dttm <= TRUNC(SYSDATE)
+        ORDER BY
+            wd.well_api_nbr,
+            cf.eftv_dttm
+        """
+
+        try:
+            conn = self.conn_manager.get_connection('odw')
+            cursor = conn.cursor()
+            cursor.execute(sql_query)
+
+            if cursor.description:
+                rows = cursor.fetchall()
+                columns = [col[0] for col in cursor.description]
+                df = pd.DataFrame(rows, columns=columns)
+
+                # Convert date column for proper display/sorting if needed
+                if 'DATE' in df.columns:
+                    df['DATE'] = pd.to_datetime(df['DATE'], errors='coerce')
+
+                # Call display_results, but specifically tell it NOT to apply the global sort
+                self.display_results(df, apply_global_sort=False) # <--- IMPORTANT CHANGE HERE
+                self.current_data = df # Store for clipboard copy
+            else:
+                conn.commit()
+                messagebox.showinfo("Query Executed", "SQL query executed successfully. No results to display.")
+                self.clear_results()
+                self.current_data = None
+
+            cursor.close()
+            conn.close()
+
+        except ConnectionError as e:
+            messagebox.showerror("Connection Error", str(e))
+            self.clear_results()
+        except cx_Oracle.Error as e:
+            error_obj, = e.args
+            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
+            self.clear_results()
+        except Exception as e:
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
+            self.clear_results()
+
+    # display_results, clear_results, copy_to_clipboard are inherited from Page class
+
+
 # Main Application Class
 class MainApplication(tb.Window):
     def __init__(self):
@@ -903,8 +1021,7 @@ class MainApplication(tb.Window):
 
         self.frames = {}
         # List all pages to be created in order of appearance
-        # TubingPressurePage is defined before MainApplication, so it can be referenced.
-        for F in (WellAPIInputPage, WellBasicDataPage, EngineeringStringPage, PerformanceSummaryPage, TubingPressurePage):
+        for F in (WellAPIInputPage, WellBasicDataPage, EngineeringStringPage, PerformanceSummaryPage, TubingPressurePage, ProductionInjectionPage):
             page_name = F.__name__
             frame = F(parent=self.container, controller=self)
             self.frames[page_name] = frame
