@@ -3,7 +3,55 @@
         "name": "Technical",
         "path": "J:\\Technical",
         "Indexed": "Yes",
-        "Date Indexed": "2025-07-12 15:04:03",
-        "Index File": "Technical.json"
+        "Date Indexed": "2025-07-12 23:53:55",
+        "Index File": "Technical_files.json"
+    },
+    {
+        "name": "Tulare",
+        "path": "R:\\Tulare",
+        "Indexed": "No",
+        "Date Indexed": null
+    },
+    {
+        "name": "SanArdoRES",
+        "path": "R:\\SanArdoRES",
+        "Indexed": "In Progress",
+        "Date Indexed": null
+    },
+    {
+        "name": "SJV",
+        "path": "R:\\SJV",
+        "Indexed": "No",
+        "Date Indexed": null
+    },
+    {
+        "name": "Reserve Team",
+        "path": "R:\\Reserve Team",
+        "Indexed": "No",
+        "Date Indexed": null
+    },
+    {
+        "name": "Steam Optimization",
+        "path": "R:\\Steam Optimization",
+        "Indexed": "No",
+        "Date Indexed": null
+    },
+    {
+        "name": "EHS - DOGGR",
+        "path": "I:\\EHS - DOGGR",
+        "Indexed": "No",
+        "Date Indexed": null
+    },
+    {
+        "name": "DiatNP",
+        "path": "R:\\DiatNP",
+        "Indexed": "No",
+        "Date Indexed": null
+    },
+    {
+        "name": "COASTAL",
+        "path": "R:\\COASTAL",
+        "Indexed": "No",
+        "Date Indexed": null
     }
 ]
