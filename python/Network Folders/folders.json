@@ -9,14 +9,16 @@
     {
         "name": "Tulare",
         "path": "R:\\Tulare",
-        "Indexed": "No",
-        "Date Indexed": null
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 11:02:25",
+        "Index File": "Tulare_files.json"
     },
     {
         "name": "SanArdoRES",
         "path": "R:\\SanArdoRES",
-        "Indexed": "In Progress",
-        "Date Indexed": null
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 11:48:51",
+        "Index File": "SanArdoRES_files.json"
     },
     {
         "name": "SJV",

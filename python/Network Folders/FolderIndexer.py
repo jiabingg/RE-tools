@@ -112,7 +112,7 @@ class IndexerGUI:
                                 self.log_queue.put((f"Discovery checkpoint: {subfolders_found} folders found and saved.", 2))
                     
                     status_data["folders"] = [{"path": p, "status": "No"} for p in all_subfolders]
-                    status_data["meta"]["discovery_complete"] = True # Mark discovery as complete
+                    status_data["meta"]["discovery_complete"] = True 
                     write_json(status_file_path, status_data)
                     self.log_queue.put((f"Discovery complete. Found a total of {len(all_subfolders)} subfolders.", 1))
                 except Exception as e:
@@ -125,7 +125,7 @@ class IndexerGUI:
             subfolder_statuses = status_data["folders"]
             indexed_files_data = read_json(data_file_path) or []
             
-            something_was_indexed = False
+            something_was_indexed_in_run = False
             subfolders_since_update = 0 
             total_subfolders = len(subfolder_statuses)
 
@@ -144,22 +144,29 @@ class IndexerGUI:
                                         "path": entry.path,
                                         "modified_date": mod_time
                                     })
-                                except (OSError, PermissionError) as e:
-                                    self.log_queue.put((f"Skipping unreadable file: {entry.name} ({e})", 3))
+                                except (OSError, PermissionError):
+                                    pass # Logged in previous versions, now just skipping
                     
-                    folder_entry['status'] = 'Yes'
-                    write_json(status_file_path, status_data)
-                    write_json(data_file_path, indexed_files_data)
-                    something_was_indexed = True
+                    folder_entry['status'] = 'Yes' # Mark as done IN MEMORY
+                    something_was_indexed_in_run = True
                     subfolders_since_update += 1
 
-                    if subfolders_since_update >= 100:
-                        self.log_queue.put((f"Indexing Progress: {i + 1} of {total_subfolders} subfolders processed.", 2))
+                    if subfolders_since_update >= 500:
+                        self.log_queue.put((f"CHECKPOINT: Saving progress. {i + 1} of {total_subfolders} subfolders processed.", 2))
+                        # Save the batch of changes to disk
+                        write_json(status_file_path, status_data)
+                        write_json(data_file_path, indexed_files_data)
                         subfolders_since_update = 0
 
                 except (OSError, PermissionError) as e:
                     self.log_queue.put((f"ERROR scanning subfolder {folder_entry['path']}: {e}. Will retry on next run.", 2))
                     break 
+
+            # After the loop, save any remaining data that didn't form a full batch
+            if something_was_indexed_in_run:
+                self.log_queue.put(("Saving final data for this run...", 1))
+                write_json(status_file_path, status_data)
+                write_json(data_file_path, indexed_files_data)
 
             if all(f['status'] == 'Yes' for f in subfolder_statuses):
                 self.log_queue.put((f"SUCCESS: Granular indexing complete for {top_folder_info['name']}.", 1))
@@ -167,7 +174,7 @@ class IndexerGUI:
                 top_folder_info['Date Indexed'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 top_folder_info['Index File'] = os.path.basename(data_file_path) 
                 write_json(main_config_path, main_config)
-            elif something_was_indexed:
+            elif something_was_indexed_in_run:
                  self.log_queue.put((f"Finished a partial indexing run for {top_folder_info['name']}. Restart to continue.", 1))
 
         self.log_queue.put(("All top-level folders processed.", 0))
