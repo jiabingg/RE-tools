@@ -381,7 +381,8 @@ class EngineeringStringPage(Page):
         where cd.actv_indc = 'Y'
         and wd.actv_indc = 'Y' -- Ensure the well is active as well
         and wd.well_api_nbr in ({formatted_well_apis}) -- Filter by WELL_API_NBR
-        and prim_purp_type_cde = 'INJ' and cmpl_state_type_cde in ('OPNL', 'TA')
+        --and prim_purp_type_cde = 'INJ' 
+        and cmpl_state_type_cde in ('OPNL', 'TA')
         group by cd.cmpl_nme, cd.cmpl_fac_id, wd.well_api_nbr, engr_strg_nme
         )
 
