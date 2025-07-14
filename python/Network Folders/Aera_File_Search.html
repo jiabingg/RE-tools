@@ -3,51 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Folder Search</title>
+    <title>Legacy Aera RMT File Search</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 0 auto; max-width: 1200px; padding: 20px; background-color: #f4f4f9; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f9; }
+        .container, .footer-container { max-width: 1200px; margin: 20px auto; padding: 25px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1 { color: #333; }
-        .container { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .subtitle { font-size: 0.9em; color: #555; margin-top: -10px; margin-bottom: 20px;}
         .search-area { display: flex; flex-wrap: wrap; gap: 20px; }
         .folder-selection { flex: 1; min-width: 300px; border: 1px solid #ccc; padding: 10px; border-radius: 5px; max-height: 180px; overflow-y: auto; }
         .search-controls { flex: 2; min-width: 300px; }
         .control-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .checkbox-item { display: block; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .checkbox-item label { margin-left: 5px; }
+        /* MODIFIED THIS RULE */
+        .checkbox-item { display: block; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .checkbox-item label { margin-left: 5px; cursor: pointer; }
         .folder-path { color: #555; font-size: 0.9em; }
         #keyword-input { padding: 10px; border-radius: 5px; border: 1px solid #ccc; flex-grow: 1; }
         #search-btn { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer; }
         #search-btn:hover { background-color: #0056b3; }
-        #results-count { margin-top: 20px; font-weight: bold; }
+        .status-area { margin-top: 20px; }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+        .export-buttons button { margin-left: 10px; padding: 5px 10px; font-size: 0.9em; cursor: pointer; }
+        #loading-progress { font-family: monospace; font-size: 0.9em; color: #333; height: 4.5em; overflow-y: auto; background-color: #f9f9f9; border: 1px solid #eee; padding: 8px; border-radius: 4px; margin-bottom: 10px;}
+        #total-files-status { font-weight: bold; color: #0056b3; }
+        #results-count { font-weight: bold; }
         #results-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         #results-table th, #results-table td { padding: 12px; border: 1px solid #ddd; text-align: left; word-break: break-all; }
-        #results-table th { background-color: #f2f2f2; }
         .highlight { background-color: yellow; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>📁 Network Folder Search</h1>
+        <h1>Legacy Aera RMT File Search</h1>
+        <p class="subtitle">Developed and maintained by Bin Jia. If you want to add another folder to the search, please email at <a href="mailto:bjia@aeraenergy.com">bjia@aeraenergy.com</a>.</p>
+        <hr>
 
         <div class="search-area">
-            <div class="folder-selection" id="folder-checkboxes">
-                </div>
-
+            <div class="folder-selection" id="folder-checkboxes"></div>
             <div class="search-controls">
                 <div class="control-group">
                     <input type="text" id="keyword-input" placeholder="Enter keywords...">
                     <button id="search-btn">Search</button>
                 </div>
                 <div class="control-group">
-                    <label>
-                        <input type="checkbox" id="match-all"> Match all keywords
-                    </label>
+                    <label><input type="checkbox" id="match-all"> Match all keywords</label>
                 </div>
             </div>
         </div>
 
-        <div id="results-count"></div>
+        <div class="status-area">
+            <div id="total-files-status">Total files loaded: 0</div>
+            <div id="loading-progress"></div>
+            <div class="results-header">
+                <div id="results-count"></div>
+                <div class="export-buttons" id="export-buttons" style="display: none;">
+                    <button id="export-btn">📄 Export as CSV</button>
+                </div>
+            </div>
+        </div>
+        
         <table id="results-table" style="display:none;">
             <thead>
                 <tr>
@@ -60,18 +74,144 @@
         </table>
     </div>
 
+    <div class="footer-container">
+        <h2>CRC CalGEM and S-Drive Search</h2>
+        <p><a href="http://internal-configapploadbalancer-2035416526.us-west-2.elb.amazonaws.com:8080/calgem_keyword" target="_blank" rel="noopener noreferrer">http://internal-configapploadbalancer-2035416526.us-west-2.elb.amazonaws.com:8080/calgem_keyword</a></p>
+    </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Element References ---
     const folderCheckboxesContainer = document.getElementById('folder-checkboxes');
     const keywordInput = document.getElementById('keyword-input');
     const matchAllCheckbox = document.getElementById('match-all');
     const searchBtn = document.getElementById('search-btn');
     const resultsCount = document.getElementById('results-count');
+    const loadingProgress = document.getElementById('loading-progress');
+    const totalFilesStatus = document.getElementById('total-files-status');
     const resultsTable = document.getElementById('results-table');
     const resultsTbody = resultsTable.querySelector('tbody');
+    const exportButtons = document.getElementById('export-buttons');
+    const exportBtn = document.getElementById('export-btn');
 
+    // --- State Variables ---
     let allFilesData = {};
+    let currentSearchResults = [];
 
+    // --- Functions ---
+    const updateTotalFilesCount = () => {
+        const total = Object.values(allFilesData).reduce((sum, arr) => sum + arr.length, 0);
+        totalFilesStatus.textContent = `Total files loaded: ${total.toLocaleString()}`;
+    };
+    
+    const logProgress = (message) => {
+        loadingProgress.innerHTML += message + '<br>';
+        loadingProgress.scrollTop = loadingProgress.scrollHeight;
+    };
+
+    const handleCheckboxChange = async (event) => {
+        const checkbox = event.target;
+        const indexFileName = checkbox.value;
+        
+        if (checkbox.checked) {
+            logProgress(`⏳ Loading ${indexFileName}...`);
+            try {
+                const response = await fetch(indexFileName);
+                if (!response.ok) throw new Error(`Could not load ${indexFileName}`);
+                const data = await response.json();
+                allFilesData[indexFileName] = data;
+                logProgress(`✔️ Loaded ${indexFileName} (${data.length.toLocaleString()} files).`);
+            } catch (error) {
+                console.error(error);
+                logProgress(`❌ Error loading ${indexFileName}.`);
+                allFilesData[indexFileName] = [];
+            }
+        } else {
+            delete allFilesData[indexFileName];
+            logProgress(`🗑️ Unloaded ${indexFileName}.`);
+        }
+        updateTotalFilesCount();
+    };
+
+    const highlightKeywords = (text, keywords) => {
+        if (!keywords.length || !text) return text;
+        const regex = new RegExp(`(${keywords.join('|')})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+    };
+
+    const performSearch = () => {
+        const checkedBoxes = folderCheckboxesContainer.querySelectorAll('input[type="checkbox"]:checked');
+        const keywords = keywordInput.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        
+        if (checkedBoxes.length === 0) {
+            alert('Please select and load at least one folder to search.');
+            return;
+        }
+        if (keywords.length === 0) {
+            alert('Please enter a keyword to search.');
+            return;
+        }
+
+        resultsTbody.innerHTML = '';
+        resultsTable.style.display = 'none';
+        exportButtons.style.display = 'none';
+        currentSearchResults = [];
+
+        for (const indexFile in allFilesData) {
+            const files = allFilesData[indexFile] || [];
+            files.forEach(file => {
+                const fileNameLower = file.name.toLowerCase();
+                const isMatch = matchAllCheckbox.checked
+                    ? keywords.every(kw => fileNameLower.includes(kw))
+                    : keywords.some(kw => fileNameLower.includes(kw));
+                if (isMatch) currentSearchResults.push(file);
+            });
+        }
+
+        resultsTable.style.display = 'table';
+        resultsCount.textContent = `Found ${currentSearchResults.length.toLocaleString()} matching files.`;
+        if (currentSearchResults.length > 0) {
+            exportButtons.style.display = 'block';
+            currentSearchResults.forEach(file => {
+                const row = resultsTbody.insertRow();
+                row.innerHTML = `
+                    <td>${highlightKeywords(file.name, keywords)}</td>
+                    <td>${file.path}</td>
+                    <td>${file.modified_date}</td>
+                `;
+            });
+        }
+    };
+    
+    // --- Export Function ---
+    const exportResultsAsCSV = () => {
+        const header = ["File Name", "Full Path", "Date Modified"];
+        const formatField = (field) => {
+            const str = String(field || '');
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        };
+
+        const rows = currentSearchResults.map(file => 
+            [formatField(file.name), formatField(file.path), formatField(file.modified_date)].join(',')
+        );
+        
+        const csvString = [header.join(','), ...rows].join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "search_results.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // --- Event Listeners ---
     fetch('folders.json')
         .then(response => response.json())
         .then(data => {
@@ -80,15 +220,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (folder.Indexed === 'Yes' && folder['Index File']) {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'checkbox-item';
-
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.id = `folder-${folder.name}`;
                     checkbox.value = folder['Index File'];
-
+                    checkbox.addEventListener('change', handleCheckboxChange);
+                    
                     const label = document.createElement('label');
                     label.htmlFor = `folder-${folder.name}`;
-                    // MODIFIED LINE: Name and path are now on the same line.
                     label.innerHTML = `<strong>${folder.name}:</strong> <span class="folder-path">${folder.path}</span>`;
                     
                     itemDiv.appendChild(checkbox);
@@ -97,79 +236,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         })
-        .catch(error => console.error('Error loading folders.json:', error));
-
-    const loadFolderData = async (indexFileName) => {
-        if (allFilesData[indexFileName]) return;
-        try {
-            const response = await fetch(indexFileName);
-            if (!response.ok) throw new Error(`Could not load ${indexFileName}`);
-            allFilesData[indexFileName] = await response.json();
-        } catch (error) {
-            console.error(error);
-            allFilesData[indexFileName] = [];
-        }
-    };
-    
-    const highlightKeywords = (text, keywords) => {
-        if (!keywords.length || !text) return text;
-        const regex = new RegExp(`(${keywords.join('|')})`, 'gi');
-        return text.replace(regex, '<span class="highlight">$1</span>');
-    };
-
-    const performSearch = async () => {
-        const checkedBoxes = folderCheckboxesContainer.querySelectorAll('input[type="checkbox"]:checked');
-        const selectedIndexFiles = Array.from(checkedBoxes).map(cb => cb.value);
-
-        const keywords = keywordInput.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
-        const matchAll = matchAllCheckbox.checked;
-
-        if (selectedIndexFiles.length === 0) {
-            alert('Please select at least one folder to search.');
-            return;
-        }
-        if (keywords.length === 0) {
-            alert('Please enter a keyword to search.');
-            return;
-        }
-
-        resultsCount.textContent = 'Loading and searching...';
-        resultsTbody.innerHTML = '';
-        resultsTable.style.display = 'none';
-
-        await Promise.all(selectedIndexFiles.map(loadFolderData));
-        
-        let searchResults = [];
-        selectedIndexFiles.forEach(indexFile => {
-            const files = allFilesData[indexFile] || [];
-            files.forEach(file => {
-                const fileNameLower = file.name.toLowerCase();
-                const isMatch = matchAll
-                    ? keywords.every(kw => fileNameLower.includes(kw))
-                    : keywords.some(kw => fileNameLower.includes(kw));
-
-                if (isMatch) searchResults.push(file);
-            });
+        .catch(error => {
+            console.error('Error loading folders.json:', error);
+            folderCheckboxesContainer.innerHTML = '<span style="color: red;">Error: Could not load folders.json.</span>';
         });
-
-        resultsTable.style.display = 'table';
-        resultsCount.textContent = `Found ${searchResults.length} matching files.`;
-        if (searchResults.length === 0) return;
-
-        searchResults.forEach(file => {
-            const row = resultsTbody.insertRow();
-            row.innerHTML = `
-                <td>${highlightKeywords(file.name, keywords)}</td>
-                <td>${file.path}</td>
-                <td>${file.modified_date}</td>
-            `;
-        });
-    };
 
     searchBtn.addEventListener('click', performSearch);
     keywordInput.addEventListener('keyup', (event) => {
          if (event.key === 'Enter') performSearch();
     });
+    exportBtn.addEventListener('click', exportResultsAsCSV);
 });
 </script>
 
