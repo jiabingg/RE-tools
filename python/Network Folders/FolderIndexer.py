@@ -134,6 +134,8 @@ class IndexerGUI:
                     continue
 
                 try:
+                    # The following line was removed to reduce log messages
+                    # self.log_queue.put((f"Scanning subfolder: {folder_entry['path']}", 2))
                     with os.scandir(folder_entry['path']) as it:
                         for entry in it:
                             if entry.is_file(follow_symlinks=False):
@@ -145,24 +147,24 @@ class IndexerGUI:
                                         "modified_date": mod_time
                                     })
                                 except (OSError, PermissionError):
-                                    pass # Logged in previous versions, now just skipping
+                                    pass
                     
-                    folder_entry['status'] = 'Yes' # Mark as done IN MEMORY
+                    folder_entry['status'] = 'Yes'
                     something_was_indexed_in_run = True
                     subfolders_since_update += 1
 
                     if subfolders_since_update >= 500:
                         self.log_queue.put((f"CHECKPOINT: Saving progress. {i + 1} of {total_subfolders} subfolders processed.", 2))
-                        # Save the batch of changes to disk
                         write_json(status_file_path, status_data)
                         write_json(data_file_path, indexed_files_data)
                         subfolders_since_update = 0
 
                 except (OSError, PermissionError) as e:
-                    self.log_queue.put((f"ERROR scanning subfolder {folder_entry['path']}: {e}. Will retry on next run.", 2))
-                    break 
+                    self.log_queue.put((f"WARNING: Skipping inaccessible subfolder {folder_entry['path']}: {e}", 2))
+                    folder_entry['status'] = 'Yes' 
+                    something_was_indexed_in_run = True
+                    continue
 
-            # After the loop, save any remaining data that didn't form a full batch
             if something_was_indexed_in_run:
                 self.log_queue.put(("Saving final data for this run...", 1))
                 write_json(status_file_path, status_data)
