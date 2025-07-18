@@ -1,0 +1,72 @@
+[
+    {
+        "name": "Technical",
+        "path": "J:\\Technical",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-12 23:53:55",
+        "Index File": "Technical_files.json"
+    },
+    {
+        "name": "Tulare",
+        "path": "R:\\Tulare",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 11:02:25",
+        "Index File": "Tulare_files.json"
+    },
+    {
+        "name": "SanArdoRES",
+        "path": "R:\\SanArdoRES",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 11:48:51",
+        "Index File": "SanArdoRES_files.json"
+    },
+    {
+        "name": "SJV",
+        "path": "R:\\SJV",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 15:05:06",
+        "Index File": "SJV_files.json"
+    },
+    {
+        "name": "Reserve Team",
+        "path": "R:\\Reserve Team",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 15:12:21",
+        "Index File": "Reserve_Team_files.json"
+    },
+    {
+        "name": "Steam Optimization",
+        "path": "R:\\Steam Optimization",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 15:12:31",
+        "Index File": "Steam_Optimization_files.json"
+    },
+    {
+        "name": "EHS - DOGGR",
+        "path": "I:\\EHS - DOGGR",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 15:50:04",
+        "Index File": "EHS___DOGGR_files.json"
+    },
+    {
+        "name": "DiatNP",
+        "path": "R:\\DiatNP",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 19:00:31",
+        "Index File": "DiatNP_files.json"
+    },
+    {
+        "name": "COASTAL",
+        "path": "R:\\COASTAL",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-13 20:19:02",
+        "Index File": "COASTAL_files.json"
+    },
+    {
+        "name": "MWSS",
+        "path": "R:\\MWSS",
+        "Indexed": "Yes",
+        "Date Indexed": "2025-07-17 08:23:39",
+        "Index File": "MWSS_files.json"
+    }
+]

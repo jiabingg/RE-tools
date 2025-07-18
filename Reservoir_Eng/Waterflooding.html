@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hilcorp Reservoir Engineer Interview Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Calm Harmony (Stone, White, Deep Teal, Amber) -->
+    <!-- Application Structure Plan: A top-navigation, single-page application structure was chosen to provide a clear, non-linear path for interview preparation. Users can freely switch between high-level company context, fundamental technical concepts, practical data analysis techniques, and direct question practice. This is superior to a linear report as it allows the user to focus on areas where they need the most review, mirroring a self-guided study session for maximum efficiency and knowledge retention. -->
+    <!-- Visualization & Content Choices: 
+        - Hilcorp Ops (Map): Report Info -> Hilcorp's Alaskan presence. Goal -> Inform/Organize. Viz -> HTML/CSS-based interactive map. Interaction -> Click regions to see details. Justification -> Provides crucial context on the operating environment without external libraries or complex graphics.
+        - Waterflood Fundamentals: Report Info -> Core reservoir engineering principles. Goal -> Inform/Organize. Viz -> HTML/CSS grid of cards. Interaction -> Click to reveal details. Justification -> Breaks down complex topics into digestible, interactive pieces for easier learning.
+        - Diagnostic Plots: Report Info -> Waterflood surveillance techniques (Hall, WOR plots). Goal -> Analyze/Compare. Viz -> Chart.js line charts. Interaction -> User selects plot type from a dropdown, which dynamically updates the chart and its interpretation guide. Justification -> This core interactive element actively simulates the data analysis portion of the job, teaching the user how to interpret key data signatures, which is a critical skill. Confirms NO SVG/Mermaid.
+        - Interview Questions: Report Info -> Common technical/behavioral questions. Goal -> Organize/Inform. Viz -> HTML accordion. Interaction -> Click to expand/collapse categories. Justification -> Cleanly organizes a large amount of text, allowing the user to focus on one area at a time.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active {
+            border-bottom-color: #0d9488; /* teal-600 */
+            color: #0f766e; /* teal-700 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .concept-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .accordion-header {
+            cursor: pointer;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .map-region {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .map-region.active {
+            background-color: #0d9488 !important;
+            color: white;
+        }
+        .map-region:not(.active):hover {
+            background-color: #5eead4 !important; /* teal-300 */
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-800">Reservoir Engineer Interview Prep</h1>
+            <p class="text-lg text-stone-600 mt-2">Focus: Hilcorp Alaska Waterflood Operations</p>
+        </header>
+
+        <nav id="main-nav" class="flex justify-center border-b border-stone-300 mb-8 space-x-4 md:space-x-8">
+            <a href="#context" class="nav-link py-4 px-2 text-sm md:text-base font-semibold text-stone-600 hover:text-teal-600">Hilcorp Alaska Context</a>
+            <a href="#fundamentals" class="nav-link py-4 px-2 text-sm md:text-base font-semibold text-stone-600 hover:text-teal-600">Waterflood Fundamentals</a>
+            <a href="#diagnostics" class="nav-link py-4 px-2 text-sm md:text-base font-semibold text-stone-600 hover:text-teal-600">Diagnostic Plots</a>
+            <a href="#interview" class="nav-link py-4 px-2 text-sm md:text-base font-semibold text-stone-600 hover:text-teal-600">Interview Questions</a>
+        </nav>
+
+        <main>
+            <!-- Section 1: Hilcorp Alaska Context -->
+            <section id="context" class="content-section">
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold text-teal-800 mb-4">Understanding the Operating Environment</h2>
+                    <p class="text-stone-700">This section provides an overview of Hilcorp's major operating areas in Alaska. As a reservoir engineer, understanding the specific geology, history, and challenges of these fields is critical. Hilcorp specializes in revitalizing mature assets, and their Alaskan portfolio is a prime example. Your role will involve optimizing production from these legacy fields, primarily through waterflood management. Use the interactive map below to explore the key characteristics of each region.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 bg-white p-4 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 text-center">Alaska Operations Map</h3>
+                        <div class="bg-stone-200 rounded p-4 h-96 flex flex-col justify-center items-center space-y-4">
+                           <div id="region-prudhoe" class="map-region bg-teal-500 text-white w-48 text-center p-4 rounded shadow-md">Prudhoe Bay (North Slope)</div>
+                           <div class="h-16 w-px bg-stone-400"></div>
+                           <div id="region-cook" class="map-region bg-amber-500 text-white w-48 text-center p-4 rounded shadow-md">Cook Inlet</div>
+                        </div>
+                    </div>
+                    <div id="region-details" class="md:col-span-2 bg-white p-6 rounded-lg shadow-sm min-h-[24rem]">
+                         <h3 class="text-xl font-bold text-stone-700 mb-2">Select a region to see details</h3>
+                         <p class="text-stone-600">Click on "Prudhoe Bay" or "Cook Inlet" to learn about the field characteristics and challenges you would be facing.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Waterflood Fundamentals -->
+            <section id="fundamentals" class="content-section">
+                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold text-teal-800 mb-4">Core Waterflood Concepts</h2>
+                    <p class="text-stone-700">A strong grasp of waterflooding fundamentals is non-negotiable. This section provides an interactive review of the core concepts you must know. These principles govern how effectively you can sweep remaining oil from the reservoir. The interviewer will expect you to explain these terms, their formulas, and their practical implications for managing a mature waterflood like those in Prudhoe Bay. Click on each card to reveal more information.</p>
+                </div>
+                <div id="concepts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Concept cards will be injected here by JS -->
+                </div>
+            </section>
+
+            <!-- Section 3: Diagnostic Plots -->
+            <section id="diagnostics" class="content-section">
+                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold text-teal-800 mb-4">Interactive Diagnostic Plot Analysis</h2>
+                    <p class="text-stone-700">As a reservoir engineer, your primary role in waterflood management is surveillance and diagnostics. You will analyze plots like these daily to monitor performance, identify problems, and propose solutions. This interactive tool lets you explore common diagnostic plots. Select a plot from the dropdown to see a typical example and learn how to interpret its key features. Being able to quickly diagnose well and reservoir behavior from these plots is a skill Hilcorp highly values.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+                        <label for="plot-selector" class="font-semibold text-lg mb-2 md:mb-0">Select a Diagnostic Plot:</label>
+                        <select id="plot-selector" class="p-2 border border-stone-300 rounded-md shadow-sm w-full md:w-auto">
+                            <option value="hall">Hall Plot</option>
+                            <option value="wor">WOR vs. Cumulative Oil</option>
+                            <option value="dca">Decline Curve Analysis (Waterflood)</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="diagnostic-chart"></canvas>
+                    </div>
+                    <div id="plot-interpretation" class="mt-6 p-4 bg-teal-50 border-l-4 border-teal-500 rounded-r-lg">
+                        <!-- Interpretation text will be injected here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Interview Questions -->
+            <section id="interview" class="content-section">
+                <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold text-teal-800 mb-4">Practice Interview Questions</h2>
+                    <p class="text-stone-700">This section contains a curated list of technical, behavioral, and situational questions you might encounter. Hilcorp's culture emphasizes ownership, efficiency, and safety. Prepare to answer technical questions directly and frame your behavioral answers using the STAR (Situation, Task, Action, Result) method, highlighting how your actions added value. Click on each category to expand the list of questions.</p>
+                </div>
+                <div id="accordion-container" class="space-y-4">
+                    <!-- Accordion items will be injected here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    const mainNav = document.getElementById('main-nav');
+
+    const regionData = {
+        prudhoe: {
+            title: 'Prudhoe Bay Field (North Slope)',
+            content: `
+                <ul class="list-disc list-inside space-y-2 text-stone-700">
+                    <li><b>Field Type:</b> Giant, mature sandstone reservoir. Largest oil field in North America.</li>
+                    <li><b>Hilcorp's Role:</b> Acquired BP's stake in 2020, becoming the operator. Focused on maximizing recovery from this legacy asset.</li>
+                    <li><b>Waterflood Status:</b> One of the world's largest and longest-running waterfloods. Highly mature.</li>
+                    <li><b>Key Challenges:</b>
+                        <ul class="list-['-_'] ml-6 mt-1 space-y-1">
+                            <li>High water cut management and produced water disposal/re-injection.</li>
+                            <li>Optimizing sweep efficiency in a mature, complex reservoir.</li>
+                            <li>Potential for wellbore scaling, souring (H2S), and corrosion.</li>
+                            <li>Arctic operating conditions: permafrost, extreme cold, and logistical challenges.</li>
+                            <li>Maintaining integrity of aging facilities and wellbores.</li>
+                        </ul>
+                    </li>
+                    <li><b>Your Potential Role:</b> Pattern surveillance, identifying infill drilling opportunities, optimizing injection rates, and troubleshooting problem wells.</li>
+                </ul>
+            `
+        },
+        cook: {
+            title: 'Cook Inlet Fields',
+            content: `
+                <ul class="list-disc list-inside space-y-2 text-stone-700">
+                    <li><b>Field Type:</b> Multiple mature oil and gas fields, often with complex faulting.</li>
+                    <li><b>Hilcorp's Role:</b> Leading operator in the Inlet, known for acquiring and revitalizing fields others considered depleted.</li>
+                    <li><b>Waterflood Status:</b> Waterflooding is a key EOR method used to boost recovery in these mature fields.</li>
+                    <li><b>Key Challenges:</b>
+                        <ul class="list-['-_'] ml-6 mt-1 space-y-1">
+                            <li>Complex geology with many faults, complicating sweep patterns.</li>
+                            <li>Managing older infrastructure with potential integrity issues.</li>
+                            <li>Water sourcing and compatibility for injection.</li>
+                            <li>Balancing injection and production in smaller, compartmentalized reservoirs.</li>
+                            <li>Strict environmental regulations in a sensitive marine ecosystem.</li>
+                        </ul>
+                    </li>
+                    <li><b>Your Potential Role:</b> Reservoir characterization, waterflood pattern design and management, evaluating EOR potential beyond waterflooding.</li>
+                </ul>
+            `
+        }
+    };
+
+    const conceptsData = [
+        { title: 'Mobility Ratio (M)', content: '<strong>Definition:</strong> The ratio of the mobility of the displacing fluid (water) to the displaced fluid (oil). It dictates the stability of the flood front.<br><strong>Formula:</strong> M = (k<sub>rw</sub>/μ<sub>w</sub>) / (k<sub>ro</sub>/μ<sub>o</sub>)<br><strong>Significance:</strong> If M > 1 (unfavorable), the water moves more easily than oil, leading to "viscous fingering" and poor sweep efficiency. If M < 1 (favorable), the flood front is stable, resulting in better displacement.' },
+        { title: 'Sweep Efficiency (E<sub>s</sub>)', content: '<strong>Definition:</strong> The fraction of the reservoir volume contacted by the injected fluid. It has two main components.<br><strong>Components:</strong><br>1. <strong>Areal Sweep (E<sub>a</sub>):</strong> The fraction of the horizontal plane of the reservoir swept. Affected by pattern type and mobility ratio.<br>2. <strong>Vertical Sweep (E<sub>v</sub>):</strong> The fraction of the vertical cross-section swept. Affected by gravity and reservoir heterogeneity (e.g., high-perm streaks).<br><strong>Overall Recovery =</strong> E<sub>s</sub> * E<sub>d</sub> (Displacement Efficiency)' },
+        { title: 'Voidage Replacement Ratio (VRR)', content: '<strong>Definition:</strong> The ratio of injected reservoir volume to produced reservoir volume.<br><strong>Formula:</strong> VRR = Injected Volume (bbl) / Produced Volume (Oil+Water+Gas) (bbl)<br><strong>Significance:</strong> A key tool for pressure maintenance. VRR = 1 aims to maintain reservoir pressure. VRR > 1 increases pressure (re-pressurization). VRR < 1 depletes pressure. Managing VRR is crucial for maximizing recovery and preventing damage.' },
+        { title: 'Injectivity Index (II)', content: '<strong>Definition:</strong> A measure of how easily a well can take injected fluid.<br><strong>Formula:</strong> II = q<sub>w</sub> / (P<sub>wh</sub> - P<sub>res</sub>), where q<sub>w</sub> is injection rate and P<sub>wh</sub> is wellhead pressure.<br><strong>Significance:</strong> A declining Injectivity Index, often seen on a Hall Plot, suggests wellbore damage (scaling, plugging) or near-wellbore pressure increase, requiring stimulation or workover.' },
+        { title: 'Pattern Types', content: '<strong>Definition:</strong> The geometric arrangement of injection and production wells.<br><strong>Common Types:</strong><br>• <strong>Five-Spot:</strong> Four injectors at the corners of a square with a producer in the center (or vice-versa). Very common.<br>• <strong>Line Drive:</strong> Rows of injectors alternate with rows of producers.<br>• <strong>Seven-Spot & Nine-Spot:</strong> Variations of the five-spot with more injectors.<br><strong>Significance:</strong> The choice of pattern affects areal sweep efficiency, well spacing, and operational flexibility.' },
+        { title: 'Water-Oil Ratio (WOR)', content: '<strong>Definition:</strong> The ratio of the volume of water produced to the volume of oil produced.<br><strong>Formula:</strong> WOR = Produced Water (bbl) / Produced Oil (bbl)<br><strong>Significance:</strong> A key indicator of waterflood maturity. As the flood progresses, WOR increases. Tracking WOR vs. cumulative production helps diagnose water breakthrough and assess the economic limit of a well.' }
+    ];
+
+    const interviewQuestions = [
+        {
+            category: 'Technical Questions',
+            questions: [
+                'Explain the concept of mobility ratio and why it is critical in waterflooding.',
+                'You see a sudden increase in the slope of a Hall Plot for one of your injectors. What are the possible causes and what would be your diagnostic workflow?',
+                'How would you differentiate between poor areal sweep and poor vertical sweep in a waterflood pattern?',
+                'Describe the concept of Voidage Replacement Ratio. How would you manage the VRR in a mature field like Prudhoe Bay?',
+                'What is water breakthrough? How does it manifest on a production plot (WOR vs. Np)?',
+                'What are tracers and how are they used in waterflood surveillance?',
+                'What factors would you consider when designing a new waterflood pattern in a section of a field?',
+                'Discuss the potential issues with water chemistry compatibility between injected and formation water.'
+            ]
+        },
+        {
+            category: 'Behavioral & Situational Questions',
+            questions: [
+                'Tell me about a time you had to analyze a large, complex dataset to solve a problem. What was your process and what was the outcome?',
+                'Describe a situation where you identified a safety concern and what you did about it.',
+                'Hilcorp\'s culture emphasizes ownership. Describe a project where you took ownership from start to finish.',
+                'Tell me about a time you had a disagreement with a colleague or manager on a technical matter. How did you handle it?',
+                'This role is in Alaska. Why are you interested in relocating and working in a challenging arctic environment?',
+                'You are given a group of 20 wells with declining production. What is your 30-day plan to analyze the situation and propose recommendations?',
+                'How do you stay current with new technologies and practices in reservoir engineering?'
+            ]
+        }
+    ];
+
+    function initNavigation() {
+        const hash = window.location.hash || '#context';
+        updateActiveContent(hash);
+
+        mainNav.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href');
+                window.location.hash = targetId;
+                updateActiveContent(targetId);
+            }
+        });
+    }
+
+    function updateActiveContent(targetId) {
+        navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === targetId);
+        });
+        contentSections.forEach(section => {
+            section.classList.toggle('active', `#${section.id}` === targetId);
+        });
+    }
+
+    function populateRegionInfo() {
+        const detailsPane = document.getElementById('region-details');
+        document.getElementById('region-prudhoe').addEventListener('click', (e) => {
+            detailsPane.innerHTML = `
+                <h3 class="text-xl font-bold text-teal-700 mb-2">${regionData.prudhoe.title}</h3>
+                ${regionData.prudhoe.content}
+            `;
+            document.getElementById('region-cook').classList.remove('active');
+            e.currentTarget.classList.add('active');
+        });
+        document.getElementById('region-cook').addEventListener('click', (e) => {
+            detailsPane.innerHTML = `
+                <h3 class="text-xl font-bold text-amber-700 mb-2">${regionData.cook.title}</h3>
+                ${regionData.cook.content}
+            `;
+            document.getElementById('region-prudhoe').classList.remove('active');
+            e.currentTarget.classList.add('active');
+        });
+        document.getElementById('region-prudhoe').click();
+    }
+
+    function populateConcepts() {
+        const grid = document.getElementById('concepts-grid');
+        grid.innerHTML = conceptsData.map(concept => `
+            <div class="concept-card bg-white rounded-lg shadow-sm p-5 cursor-pointer">
+                <h3 class="text-lg font-bold text-teal-800">${concept.title}</h3>
+                <div class="concept-details text-stone-600 mt-2 text-sm" style="display: none;">
+                    ${concept.content}
+                </div>
+            </div>
+        `).join('');
+
+        grid.addEventListener('click', (e) => {
+            const card = e.target.closest('.concept-card');
+            if (card) {
+                const details = card.querySelector('.concept-details');
+                details.style.display = details.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    }
+    
+    function populateAccordion() {
+        const container = document.getElementById('accordion-container');
+        container.innerHTML = interviewQuestions.map((group, index) => `
+            <div class="border border-stone-200 rounded-lg">
+                <div class="accordion-header bg-stone-50 hover:bg-stone-100 p-4 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-teal-800">${group.category}</h3>
+                    <span class="transform transition-transform duration-300">▼</span>
+                </div>
+                <div class="accordion-content bg-white">
+                    <ul class="p-4 list-disc list-inside space-y-3 text-stone-700">
+                        ${group.questions.map(q => `<li>${q}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `).join('');
+
+        container.addEventListener('click', e => {
+            const header = e.target.closest('.accordion-header');
+            if (header) {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('span');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                    document.querySelectorAll('.accordion-header span').forEach(i => i.style.transform = 'rotate(0deg)');
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            }
+        });
+    }
+
+    let diagnosticChart = null;
+    const chartData = {
+        hall: {
+            labels: [0, 50, 100, 150, 200, 250, 300, 350, 400],
+            datasets: [{
+                label: 'Cumulative Injection (MMBBL)',
+                data: [2000, 2100, 2200, 2300, 2400, 2700, 3000, 3300, 3600],
+                borderColor: '#0d9488',
+                backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                fill: false,
+                tension: 0.1
+            }],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: 'Cumulative Injection (MMBBL)' } },
+                    y: { title: { display: true, text: 'Hall Integral (psi-MMBBL/cp)' } }
+                },
+                plugins: {
+                    title: { display: true, text: 'Hall Plot: Diagnosing Injectivity' }
+                }
+            },
+            interpretation: '<strong>Interpretation:</strong> The Hall Plot tracks injection performance. A constant slope indicates stable injectivity. The steepening slope after 200 MMBBL indicates a decrease in injectivity, likely due to wellbore plugging, scaling, or near-wellbore reservoir fill-up. This would trigger an investigation into the well\'s condition and a potential workover/stimulation job.'
+        },
+        wor: {
+            labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            datasets: [{
+                label: 'Water-Oil Ratio (WOR)',
+                data: [0.1, 0.2, 0.4, 0.8, 1.5, 2.5, 4, 6, 8.5, 11, 14],
+                borderColor: '#d97706',
+                backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                tension: 0.4,
+                yAxisID: 'y'
+            }],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'logarithmic',
+                        position: 'left',
+                        title: { display: true, text: 'WOR (log scale)' }
+                    },
+                    x: { title: { display: true, text: 'Cumulative Oil Production, Np (MMSTB)' } }
+                },
+                plugins: {
+                    title: { display: true, text: 'WOR vs. Cumulative Oil: Tracking Water Breakthrough' }
+                }
+            },
+            interpretation: '<strong>Interpretation:</strong> This plot shows how much water is produced for every barrel of oil. The sharp increase in the slope after 4 MMSTB indicates significant water breakthrough, meaning the injected water has established a high-permeability channel to the producer. While expected, the rate of increase is monitored closely to manage economics and potentially shut off high water-producing zones.'
+        },
+        dca: {
+            labels: Array.from({length: 12}, (_, i) => `Year ${i + 1}`),
+            datasets: [{
+                label: 'Oil Rate (BOPD)',
+                data: [1000, 850, 720, 610, 520, 440, 370, 310, 260, 220, 190, 160],
+                borderColor: '#0f766e',
+                backgroundColor: 'rgba(15, 118, 110, 0.1)',
+                tension: 0.1
+            }],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'logarithmic',
+                        title: { display: true, text: 'Oil Rate (BOPD, log scale)' }
+                    },
+                    x: { title: { display: true, text: 'Time' } }
+                },
+                plugins: {
+                    title: { display: true, text: 'Decline Curve Analysis (Post-Waterflood Response)' }
+                }
+            },
+            interpretation: '<strong>Interpretation:</strong> This semi-log plot shows oil production rate over time after a waterflood has stabilized the decline. The straight line on the semi-log plot indicates an exponential decline, which is typical for a boundary-dominated flow regime in a mature waterflood. The slope of this line gives the decline rate, which is used to forecast future production and ultimate recovery.'
+        }
+    };
+    
+    const plotSelector = document.getElementById('plot-selector');
+    const interpretationDiv = document.getElementById('plot-interpretation');
+    const ctx = document.getElementById('diagnostic-chart').getContext('2d');
+
+    function renderChart(plotType) {
+        if (diagnosticChart) {
+            diagnosticChart.destroy();
+        }
+        const data = chartData[plotType];
+        diagnosticChart = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: data.options
+        });
+        interpretationDiv.innerHTML = `<h4 class="font-bold text-lg mb-2 text-stone-800">Plot Interpretation</h4><p class="text-stone-700">${data.interpretation}</p>`;
+    }
+
+    plotSelector.addEventListener('change', (e) => {
+        renderChart(e.target.value);
+    });
+
+    initNavigation();
+    populateRegionInfo();
+    populateConcepts();
+    populateAccordion();
+    renderChart('hall'); 
+});
+</script>
+
+</body>
+</html>

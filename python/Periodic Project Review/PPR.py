@@ -957,7 +957,7 @@ class ProductionInjectionPage(Page):
             cd.actv_indc = 'Y'
             AND wd.actv_indc = 'Y'
             AND wd.well_api_nbr IN ({formatted_well_apis})
-            AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -24)
+            AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -62)
             AND cf.eftv_dttm <= TRUNC(SYSDATE)
         ORDER BY
             wd.well_api_nbr,
