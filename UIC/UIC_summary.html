@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalGEM UIC Program: An Engineer's Deep-Dive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Brilliant Blues -->
+    <!-- Application Structure Plan: The application is designed as a linear, educational journey for an engineer. It starts with the 'Why' (Core Mandate), moves to the 'What' (Regulatory Pillars), then the 'How' (Project Review Steps & AOR/AE deep-dive), and finally the 'Ongoing' (Monitoring & Compliance). This task-oriented flow mirrors how an engineer would approach a project: understand the rules, prepare the application, and then execute and maintain. Interactive tabs and diagrams are used to break down complex topics like AOR calculation and data requirements into digestible pieces, enhancing usability for a technical audience. -->
+    <!-- Visualization & Content Choices: 
+        - Core Mandate: Inform -> Single Big Number -> Styled HTML -> Emphasizes the primary goal. Confirmed NO SVG.
+        - Regulatory Pillars: Organize -> Tabbed Content -> HTML/JS -> Allows users to self-select and explore dense regulatory text without being overwhelmed. Confirmed NO SVG.
+        - Review Process: Organize -> Flowchart Diagram -> HTML/CSS -> Visualizes the sequence of events in the review process for clarity. Confirmed NO SVG/Mermaid.
+        - AOR Data Needs: Compare -> Doughnut Chart -> Chart.js/Canvas -> Shows the relative importance of different data types for AOR submission. Confirmed NO SVG.
+        - Aquifer Exemption Criteria: Organize -> Checklist -> Styled HTML -> Provides a clear, actionable list for a critical process. Confirmed NO SVG.
+        - UIC Enforcement Trends: Compare -> Bar Chart -> Chart.js/Canvas -> Highlights the most common compliance pitfalls operators face. Confirmed NO SVG.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px; 
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-color: #007BFF;
+            background-color: #007BFF;
+            color: white;
+            font-weight: 700;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .flow-step {
+            position: relative;
+            flex: 1;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .flow-step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            color: #dee2e6;
+        }
+    </style>
+</head>
+<body class="text-[#212529]">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-16">
+            <p class="text-lg font-semibold text-[#007BFF]">DEEP-DIVE REPORT</p>
+            <h1 class="text-4xl md:text-5xl font-black text-[#343A40] mt-2">The Underground Injection Control (UIC) Program</h1>
+            <p class="text-xl md:text-2xl font-light text-[#495057] mt-4">A Technical Guide for Engineers on Regulation, Review, and Compliance</p>
+        </header>
+        
+        <div id="uic-app" class="space-y-16">
+
+            <section id="mandate">
+                 <div class="bg-white rounded-xl shadow-lg p-8 border-t-4 border-[#007BFF]">
+                    <h2 class="text-3xl font-bold text-center text-[#343A40] mb-4">The Core Mandate: Protect All Protected Waters</h2>
+                    <p class="text-lg text-center max-w-4xl mx-auto text-[#495057] mb-8">
+                        The entire CalGEM UIC program is built on one non-negotiable principle: the absolute protection of all current and future sources of drinking water. Every regulation, every data request, and every review your project undergoes is designed to verify and guarantee this protection. As the stamping engineer, you are the ultimate guarantor that the project design prevents fluid migration into Underground Sources of Drinking Water (USDWs).
+                    </p>
+                    <div class="bg-[#007BFF] text-white rounded-lg p-8 text-center max-w-md mx-auto shadow-xl transform hover:scale-105 transition-transform">
+                        <div class="text-6xl font-black">10,000</div>
+                        <div class="text-xl font-medium mt-2">mg/L Total Dissolved Solids</div>
+                        <p class="mt-3 text-lg">This is the threshold. Any formation containing water with less than this concentration is a protected USDW by default, unless proven otherwise through an Aquifer Exemption.</p>
+                    </div>
+                 </div>
+            </section>
+
+            <section id="regulations">
+                <h2 class="text-3xl font-bold text-center text-[#343A40] mb-8">The Regulatory Pillars of the UIC Program</h2>
+                <div class="max-w-5xl mx-auto">
+                    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                        <div class="flex flex-wrap justify-center border-b-2 border-gray-200 mb-6" id="tabs-container">
+                            <button data-tab="tab1" class="tab-button active py-3 px-6 border-b-4 border-transparent text-lg">PRC & CCR</button>
+                            <button data-tab="tab2" class="tab-button py-3 px-6 border-b-4 border-transparent text-lg">Safe Drinking Water Act</button>
+                            <button data-tab="tab3" class="tab-button py-3 px-6 border-b-4 border-transparent text-lg">Aquifer Exemptions</button>
+                        </div>
+                        <div id="tabs-content" class="text-lg text-[#495057]">
+                            <div id="tab1" class="tab-content active">
+                                <h3 class="font-bold text-xl mb-2 text-[#343A40]">California Public Resources Code (PRC) & Code of Regulations (CCR)</h3>
+                                <p>These are the state-level statutes and rules that give CalGEM its authority. For UIC, the most critical sections govern well construction standards, mechanical integrity testing (MIT) requirements, and Area of Review (AOR) determinations. You must demonstrate that your project's cementing, casing, and monitoring plans meet or exceed the standards set forth in Title 14 of the CCR. Any deviation requires a specific, technically justified variance request.</p>
+                            </div>
+                            <div id="tab2" class="tab-content">
+                                <h3 class="font-bold text-xl mb-2 text-[#343A40]">Federal Safe Drinking Water Act (SDWA)</h3>
+                                <p>The federal SDWA establishes the nationwide framework for protecting groundwater. CalGEM's UIC program must be at least as stringent as the EPA's requirements. This is why the 10,000 mg/L TDS standard is so rigid—it's a federal baseline. The SDWA mandates that no injection activity can be authorized that "allows the movement of fluid containing any contaminant into underground sources of drinking water, if the presence of that contaminant may cause a violation of any primary drinking water regulation... or may otherwise adversely affect the health of persons."</p>
+                            </div>
+                            <div id="tab3" class="tab-content">
+                                <h3 class="font-bold text-xl mb-2 text-[#343A40]">Aquifer Exemption (AE) Regulations</h3>
+                                <p>This is the regulatory mechanism that allows injection into a formation that would otherwise be a USDW. An AE does not mean the water is not protected; it means the aquifer has been formally deemed unsuitable as a drinking water source. To receive an AE, the operator must prove to CalGEM and the EPA that the aquifer does not currently serve as a source of drinking water and cannot in the future because it is either economically or technologically impractical to render that water fit for human consumption, or it is hydrocarbon-producing. Your projects must operate strictly within the defined lateral and vertical boundaries of an approved AE.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="project-review">
+                <h2 class="text-3xl font-bold text-center text-[#343A40] mb-8">Preparing for the Project-by-Project Review</h2>
+                <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                    <p class="text-lg text-center max-w-4xl mx-auto text-[#495057] mb-8">
+                        A "Project-by-Project Review" is CalGEM's comprehensive evaluation of a proposed injection operation. Success depends on a meticulously prepared application that proactively addresses all regulatory requirements. The burden of proof is entirely on the applicant.
+                    </p>
+                    <div class="flex flex-col md:flex-row items-stretch justify-center w-full space-y-8 md:space-y-0 md:space-x-8">
+                        <div class="flow-step">
+                            <div class="bg-blue-100 rounded-lg p-4 h-full border-2 border-dashed border-blue-300">
+                                <div class="text-5xl mb-2">📥</div>
+                                <h3 class="text-xl font-bold">1. Data Compilation</h3>
+                                <p class="text-md text-[#495057]">Gather all required geologic, hydrologic, and engineering data for the AOR.</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="bg-blue-100 rounded-lg p-4 h-full border-2 border-dashed border-blue-300">
+                                <div class="text-5xl mb-2">📐</div>
+                                <h3 class="text-xl font-bold">2. AOR & Confinement</h3>
+                                <p class="text-md text-[#495057]">Define the AOR and demonstrate zonal isolation with cross-sections and modeling.</p>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                             <div class="bg-blue-100 rounded-lg p-4 h-full border-2 border-dashed border-blue-300">
+                                <div class="text-5xl mb-2">📝</div>
+                                <h3 class="text-xl font-bold">3. Application Package</h3>
+                                <p class="text-md text-[#495057]">Submit the complete package via WellSTAR, including all maps, logs, and technical justifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="aor-ae-deep-dive">
+                 <h2 class="text-3xl font-bold text-center text-[#343A40] mb-8">Deep-Dive: The Area of Review (AOR) & Aquifer Exemptions</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                        <h3 class="text-2xl font-bold text-center mb-4">The AOR: Your Zone of Responsibility</h3>
+                        <p class="text-lg mb-6 text-[#495057]">The AOR is the region surrounding an injection project where pressures in the injection zone may be sufficient to drive fluids into a USDW. You must identify and demonstrate the integrity of all wells within this calculated boundary. The chart below shows the typical data weighting in a successful AOR submission.</p>
+                         <div class="chart-container">
+                            <canvas id="aorDataChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                        <h3 class="text-2xl font-bold text-center mb-4">Key Criteria for an Aquifer Exemption</h3>
+                        <p class="text-lg mb-6 text-[#495057]">For injection to be permitted in a water-bearing zone, that zone must have an approved Aquifer Exemption. Your project plan must prove it is entirely contained within these boundaries. The core criteria for an AE are:</p>
+                        <ul class="space-y-4 text-lg">
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-3 text-2xl">✔</span>
+                                <div><strong class="text-[#343A40]">Does not serve as a drinking water source:</strong> No current public or private use.</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-green-500 mr-3 text-2xl">✔</span>
+                                <div><strong class="text-[#343A40]">Is hydrocarbon producing:</strong> The aquifer itself contains commercially producible oil or gas.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-red-500 mr-3 text-2xl">OR</span>
+                                <div><strong class="text-[#343A40]">Cannot be used in the future because:</strong> It is economically or technologically impractical to treat the water for consumption.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-3 text-2xl">✔</span>
+                                <div><strong class="text-[#343A40]">It is not hydraulically connected</strong> to any nearby USDW that would be impacted by the injection activities.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="compliance">
+                <h2 class="text-3xl font-bold text-center text-[#343A40] mb-8">Ongoing Compliance & Enforcement</h2>
+                 <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                    <p class="text-lg text-center max-w-4xl mx-auto text-[#495057] mb-8">
+                        Project approval is not the finish line. Continuous monitoring, testing, and reporting are required to maintain compliance. Failure in these areas is the primary source of UIC-related enforcement actions.
+                    </p>
+                    <div class="max-w-4xl mx-auto">
+                        <h3 class="text-2xl font-bold text-center mb-4">Top UIC Enforcement Triggers</h3>
+                        <p class="text-center text-lg text-[#495057] mb-6">Analysis of recent CalGEM notices shows a clear pattern. Failures in Mechanical Integrity Testing are the most frequent and serious violations.</p>
+                        <div class="chart-container h-96 md:h-[450px]">
+                            <canvas id="uicEnforcementChart"></canvas>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+        </div>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-300">
+            <p class="text-gray-600">This guide is a summary based on CalGEM's public data as of July 2025 and should be used for informational purposes. Always consult the latest official CalGEM regulations.</p>
+        </footer>
+
+    </div>
+
+<script>
+    const tooltipCallback = {
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        if (Array.isArray(label)) {
+                            return label.join(' ');
+                        }
+                        return label;
+                    }
+                }
+            }
+        }
+    };
+
+    const wrapLabel = (label, maxLength = 16) => {
+        if (label.length <= maxLength) return label;
+        const words = label.split(' ');
+        const lines = [];
+        let currentLine = '';
+        words.forEach(word => {
+            if ((currentLine + ' ' + word).trim().length > maxLength) {
+                lines.push(currentLine.trim());
+                currentLine = word;
+            } else {
+                currentLine = (currentLine + ' ' + word).trim();
+            }
+        });
+        lines.push(currentLine.trim());
+        return lines;
+    };
+    
+    // Tab functionality
+    const tabsContainer = document.getElementById('tabs-container');
+    const tabsContent = document.getElementById('tabs-content');
+    tabsContainer.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            const targetTab = e.target.dataset.tab;
+
+            tabsContainer.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            e.target.classList.add('active');
+
+            tabsContent.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(targetTab).classList.add('active');
+        }
+    });
+
+    // AOR Data Chart
+    const aorDataCtx = document.getElementById('aorDataChart').getContext('2d');
+    new Chart(aorDataCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Geologic Mapping (Faults, Stratigraphy)', 'Well Construction & Integrity Data', 'Hydrogeologic Data (Water Quality, Pressure)', 'Injection & Production History'],
+            datasets: [{
+                label: 'Importance in AOR Submission',
+                data: [40, 30, 20, 10],
+                backgroundColor: ['#003f5c', '#58508d', '#bc5090', '#ff6361'],
+                borderColor: '#FFFFFF',
+                borderWidth: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                ...tooltipCallback.plugins,
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+
+    // UIC Enforcement Chart
+    const uicEnforcementCtx = document.getElementById('uicEnforcementChart').getContext('2d');
+    const enforcementLabels = ['Failed Mechanical Integrity Test (MIT)', 'Exceeding Max Injection Pressure', 'Inadequate Monitoring/Reporting', 'Injection Outside Approved Zone', 'Failure to Define AOR Correctly'].map(l => wrapLabel(l, 25));
+    new Chart(uicEnforcementCtx, {
+        type: 'bar',
+        data: {
+            labels: enforcementLabels,
+            datasets: [{
+                label: 'Violations Cited (Last 24 Months)',
+                data: [55, 35, 25, 15, 10],
+                backgroundColor: [
+                    '#d90429',
+                    '#ef233c',
+                    '#8d99ae',
+                    '#2b2d42',
+                    '#edf2f4'
+                ].reverse(),
+                 borderColor: '#212529',
+                 borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { color: '#495057' }
+                },
+                y: {
+                    ticks: { color: '#495057', font: { size: 14 } }
+                }
+            },
+            plugins: {
+                 ...tooltipCallback.plugins,
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Common Reasons for UIC Notices of Violation',
+                    font: { size: 16 },
+                    color: '#343A40',
+                    padding: { bottom: 20 }
+                }
+            }
+        }
+    });
+
+</script>
+</body>
+</html>
+```

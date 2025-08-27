@@ -8,6 +8,8 @@ import ttkbootstrap as tb
 import pandas as pd
 from datetime import datetime, date, timedelta
 
+#this comment is to demonstrate git comparison feature
+
 # Oracle Connection Manager
 class OracleConnectionManager:
     def __init__(self):
@@ -558,7 +560,7 @@ class PerformanceSummaryPage(Page):
             ) WHERE rnk = 1
         )
 
-        SELECT wd.well_nme, cd.cmpl_dmn_key, wd.well_api_nbr, wd.fld_nme,
+        SELECT wd.well_nme, wd.well_api_nbr, wd.fld_nme,
                cd.init_prod_dte, cd.init_inj_dte, cd.prim_purp_type_cde,
                cd.ENGR_STRG_NME,
                t1.last_inj_dte, t2.last_prod_dte,
@@ -817,8 +819,9 @@ class TubingPressurePage(Page):
         on wd.well_fac_id = cd.well_fac_id
         join cmpl_dly_fact cf
         on cd.cmpl_fac_id = cf.cmpl_fac_id
-        where wd.actv_indc = 'Y' and cd.actv_indc = 'Y' and cf.eftv_Dttm >= trunc(sysdate)-90
+        where wd.actv_indc = 'Y' and cd.actv_indc = 'Y' and cf.eftv_Dttm >= trunc(sysdate)-1000
         and wd.well_api_nbr in ({formatted_well_apis}) and cd.prim_purp_type_cde = 'INJ'
+        and (ALOC_WTR_INJ_VOL_QTY >0 or ALOC_STM_INJ_VOL_QTY > 0)
         group by wd.well_nme, wd.well_api_nbr,cd.prim_purp_type_cde
         """
 
@@ -1003,12 +1006,13 @@ class ProductionInjectionPage(Page):
 
     # display_results, clear_results, copy_to_clipboard are inherited from Page class
 
+#this is to test the updated code
 
 # Main Application Class
 class MainApplication(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
-        self.title("Oracle Field Data Puller")
+        self.title("Periodic Project Review")
         self.geometry("1200x900") # Changed height to 900
 
         # Configure ttk.Button font globally
