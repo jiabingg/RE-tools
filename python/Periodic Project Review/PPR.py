@@ -120,7 +120,9 @@ class Page(tk.Frame):
             display_values = []
             for item in row:
                 if isinstance(item, pd.Timestamp):
-                    display_values.append(item.strftime('%Y-%m-%d %H:%M:%S') if not pd.isna(item) else '')
+                    # --- UPDATED DATE FORMAT ---
+                    display_values.append(item.strftime('%Y-%m-%d') if not pd.isna(item) else '')
+                    # --- END UPDATED DATE FORMAT ---
                 elif pd.isna(item):
                     display_values.append('')
                 else:
@@ -1013,7 +1015,7 @@ class MainApplication(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
         self.title("Periodic Project Review")
-        self.geometry("1200x900") # Changed height to 900
+        self.geometry("1600x1200") # Changed height to 900
 
         # Configure ttk.Button font globally
         s = ttk.Style()
