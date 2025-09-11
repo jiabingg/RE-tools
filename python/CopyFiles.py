@@ -7,6 +7,7 @@ from datetime import datetime
 import csv
 import cx_Oracle
 import pandas as pd
+import queue
 
 # --- ORACLE CONNECTION MANAGER (from PPR.py) ---
 class OracleConnectionManager:
@@ -76,6 +77,7 @@ class FinderPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="#eaf0f2")
         self.controller = controller
+        self.result_queue = queue.Queue()
         
         main_frame = tk.Frame(self, padx=15, pady=15, bg="#eaf0f2")
         main_frame.pack(expand=True, fill=tk.BOTH)
@@ -105,7 +107,7 @@ class FinderPage(tk.Frame):
         self.file_list_textbox.grid(row=3, column=1, columnspan=2, rowspan=2, sticky="nsew", padx=5, pady=(15, 5))
         main_frame.rowconfigure(3, weight=1)
 
-        self.process_button = tk.Button(main_frame, text="Find, Copy, and Proceed to Step 2", font=("Helvetica", 12, "bold"), bg="#28a745", fg="white", command=self.start_processing_thread, pady=8)
+        self.process_button = tk.Button(main_frame, text="Find, Copy, and Analyze", font=("Helvetica", 12, "bold"), bg="#28a745", fg="white", command=self.start_processing_thread, pady=8)
         self.process_button.grid(row=5, column=0, columnspan=3, pady=20, sticky="ew")
 
         tk.Label(main_frame, text="Log:", font=("Helvetica", 11, "bold"), bg="#eaf0f2").grid(row=6, column=0, sticky="w", pady=(10, 0))
@@ -136,11 +138,32 @@ class FinderPage(tk.Frame):
             messagebox.showerror("Error", "Please provide at least one source folder, a target folder, and at least one 12-digit number.")
             return
         self.process_button.config(state=tk.DISABLED, text="Processing...")
-        thread = threading.Thread(target=self.process_files)
+        
+        thread = threading.Thread(target=self.process_files, args=(self.result_queue,))
         thread.daemon = True
         thread.start()
+        
+        self.after(100, self.check_queue)
 
-    def process_files(self):
+    def check_queue(self):
+        """ Periodically check the queue for results from the worker thread. """
+        try:
+            result = self.result_queue.get_nowait()
+            
+            self.process_button.config(state=tk.NORMAL, text='Find, Copy, and Analyze')
+            
+            if isinstance(result, Exception):
+                messagebox.showerror("Processing Error", f"An error occurred in the background task: {result}")
+            else:
+                # Automatic transition upon successful completion
+                self.controller.transition_to_abandonment_check(result)
+
+        except queue.Empty:
+            if self.process_button['state'] == 'disabled':
+                self.after(100, self.check_queue)
+
+    def process_files(self, result_queue):
+        """ The background task that finds/copies files and puts the result in a queue. """
         self.log_display.delete('1.0', tk.END)
         source_dirs, target_dir = self.source_listbox.get(0, tk.END), self.target_path.get()
         input_lines = self.file_list_textbox.get('1.0', tk.END).splitlines()
@@ -148,7 +171,7 @@ class FinderPage(tk.Frame):
         csv_log_data, copied_files_for_step2 = [], []
         
         def gui_log(message):
-            self.controller.after(0, self.log, message)
+            self.after(0, self.log, message)
 
         try:
             gui_log("INFO: Parsing 12-digit numbers...")
@@ -201,14 +224,13 @@ class FinderPage(tk.Frame):
                 writer = csv.DictWriter(f, fieldnames=headers, extrasaction='ignore')
                 writer.writeheader()
                 writer.writerows(csv_log_data)
-            gui_log(f"\nINFO: Detailed CSV log saved. Proceeding to Step 2...")
+            gui_log(f"\nINFO: Detailed CSV log saved. Transitioning to Step 2...")
             
-            self.controller.after(100, self.controller.transition_to_abandonment_check, copied_files_for_step2)
+            result_queue.put(copied_files_for_step2)
 
         except Exception as e:
+            result_queue.put(e)
             gui_log(f"An unexpected error occurred in Step 1: {e}")
-        finally:
-            self.controller.after(0, self.process_button.config, {'state': tk.NORMAL, 'text': 'Find, Copy, and Proceed to Step 2'})
 
 # --- PAGE 2: ABANDONMENT CHECK ---
 class AbandonmentCheckPage(tk.Frame):
@@ -251,22 +273,31 @@ class AbandonmentCheckPage(tk.Frame):
 
     def load_data_and_prepare(self):
         """ Loads data from Step 1 and populates the initial Treeview. """
-        self.copied_files_data = self.controller.shared_data.get('copied_files', [])
-        for i in self.result_tree.get_children():
-            self.result_tree.delete(i)
-        
-        if not self.copied_files_data:
-            self.result_tree["columns"] = ["Status"]
-            self.result_tree.heading("Status", text="Status")
-            self.result_tree.insert("", "end", values=["No files were copied in Step 1."])
-            return
+        try:
+            self.copied_files_data = self.controller.shared_data.get('copied_files', [])
+            for i in self.result_tree.get_children():
+                self.result_tree.delete(i)
+            
+            if not self.copied_files_data:
+                self.result_tree["columns"] = ["Status"]
+                self.result_tree.heading("Status", text="Status")
+                self.result_tree.insert("", "end", values=["No files have been processed yet. Go back to Step 1."])
+                return
 
-        df = pd.DataFrame(self.copied_files_data)
-        self.results_df = df
-        df['AbandonmentDate'] = 'N/A'
-        df['IsAbandoned'] = 'N/A'
-        
-        self.update_treeview(df)
+            df = pd.DataFrame(self.copied_files_data)
+            
+            # --- FIX: Convert to datetime object immediately upon loading ---
+            df['FileModifiedDate'] = pd.to_datetime(df['FileModifiedDate'])
+            
+            self.results_df = df
+            df['WellStatus'] = 'N/A'
+            df['AbandonmentDate'] = pd.NaT # Use NaT for empty date column
+            
+            self.update_treeview(df)
+        except Exception as e:
+            error_message = f"Failed to load and prepare data for Step 2: {e}"
+            print(error_message) # Log to console for debugging
+            messagebox.showerror("Data Load Error", error_message)
 
     def run_abandonment_query(self):
         """ Executes the SQL query to get abandonment data. """
@@ -275,7 +306,11 @@ class AbandonmentCheckPage(tk.Frame):
             return
 
         uwis_to_query = [item['UWI'] for item in self.copied_files_data]
-        formatted_uwis = ', '.join([f"'{uwi[:10]}'" for uwi in uwis_to_query]) # Use API-10
+        if not uwis_to_query:
+            messagebox.showinfo("No Data", "No valid UWIs to query.")
+            return
+
+        formatted_uwis = ', '.join([f"'{uwi[:10]}'" for uwi in uwis_to_query])
         
         sql_query = f"""
         SELECT wd.well_api_nbr, cd.CMPL_STATE_TYPE_DESC, cd.CMPL_STATE_EFTV_DTTM
@@ -291,14 +326,21 @@ class AbandonmentCheckPage(tk.Frame):
             with self.conn_manager.get_connection('odw') as conn:
                 db_df = pd.read_sql(sql_query, conn)
                 db_df['WELL_API_NBR'] = db_df['WELL_API_NBR'].astype(str)
-                # Ensure UWI in results_df is just the API-10 for merging
+                
                 self.results_df['WELL_API_NBR'] = self.results_df['UWI'].str[:10]
                 
-                merged_df = pd.merge(self.results_df, db_df, on='WELL_API_NBR', how='left')
-                merged_df.rename(columns={'CMPL_STATE_TYPE_DESC': 'WellStatus', 'CMPL_STATE_EFTV_DTTM': 'AbandonmentDate'}, inplace=True)
+                # Use a fresh copy of results_df for merging to avoid column conflicts
+                base_df = self.results_df[['UWI', 'FileName', 'FileModifiedDate', 'WELL_API_NBR']].copy()
+                merged_df = pd.merge(base_df, db_df, on='WELL_API_NBR', how='left')
                 
-                merged_df['AbandonmentDate'] = pd.to_datetime(merged_df['AbandonmentDate'], errors='coerce').dt.strftime('%Y-%m-%d')
-                merged_df['FileModifiedDate'] = pd.to_datetime(merged_df['FileModifiedDate'])
+                merged_df.rename(columns={'CMPL_STATE_TYPE_DESC': 'WellStatus', 'CMPL_STATE_EFTV_DTTM': 'StatusEffectiveDate'}, inplace=True)
+                
+                merged_df['AbandonmentDate'] = pd.NaT
+                abandoned_mask = merged_df['WellStatus'] == 'Permanently Abandoned'
+                merged_df.loc[abandoned_mask, 'AbandonmentDate'] = merged_df.loc[abandoned_mask, 'StatusEffectiveDate']
+
+                merged_df['AbandonmentDate'] = pd.to_datetime(merged_df['AbandonmentDate'], errors='coerce')
+                # FileModifiedDate is already a datetime object from load_data_and_prepare
 
                 self.results_df = merged_df
                 self.update_treeview(merged_df)
@@ -306,27 +348,38 @@ class AbandonmentCheckPage(tk.Frame):
                 messagebox.showinfo("Success", "Query complete. Results updated.")
 
         except Exception as e:
-            messagebox.showerror("Database Error", f"An error occurred: {e}")
+            messagebox.showerror("DatabaseError", f"An error occurred: {e}")
 
     def update_treeview(self, df):
         """ Clears and repopulates the treeview with DataFrame content. """
         for i in self.result_tree.get_children():
             self.result_tree.delete(i)
             
-        cols = list(df.columns)
-        self.result_tree["columns"] = cols
-        for col in cols:
+        display_cols = ['UWI', 'FileName', 'FileModifiedDate', 'WellStatus', 'AbandonmentDate']
+        cols_to_show = [col for col in display_cols if col in df.columns]
+        
+        self.result_tree["columns"] = cols_to_show
+        for col in cols_to_show:
             self.result_tree.heading(col, text=col)
             self.result_tree.column(col, width=150)
 
         for index, row in df.iterrows():
             tags = ()
-            # Highlighting logic
+            # Highlighting logic now correctly compares two datetime objects
             if pd.notna(row.get('AbandonmentDate')) and pd.notna(row.get('FileModifiedDate')):
-                if 'Permanently Abandoned' in str(row.get('WellStatus', '')) and row['FileModifiedDate'].date() < pd.to_datetime(row['AbandonmentDate']).date():
+                if row['FileModifiedDate'].date() < row['AbandonmentDate'].date():
                     tags = ('highlight',)
             
-            self.result_tree.insert("", "end", values=list(row.fillna('')), tags=tags)
+            display_values = []
+            for col in cols_to_show:
+                val = row.get(col, '')
+                if isinstance(val, pd.Timestamp):
+                    # Format dates for display, handling NaT (Not a Time) for empty dates
+                    display_values.append(val.strftime('%Y-%m-%d %H:%M:%S') if pd.notna(val) else '')
+                else:
+                    display_values.append(val if pd.notna(val) else '')
+
+            self.result_tree.insert("", "end", values=display_values, tags=tags)
             
     def export_to_csv(self):
         if self.results_df.empty:
@@ -337,7 +390,14 @@ class AbandonmentCheckPage(tk.Frame):
         if not path:
             return
         try:
-            self.results_df.to_csv(path, index=False, encoding='utf-8')
+            # Format dates for CSV export
+            export_df = self.results_df.copy()
+            if 'FileModifiedDate' in export_df.columns:
+                 export_df['FileModifiedDate'] = export_df['FileModifiedDate'].dt.strftime('%Y-%m-%d %H:%M:%S')
+            if 'AbandonmentDate' in export_df.columns:
+                 export_df['AbandonmentDate'] = export_df['AbandonmentDate'].dt.strftime('%Y-%m-%d')
+            
+            export_df.to_csv(path, index=False, encoding='utf-8')
             messagebox.showinfo("Success", f"Results successfully exported to:\n{path}")
         except Exception as e:
             messagebox.showerror("Export Error", f"Failed to export data: {e}")
