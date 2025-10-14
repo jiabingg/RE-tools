@@ -1,6 +1,6 @@
 # PDF Data Extractor
 # This script provides a graphical user interface (GUI) to select folders,
-# scan PDF files within those folders, extract specific data (API, Initials, Date),
+# scan PDF files within those folders, extract specific data (API, Wellbore, Initials, Date),
 # and display it in a table. It also allows copying the data to the clipboard
 # or exporting it as a CSV file.
 #
@@ -21,7 +21,7 @@ class PDFExtractorApp:
         """Initializes the application's GUI."""
         self.root = root
         self.root.title("PDF Data Extractor")
-        self.root.geometry("800x600")
+        self.root.geometry("950x600")
 
         # --- Main Frame ---
         main_frame = tk.Frame(root, padx=10, pady=10)
@@ -44,14 +44,18 @@ class PDFExtractorApp:
         tree_frame = tk.Frame(main_frame)
         tree_frame.pack(fill=tk.BOTH, expand=True)
 
-        self.tree = ttk.Treeview(tree_frame, columns=("File Name", "Well API", "Initials", "Date"), show="headings")
+        self.tree = ttk.Treeview(tree_frame, columns=("File Name", "API", "Wellbore", "Full Well API", "Initials", "Date"), show="headings")
         self.tree.heading("File Name", text="File Name")
-        self.tree.heading("Well API", text="Well API")
+        self.tree.heading("API", text="API")
+        self.tree.heading("Wellbore", text="Wellbore")
+        self.tree.heading("Full Well API", text="Full Well API")
         self.tree.heading("Initials", text="Initials")
         self.tree.heading("Date", text="Date")
 
         self.tree.column("File Name", width=250)
-        self.tree.column("Well API", width=150)
+        self.tree.column("API", width=120)
+        self.tree.column("Wellbore", width=80)
+        self.tree.column("Full Well API", width=150)
         self.tree.column("Initials", width=120)
         self.tree.column("Date", width=100)
         
@@ -73,14 +77,13 @@ class PDFExtractorApp:
     def start_processing_thread(self):
         """Starts the PDF processing in a separate thread to keep the GUI responsive."""
         folder_paths = filedialog.askdirectory(
-            title="Select Folders (you can select one)",
+            title="Select a Folder",
             mustexist=True
         )
         if not folder_paths:
             self.update_status("Folder selection cancelled.")
             return
             
-        # The dialog returns a single string, so we'll treat it as a list with one item
         folders_to_process = [folder_paths]
 
         # Disable buttons during processing
@@ -131,11 +134,8 @@ class PDFExtractorApp:
             doc.close()
 
             # Regex patterns
-            # Pattern for Initials and Date
             initials_date_pattern = re.compile(r"Initials:\s*(\S+)\s*Date:\s*(\S+)")
-            # Pattern for API (handles both 'API' and Greek 'ΑΡΙ')
-            api_pattern = re.compile(r"(?:API|ΑΡΙ):\s*(\d+)")
-            # Pattern for Wellbore
+            api_pattern = re.compile(r"(?:API|ΑΡΙ)\s*:\s*(\d+)")
             wellbore_pattern = re.compile(r"Wellbore:\s*(\d{2})")
 
             # Find matches
@@ -146,14 +146,18 @@ class PDFExtractorApp:
             initials = initials_date_match.group(1) if initials_date_match else "Not Found"
             date = initials_date_match.group(2) if initials_date_match else "Not Found"
             
-            api_base = api_match.group(1) if api_match else ""
-            wellbore_code = wellbore_match.group(1) if wellbore_match else ""
+            api_base = api_match.group(1) if api_match else "Not Found"
+            wellbore_code = wellbore_match.group(1) if wellbore_match else "Not Found"
             
-            full_api = api_base + wellbore_code if api_base and wellbore_code else "Not Found"
+            full_api = "Not Found"
+            if api_base != "Not Found" and wellbore_code != "Not Found":
+                 full_api = api_base + wellbore_code
 
             return {
                 "File Name": os.path.basename(file_path),
-                "Well API": full_api,
+                "API": api_base,
+                "Wellbore": wellbore_code,
+                "Full Well API": full_api,
                 "Initials": initials,
                 "Date": date,
             }
@@ -167,7 +171,9 @@ class PDFExtractorApp:
         if data:
             self.tree.insert("", "end", values=(
                 data["File Name"],
-                data["Well API"],
+                data["API"],
+                data["Wellbore"],
+                data["Full Well API"],
                 data["Initials"],
                 data["Date"]
             ))
@@ -224,9 +230,14 @@ class PDFExtractorApp:
 
         try:
             with open(file_path, 'w', newline='', encoding='utf-8') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=self.extracted_data[0].keys())
-                writer.writeheader()
-                writer.writerows(self.extracted_data)
+                # Use the column display names as headers in the CSV
+                headers = self.tree["columns"]
+                writer = csv.writer(csvfile)
+                writer.writerow(headers)
+                # Write the data rows
+                for item in self.tree.get_children():
+                    writer.writerow(self.tree.item(item)['values'])
+
             self.update_status(f"Data successfully exported to {os.path.basename(file_path)}")
         except Exception as e:
             messagebox.showerror("Export Error", f"Failed to export data:\n{e}")
@@ -237,3 +248,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PDFExtractorApp(root)
     root.mainloop()
+

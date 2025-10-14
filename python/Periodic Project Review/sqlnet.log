@@ -1,0 +1,5 @@
+NL-08014: Failed to initialize Diagnosability framework, falling back to old network tracing/logging 
+ 
+ NL-08015: Client(OCI) side initialization of Diagnosability framework failed
+  ORA-65534: Message 65534 not found;  product=RDBMS; facility=ORA
+
