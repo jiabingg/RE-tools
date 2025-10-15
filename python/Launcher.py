@@ -55,6 +55,8 @@ class Launcher(tb.Window):
         frame_sql.pack(fill="x", padx=12, pady=8)
         frame_sql.configure(height=pane_height)
         frame_sql.pack_propagate(False)
+
+        # Existing "Cum Volume" button
         btn_cum = tb.Button(
             frame_sql,
             text="Cum Volume",
@@ -62,6 +64,16 @@ class Launcher(tb.Window):
             command=lambda: self.run_script(os.path.join(self.base_dir, "CumVolume.py"), name="Cum Volume"),
         )
         btn_cum.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        # ✅ New "Prod & Inj" button
+        btn_prod_inj = tb.Button(
+            frame_sql,
+            text="Prod & Inj",
+            bootstyle="success",
+            command=lambda: self.run_script(os.path.join(self.base_dir, "ProdInj_Cum_Init_Last.py"), name="Prod & Inj"),
+        )
+        btn_prod_inj.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+
         tk.Frame(frame_sql).grid(row=1, column=0, pady=(pane_height//2, 0))
 
         # --- Wellbore Diagrams (Copy WBDs) Section ---
