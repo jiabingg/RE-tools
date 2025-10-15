@@ -11,13 +11,18 @@ from datetime import datetime
 """
 Launcher app with three sections (on the same page) for:
 1) UIC (PPR)
-2) SQL Query (Cum Volume)
-3) Wellbore Diagrams (Copy WBDs)
+2) SQL Query (Prod Inj Status, Cum Volume, Well Status)
+3) Wellbore Diagrams (Copy WBDs & Abandonment Check)
 
 Each section has a button to run the respective script, and all output streams to a single log pane.
 Modifications:
 - Pane heights increased ~3x via fixed height + pack_propagate(False)
 - Removed the word "Run" from the button text labels
+- Updated per requests:
+  * Restored "Cum Volume" (SQL/CumVolume.py)
+  * Added "Prod Inj Status" (SQL/ProdInj_Cum_Init_Last.py)
+  * Added "Well Status" (SQL/WellStatus.py)
+  * Added "Abandonment Check" (WBDs/WBD_Creation_Abandon_comp.py)
 """
 
 class Launcher(tb.Window):
@@ -38,7 +43,7 @@ class Launcher(tb.Window):
         frame_uic = tb.LabelFrame(self, text="UIC", bootstyle="primary")
         frame_uic.pack(fill="x", padx=12, pady=8)
         frame_uic.configure(height=pane_height)
-        frame_uic.pack_propagate(False)  # keep the height regardless of child size
+        frame_uic.pack_propagate(False)
         btn_ppr = tb.Button(
             frame_uic,
             text="PPR",
@@ -46,41 +51,56 @@ class Launcher(tb.Window):
             command=lambda: self.run_script(os.path.join(self.base_dir, "Periodic Project Review", "ppr.py"), name="PPR"),
         )
         btn_ppr.grid(row=0, column=0, padx=10, pady=10, sticky="w")
-
-        # Spacer to visually fill the pane
         tk.Frame(frame_uic).grid(row=1, column=0, pady=(pane_height//2, 0))
 
-        # --- SQL Query (Cum Volume) Section ---
+        # --- SQL Query Section ---
         frame_sql = tb.LabelFrame(self, text="SQL Query", bootstyle="info")
         frame_sql.pack(fill="x", padx=12, pady=8)
         frame_sql.configure(height=pane_height)
         frame_sql.pack_propagate(False)
 
-        # Existing "Cum Volume" button
+        # Buttons: Prod Inj Status, Cum Volume, Well Status
+        btn_prod_inj = tb.Button(
+            frame_sql,
+            text="Prod Inj Status",
+            bootstyle="success",
+            command=lambda: self.run_script(
+                os.path.join(self.base_dir, "SQL", "ProdInj_Cum_Init_Last.py"),
+                name="Prod Inj Status"
+            ),
+        )
+        btn_prod_inj.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
         btn_cum = tb.Button(
             frame_sql,
             text="Cum Volume",
             bootstyle="success",
-            command=lambda: self.run_script(os.path.join(self.base_dir, "CumVolume.py"), name="Cum Volume"),
+            command=lambda: self.run_script(
+                os.path.join(self.base_dir, "SQL", "CumVolume.py"),
+                name="Cum Volume"
+            ),
         )
-        btn_cum.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        btn_cum.grid(row=0, column=1, padx=10, pady=10, sticky="w")
 
-        # ✅ New "Prod & Inj" button
-        btn_prod_inj = tb.Button(
+        btn_well_status = tb.Button(
             frame_sql,
-            text="Prod & Inj",
+            text="Well Status",
             bootstyle="success",
-            command=lambda: self.run_script(os.path.join(self.base_dir, "ProdInj_Cum_Init_Last.py"), name="Prod & Inj"),
+            command=lambda: self.run_script(
+                os.path.join(self.base_dir, "SQL", "WellStatus.py"),
+                name="Well Status"
+            ),
         )
-        btn_prod_inj.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+        btn_well_status.grid(row=0, column=2, padx=10, pady=10, sticky="w")
 
         tk.Frame(frame_sql).grid(row=1, column=0, pady=(pane_height//2, 0))
 
-        # --- Wellbore Diagrams (Copy WBDs) Section ---
+        # --- Wellbore Diagrams Section ---
         frame_wbd = tb.LabelFrame(self, text="Wellbore Diagrams", bootstyle="warning")
         frame_wbd.pack(fill="x", padx=12, pady=8)
         frame_wbd.configure(height=pane_height)
         frame_wbd.pack_propagate(False)
+
         btn_wbd = tb.Button(
             frame_wbd,
             text="Copy WBDs",
@@ -88,6 +108,19 @@ class Launcher(tb.Window):
             command=lambda: self.run_script(os.path.join(self.base_dir, "WBDs", "CopyFiles.py"), name="Copy WBDs"),
         )
         btn_wbd.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        # "Abandonment Check" button
+        btn_abandon = tb.Button(
+            frame_wbd,
+            text="Abandonment Check",
+            bootstyle="warning",
+            command=lambda: self.run_script(
+                os.path.join(self.base_dir, "WBDs", "WBD_Creation_Abandon_comp.py"),
+                name="Abandonment Check"
+            ),
+        )
+        btn_abandon.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+
         tk.Frame(frame_wbd).grid(row=1, column=0, pady=(pane_height//2, 0))
 
         # --- Log Output Area ---
