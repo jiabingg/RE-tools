@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-Combined PDF Extractor + Abandonment Checker
+PDF Diagram Extractor + Abandonment Checker (DW-integrated)
 
-- Step 1: Select a folder, scan PDFs, extract API/Wellbore/Initials/DiagramDate
-- Step 2: Query Oracle for Well Status + Abandonment Effective Date
-- Compare AbandonmentDate > DiagramDate, highlight those rows
+Step 1:
+- Select a folder, scan PDFs, extract API/Wellbore/Full API/Initials/Diagram Date
+
+Step 2:
+- Query Oracle DW for the provided 10-digit APIs using your SQL
+- Keep only CMPL_STATE_TYPE_DESC = 'Permanently Abandoned'
+- For each API, only CHECK the row with the LARGEST WELLBORE (ties -> newest DiagramDate)
+- Pick the latest CMPL_STATE_EFTV_DTTM per API from DW
+- Compare AbandonmentDate > DiagramDate (diagram created before abandonment)
+- Highlight those rows
 
 Requirements:
     pip install PyMuPDF pandas cx_Oracle
 
-Notes:
-- Oracle DSN/credentials are read from env vars if present; defaults provided.
-- Date parsing for diagram date is flexible; common formats attempted, otherwise pandas fallback.
+Environment variables for Oracle (optional overrides):
+    DB_USER_ODW, DB_PASSWORD_ODW, DB_DSN_ODW
 """
 
 import os
@@ -56,20 +62,20 @@ class OracleConnectionManager:
 
 
 # ---------------------------
-# Helpers
+# Regex & parsing helpers
 # ---------------------------
 API_RE = re.compile(r"(?:API|ΑΡΙ)\s*:\s*(\d+)")
 WELLBORE_RE = re.compile(r"Wellbore:\s*(\d{2})")
 INITIALS_DATE_RE = re.compile(r"Initials:\s*(\S+)\s*Date:\s*([^\s]+)")
-# Accept also "Date :" (with space) or other light variants
-INITIALS_DATE_FALLBACK = re.compile(r"Initials\s*:\s*(\S+).*?Date\s*:?[\s]*([^\s]+)", re.IGNORECASE | re.DOTALL)
+INITIALS_DATE_FALLBACK = re.compile(
+    r"Initials\s*:\s*(\S+).*?Date\s*:?[\s]*([^\s]+)", re.IGNORECASE | re.DOTALL
+)
 
 def parse_diagram_date(raw: str):
     """Try multiple formats; return pandas.Timestamp or NaT."""
     if not raw or not isinstance(raw, str):
         return pd.NaT
     raw = raw.strip()
-    # Common patterns to try fast
     fmts = [
         "%Y-%m-%d",
         "%m/%d/%Y",
@@ -135,7 +141,7 @@ class CombinedApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("PDF Diagram Extractor + Abandonment Checker")
-        self.geometry("1100x700")
+        self.geometry("1200x720")
 
         self.conn_mgr = OracleConnectionManager()
         self.extracted_rows = []  # list of dicts from PDFs
@@ -148,7 +154,10 @@ class CombinedApp(tk.Tk):
         self.select_btn = tk.Button(controls, text="Select Folder & Scan PDFs", command=self.start_scan_thread)
         self.select_btn.pack(side=tk.LEFT, padx=(0, 10))
 
-        self.run_db_btn = tk.Button(controls, text="Run Abandonment Check", command=self.start_db_thread, state=tk.DISABLED, bg="#007bff", fg="white")
+        self.run_db_btn = tk.Button(
+            controls, text="Run Abandonment Check", command=self.start_db_thread,
+            state=tk.DISABLED, bg="#007bff", fg="white"
+        )
         self.run_db_btn.pack(side=tk.LEFT, padx=(0, 10))
 
         self.copy_btn = tk.Button(controls, text="Copy Table", command=self.copy_to_clipboard, state=tk.DISABLED)
@@ -161,12 +170,18 @@ class CombinedApp(tk.Tk):
         tree_frame = tk.Frame(self)
         tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0,10))
 
-        columns = ("File Name","API","Wellbore","Full Well API","Initials","DiagramDate","WellStatus","AbandonmentDate")
-        self.tree = ttk.Treeview(tree_frame, columns=columns, show="headings")
-        for col in columns:
+        self.columns = (
+            "File Name","API","Wellbore","Full Well API","Initials","DiagramDate",
+            "WellName","Field","PrimPurpose","EngrStorage",
+            "WellStatus","AbandonmentDate"
+        )
+        self.tree = ttk.Treeview(tree_frame, columns=self.columns, show="headings")
+        for col in self.columns:
             self.tree.heading(col, text=col)
             self.tree.column(col, width=150)
         self.tree.column("File Name", width=260)
+        self.tree.column("DiagramDate", width=170)
+        self.tree.column("AbandonmentDate", width=170)
 
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         hsb = ttk.Scrollbar(tree_frame, orient="horizontal", command=self.tree.xview)
@@ -176,7 +191,7 @@ class CombinedApp(tk.Tk):
         vsb.pack(side="right", fill="y")
         hsb.pack(side="bottom", fill="x")
 
-        # Tag for highlight
+        # Tag for highlight (abandoned AFTER diagram creation)
         self.tree.tag_configure("highlight", background="goldenrod", foreground="black")
 
         # Status
@@ -237,7 +252,11 @@ class CombinedApp(tk.Tk):
         if "DiagramDate" in df.columns:
             df["DiagramDate"] = pd.to_datetime(df["DiagramDate"], errors="coerce")
 
-        # Normalize output columns now; WellStatus/AbandonmentDate blank until DB query
+        # Initialize DW columns (placeholders for display only; dropped before merge)
+        df["WellName"] = ""
+        df["Field"] = ""
+        df["PrimPurpose"] = ""
+        df["EngrStorage"] = ""
         df["WellStatus"] = ""
         df["AbandonmentDate"] = pd.NaT
 
@@ -252,10 +271,30 @@ class CombinedApp(tk.Tk):
                     row.get("Full Well API",""),
                     row.get("Initials",""),
                     row["DiagramDate"].strftime("%Y-%m-%d %H:%M:%S") if pd.notna(row.get("DiagramDate")) else row.get("DiagramDateStr",""),
-                    "",
-                    "",
+                    "", "", "", "", "", ""
                 )
             )
+
+    # ---------- Helper: only largest wellbore per API ----------
+    def _filter_to_largest_wellbore_per_api(self, df: pd.DataFrame) -> pd.DataFrame:
+        tmp = df.copy()
+        tmp["API"] = tmp["API"].astype(str)
+        # coerce Wellbore "00","01",.. -> int; NaN -> -1 so they never win
+        wb_num = pd.to_numeric(tmp["Wellbore"], errors="coerce")
+        tmp["__WB_INT__"] = wb_num.fillna(-1).astype(int)
+        tmp["DiagramDate"] = pd.to_datetime(tmp["DiagramDate"], errors="coerce")
+
+        # max wellbore per API
+        max_wb = tmp.groupby("API", as_index=False)["__WB_INT__"].max().rename(columns={"__WB_INT__": "__WB_MAX__"})
+        tmp = tmp.merge(max_wb, on="API", how="left")
+        tmp = tmp[tmp["__WB_INT__"] == tmp["__WB_MAX__"]].copy()
+
+        # If multiple rows remain for the same API (same max wellbore), keep newest DiagramDate
+        tmp.sort_values(["API", "DiagramDate"], ascending=[True, True], inplace=True)
+        keep_idx = tmp.groupby("API", as_index=False).tail(1).index
+
+        filtered = tmp.loc[keep_idx].drop(columns=["__WB_INT__", "__WB_MAX__"])
+        return filtered
 
     # ---------- Step 2: Oracle DB & Compare ----------
     def start_db_thread(self):
@@ -263,74 +302,139 @@ class CombinedApp(tk.Tk):
             messagebox.showinfo("No Data", "No extracted rows to check.")
             return
         self.run_db_btn.configure(state=tk.DISABLED)
-        t = threading.Thread(target=self.query_and_compare)
+        t = threading.Thread(target=self.query_and_compare_pa_only)
         t.daemon = True
         t.start()
 
-    def query_and_compare(self):
+    def query_and_compare_pa_only(self):
+        """
+        Uses the provided SQL. Restricts to 'Permanently Abandoned', picks the latest
+        CMPL_STATE_EFTV_DTTM per API, merges back with ONLY the largest-wellbore row per API,
+        and highlights where AbandonmentDate > DiagramDate.
+        """
         try:
-            # Unique 10-digit APIs
-            apis = sorted(set(str(x) for x in self.results_df["API"] if pd.notna(x) and str(x).isdigit()))
+            # Filter base to largest wellbore per API (with DiagramDate tie-break)
+            base_all = self.results_df.copy()
+            base_filtered = self._filter_to_largest_wellbore_per_api(base_all)
+
+            # Distinct 10-digit APIs to query from base_filtered
+            apis = sorted(set(str(x) for x in base_filtered["API"] if pd.notna(x) and str(x).isdigit()))
             if not apis:
                 messagebox.showinfo("No APIs", "No valid 10-digit API numbers were extracted.")
                 return
 
-            formatted = ", ".join([f"'{a}'" for a in apis])
+            formatted_well_apis = ", ".join([f"'{a}'" for a in apis])
 
-            sql = f"""
-                SELECT wd.well_api_nbr AS WELL_API_NBR,
-                       cd.CMPL_STATE_TYPE_DESC AS CMPL_STATE_TYPE_DESC,
-                       cd.CMPL_STATE_EFTV_DTTM AS CMPL_STATE_EFTV_DTTM
-                FROM well_dmn wd
-                JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-                WHERE cd.actv_indc = 'Y'
-                  AND wd.actv_indc = 'Y'
-                  AND cd.cmpl_state_type_cde NOT IN ('PRPO','FUTR')
-                  AND wd.well_api_nbr IN ({formatted})
-                  AND cd.CMPL_SEQ_NBR IS NOT NULL
+            sql_query = f"""
+                select
+                    wd.well_nme,
+                    wd.well_api_nbr,
+                    wd.fld_nme,
+                    cd.prim_purp_type_cde,
+                    cd.ENGR_STRG_NME,
+                    cd.CMPL_STATE_TYPE_DESC,
+                    cd.CMPL_STATE_EFTV_DTTM
+                from well_dmn wd
+                join cmpl_dmn cd
+                  on wd.well_fac_id = cd.well_fac_id
+                where cd.actv_indc = 'Y'
+                  and wd.actv_indc = 'Y'
+                  and cd.cmpl_state_type_cde not in ('PRPO','FUTR')
+                  and wd.well_api_nbr in ({formatted_well_apis})
+                  and cd.CMPL_SEQ_NBR is not null
             """
 
             self.set_status("Querying Oracle…")
             with self.conn_mgr.get_connection("odw") as conn:
-                db_df = pd.read_sql(sql, conn)
+                db_df = pd.read_sql(sql_query, conn)
 
-            # Normalize & parse
+            if db_df.empty:
+                # No rows from DW — show base_filtered (no PA info)
+                final = base_filtered.copy()
+                for col in ("WellStatus","AbandonmentDate","WellName","Field","PrimPurpose","EngrStorage"):
+                    if col == "AbandonmentDate":
+                        final[col] = pd.NaT
+                    else:
+                        final[col] = ""
+                self.results_df = final
+                self.refresh_tree_with_results()
+                self.set_status("No DW rows returned for the provided APIs.")
+                return
+
+            # Normalize DW columns
+            db_df.columns = [c.upper() for c in db_df.columns]
             db_df["WELL_API_NBR"] = db_df["WELL_API_NBR"].astype(str)
             db_df["CMPL_STATE_EFTV_DTTM"] = pd.to_datetime(db_df["CMPL_STATE_EFTV_DTTM"], errors="coerce")
 
-            # Prepare base with API key
-            base = self.results_df.copy()
+            # Filter to Permanently Abandoned only
+            pa = db_df[db_df["CMPL_STATE_TYPE_DESC"].eq("Permanently Abandoned")].copy()
+
+            if pa.empty:
+                final = base_filtered.copy()
+                for col in ("WellStatus","AbandonmentDate","WellName","Field","PrimPurpose","EngrStorage"):
+                    if col == "AbandonmentDate":
+                        final[col] = pd.NaT
+                    else:
+                        final[col] = ""
+                self.results_df = final
+                self.refresh_tree_with_results()
+                self.set_status("No 'Permanently Abandoned' rows found for these APIs.")
+                return
+
+            # Keep the latest PA effective date per API
+            pa.sort_values(["WELL_API_NBR", "CMPL_STATE_EFTV_DTTM"], inplace=True)
+            latest_pa = pa.groupby("WELL_API_NBR", as_index=False).last()
+
+            # Prepare base with API key — drop placeholders BEFORE merge to avoid duplicates
+            base = base_filtered.drop(
+                columns=["WellStatus","AbandonmentDate","WellName","Field","PrimPurpose","EngrStorage"],
+                errors="ignore"
+            ).copy()
             base["WELL_API_NBR"] = base["API"].astype(str)
 
-            merged = pd.merge(
-                base,
-                db_df.rename(columns={
-                    "CMPL_STATE_TYPE_DESC": "WellStatus",
-                    "CMPL_STATE_EFTV_DTTM": "AbandonmentDate"
-                }),
-                on="WELL_API_NBR",
-                how="left"
-            )
-
-            # If there are multiple completion rows per API, keep the latest effective date per status row
-            # (Commonly you'd group/select 'Permanently Abandoned' row; here we prefer latest per API)
-            # Reduce by keeping the max AbandonmentDate per API+WellStatus row, then dedupe by API keeping the latest AbandonmentDate
-            merged.sort_values(["WELL_API_NBR", "AbandonmentDate"], inplace=True)
-            merged = merged.groupby(["WELL_API_NBR"], as_index=False).last()
-
-            # Re-join with original (to keep file-level rows if there were multiple files per API)
+            # Merge latest PA with base (suffixes just in case)
             final = pd.merge(
-                base.drop(columns=["WellStatus","AbandonmentDate"], errors="ignore"),
-                merged[["WELL_API_NBR","WellStatus","AbandonmentDate"]],
+                base,
+                latest_pa[[
+                    "WELL_API_NBR",
+                    "CMPL_STATE_TYPE_DESC",
+                    "CMPL_STATE_EFTV_DTTM",
+                    "WELL_NME",
+                    "FLD_NME",
+                    "PRIM_PURP_TYPE_CDE",
+                    "ENGR_STRG_NME"
+                ]],
                 on="WELL_API_NBR",
-                how="left"
+                how="left",
+                suffixes=("", "_dw")
             )
 
-            # Highlight rule: AbandonmentDate AFTER DiagramDate
-            # i.e., DiagramDate < AbandonmentDate
+            # Rename for UI
+            final.rename(columns={
+                "CMPL_STATE_TYPE_DESC": "WellStatus",
+                "CMPL_STATE_EFTV_DTTM": "AbandonmentDate",
+                "WELL_NME": "WellName",
+                "FLD_NME": "Field",
+                "PRIM_PURP_TYPE_CDE": "PrimPurpose",
+                "ENGR_STRG_NME": "EngrStorage",
+            }, inplace=True)
+
+            # Ensure expected columns exist (if DW had no match for some APIs)
+            for col, default in [
+                ("WellStatus", ""),
+                ("AbandonmentDate", pd.NaT),
+                ("WellName", ""),
+                ("Field", ""),
+                ("PrimPurpose", ""),
+                ("EngrStorage", ""),
+            ]:
+                if col not in final.columns:
+                    final[col] = default
+
             self.results_df = final
             self.refresh_tree_with_results()
-            self.set_status("Done. Rows highlighted where AbandonmentDate > DiagramDate.")
+            self.set_status("Done. Highlighted where AbandonmentDate > DiagramDate (PA only), largest wellbore per API.")
+
         except Exception as e:
             messagebox.showerror("Database Error", str(e))
         finally:
@@ -341,7 +445,9 @@ class CombinedApp(tk.Tk):
         for _, row in self.results_df.iterrows():
             diagram = row.get("DiagramDate")
             abdn = row.get("AbandonmentDate")
+
             tag = ()
+            # Highlight when Permanently Abandoned after the diagram date
             if pd.notna(diagram) and pd.notna(abdn) and abdn > diagram:
                 tag = ("highlight",)
 
@@ -354,13 +460,17 @@ class CombinedApp(tk.Tk):
                     row.get("Full Well API",""),
                     row.get("Initials",""),
                     diagram.strftime("%Y-%m-%d %H:%M:%S") if pd.notna(diagram) else row.get("DiagramDateStr",""),
+                    row.get("WellName","") if pd.notna(row.get("WellName","")) else "",
+                    row.get("Field","") if pd.notna(row.get("Field","")) else "",
+                    row.get("PrimPurpose","") if pd.notna(row.get("PrimPurpose","")) else "",
+                    row.get("EngrStorage","") if pd.notna(row.get("EngrStorage","")) else "",
                     row.get("WellStatus","") if pd.notna(row.get("WellStatus","")) else "",
                     abdn.strftime("%Y-%m-%d %H:%M:%S") if pd.notna(abdn) else "",
                 ),
                 tags=tag
             )
 
-        # Enable copy/export if we have anything
+        # Enable copy/export when we have any data
         if len(self.results_df) > 0:
             self.copy_btn.configure(state=tk.NORMAL)
             self.export_btn.configure(state=tk.NORMAL)
@@ -370,7 +480,7 @@ class CombinedApp(tk.Tk):
         if self.tree.get_children() == ():
             messagebox.showinfo("No Data", "Nothing to copy.")
             return
-        headers = self.tree["columns"]
+        headers = self.columns
         rows = ["\t".join(headers)]
         for iid in self.tree.get_children():
             vals = self.tree.item(iid)["values"]
@@ -393,15 +503,24 @@ class CombinedApp(tk.Tk):
             return
 
         out = self.results_df.copy()
-        # Pretty date strings
+
+        # Pretty date strings (DiagramDate keeps original if NaT)
         if "DiagramDate" in out.columns:
-            out["DiagramDate"] = out["DiagramDate"].dt.strftime("%Y-%m-%d %H:%M:%S").fillna(out.get("DiagramDateStr",""))
+            out["DiagramDate"] = out["DiagramDate"].dt.strftime("%Y-%m-%d %H:%M:%S")
+            if "DiagramDateStr" in out.columns:
+                out["DiagramDate"] = out["DiagramDate"].fillna(out["DiagramDateStr"])
+
         if "AbandonmentDate" in out.columns:
             out["AbandonmentDate"] = out["AbandonmentDate"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
-        # Reorder columns nicely if present
-        cols = ["File Name","API","Wellbore","Full Well API","Initials","DiagramDate","WellStatus","AbandonmentDate"]
-        cols = [c for c in cols if c in out.columns] + [c for c in out.columns if c not in cols]
+        # Order columns nicely
+        pref = [
+            "File Name","API","Wellbore","Full Well API","Initials","DiagramDate",
+            "WellName","Field","PrimPurpose","EngrStorage",
+            "WellStatus","AbandonmentDate"
+        ]
+        cols = [c for c in pref if c in out.columns] + [c for c in out.columns if c not in pref and c != "DiagramDateStr"]
+
         try:
             out.to_csv(path, index=False, columns=cols, encoding="utf-8")
             self.set_status(f"Exported to {os.path.basename(path)}")
