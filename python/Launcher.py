@@ -11,17 +11,18 @@ from datetime import datetime
 """
 Launcher app with three sections (on the same page) for:
 1) UIC (PPR)
-2) SQL Query (Prod Inj Status, Cum Volume, Well Status)
+2) SQL Query (Prod Inj Status, Cum Volume, Well Status, Wellbores)
 3) Wellbore Diagrams (Copy WBDs & Abandonment Check)
 
-Each section has a button to run the respective script, and all output streams to a single log pane.
+Each section has buttons to run the respective scripts, and all output streams to a single log pane.
 Modifications:
 - Pane heights increased ~3x via fixed height + pack_propagate(False)
-- Removed the word "Run" from the button text labels
-- Updated per requests:
+- Removed the word "Run" from button labels
+- Latest updates:
+  * Added "Wellbores" (SQL/Wellbores.py)
+  * Added "Well Status" (SQL/WellStatus.py)
   * Restored "Cum Volume" (SQL/CumVolume.py)
   * Added "Prod Inj Status" (SQL/ProdInj_Cum_Init_Last.py)
-  * Added "Well Status" (SQL/WellStatus.py)
   * Added "Abandonment Check" (WBDs/WBD_Creation_Abandon_comp.py)
 """
 
@@ -48,7 +49,10 @@ class Launcher(tb.Window):
             frame_uic,
             text="PPR",
             bootstyle="primary",
-            command=lambda: self.run_script(os.path.join(self.base_dir, "Periodic Project Review", "ppr.py"), name="PPR"),
+            command=lambda: self.run_script(
+                os.path.join(self.base_dir, "Periodic Project Review", "ppr.py"), 
+                name="PPR"
+            ),
         )
         btn_ppr.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         tk.Frame(frame_uic).grid(row=1, column=0, pady=(pane_height//2, 0))
@@ -59,7 +63,7 @@ class Launcher(tb.Window):
         frame_sql.configure(height=pane_height)
         frame_sql.pack_propagate(False)
 
-        # Buttons: Prod Inj Status, Cum Volume, Well Status
+        # Buttons: Prod Inj Status, Cum Volume, Well Status, Wellbores
         btn_prod_inj = tb.Button(
             frame_sql,
             text="Prod Inj Status",
@@ -93,6 +97,18 @@ class Launcher(tb.Window):
         )
         btn_well_status.grid(row=0, column=2, padx=10, pady=10, sticky="w")
 
+        # ✅ New "Wellbores" button
+        btn_wellbores = tb.Button(
+            frame_sql,
+            text="Wellbores",
+            bootstyle="success",
+            command=lambda: self.run_script(
+                os.path.join(self.base_dir, "SQL", "Wellbores.py"),
+                name="Wellbores"
+            ),
+        )
+        btn_wellbores.grid(row=0, column=3, padx=10, pady=10, sticky="w")
+
         tk.Frame(frame_sql).grid(row=1, column=0, pady=(pane_height//2, 0))
 
         # --- Wellbore Diagrams Section ---
@@ -105,11 +121,13 @@ class Launcher(tb.Window):
             frame_wbd,
             text="Copy WBDs",
             bootstyle="warning",
-            command=lambda: self.run_script(os.path.join(self.base_dir, "WBDs", "CopyFiles.py"), name="Copy WBDs"),
+            command=lambda: self.run_script(
+                os.path.join(self.base_dir, "WBDs", "CopyFiles.py"), 
+                name="Copy WBDs"
+            ),
         )
         btn_wbd.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        # "Abandonment Check" button
         btn_abandon = tb.Button(
             frame_wbd,
             text="Abandonment Check",
@@ -126,13 +144,17 @@ class Launcher(tb.Window):
         # --- Log Output Area ---
         log_frame = tb.LabelFrame(self, text="Output Log", bootstyle="secondary")
         log_frame.pack(fill="both", expand=True, padx=12, pady=6)
-        self.log = scrolledtext.ScrolledText(log_frame, wrap=tk.WORD, font=("Courier New", 10))
+        self.log = scrolledtext.ScrolledText(
+            log_frame, wrap=tk.WORD, font=("Courier New", 10)
+        )
         self.log.pack(fill="both", expand=True, padx=8, pady=8)
 
         # Footer info
         footer = tb.Frame(self)
         footer.pack(fill="x", padx=12, pady=6)
-        tb.Label(footer, text="Scripts launch with the same Python interpreter as this app.").pack(side="left")
+        tb.Label(
+            footer, text="Scripts launch with the same Python interpreter as this app."
+        ).pack(side="left")
 
     # ----------------------
     # Logging and subprocess management
