@@ -2,6 +2,7 @@ import os
 import sys
 import threading
 import subprocess
+import webbrowser
 import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import ttk
@@ -10,51 +11,61 @@ from datetime import datetime
 
 """
 Launcher app with three sections (on the same page) for:
-1) UIC (PPR)
-2) SQL Query (Prod Inj Status, Cum Volume, Well Status, Wellbores)
+1) UIC (PPR, WBD Search, CRC File Search)
+2) SQL Query (Prod Inj Status, Cum Volume, Well Status, Wellbores, Alloc Prod&Inj)
 3) Wellbore Diagrams (Copy WBDs & Abandonment Check)
 
-Each section has buttons to run the respective scripts, and all output streams to a single log pane.
-Modifications:
-- Pane heights increased ~3x via fixed height + pack_propagate(False)
-- Removed the word "Run" from button labels
-- Latest updates:
-  * Added "Wellbores" (SQL/Wellbores.py)
-  * Added "Well Status" (SQL/WellStatus.py)
-  * Restored "Cum Volume" (SQL/CumVolume.py)
-  * Added "Prod Inj Status" (SQL/ProdInj_Cum_Init_Last.py)
-  * Added "Abandonment Check" (WBDs/WBD_Creation_Abandon_comp.py)
+Each section has buttons to run scripts or open internal tools, and all script output streams to a shared log pane.
 """
 
 class Launcher(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
         self.title("Project Utilities Launcher")
-        self.geometry("1000x900")
+        self.geometry("1100x950")
 
         s = ttk.Style()
         s.configure("TButton", font=("Helvetica", 12, "bold"))
 
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        pane_height = 260  # consistent height for all panes
 
-        # Target pane height (~3x bigger than before)
-        pane_height = 240  # adjust as desired
-
-        # --- UIC (PPR) Section ---
+        # --- UIC (PPR + Web Tools) Section ---
         frame_uic = tb.LabelFrame(self, text="UIC", bootstyle="primary")
         frame_uic.pack(fill="x", padx=12, pady=8)
         frame_uic.configure(height=pane_height)
         frame_uic.pack_propagate(False)
+
+        # PPR script
         btn_ppr = tb.Button(
             frame_uic,
             text="PPR",
             bootstyle="primary",
             command=lambda: self.run_script(
-                os.path.join(self.base_dir, "Periodic Project Review", "ppr.py"), 
+                os.path.join(self.base_dir, "Periodic Project Review", "ppr.py"),
                 name="PPR"
             ),
         )
         btn_ppr.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        # ✅ New "WBD Search" button (opens internal site)
+        btn_wbd_search = tb.Button(
+            frame_uic,
+            text="WBD Search",
+            bootstyle="primary",
+            command=lambda: self.open_website("http://aeraweb02/UICApp/WBD_Search/WBD_Bulk_Checker.html", "WBD Search"),
+        )
+        btn_wbd_search.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+
+        # ✅ New "CRC File Search" button (opens internal site)
+        btn_crc_search = tb.Button(
+            frame_uic,
+            text="CRC File Search",
+            bootstyle="primary",
+            command=lambda: self.open_website("http://aeraweb02/UICApp/Network_Folder_Search/CRC_File_Search.html", "CRC File Search"),
+        )
+        btn_crc_search.grid(row=0, column=2, padx=10, pady=10, sticky="w")
+
         tk.Frame(frame_uic).grid(row=1, column=0, pady=(pane_height//2, 0))
 
         # --- SQL Query Section ---
@@ -63,7 +74,7 @@ class Launcher(tb.Window):
         frame_sql.configure(height=pane_height)
         frame_sql.pack_propagate(False)
 
-        # Buttons: Prod Inj Status, Cum Volume, Well Status, Wellbores
+        # Buttons: Prod Inj Status, Cum Volume, Well Status, Wellbores, Alloc Prod&Inj
         btn_prod_inj = tb.Button(
             frame_sql,
             text="Prod Inj Status",
@@ -97,7 +108,6 @@ class Launcher(tb.Window):
         )
         btn_well_status.grid(row=0, column=2, padx=10, pady=10, sticky="w")
 
-        # ✅ New "Wellbores" button
         btn_wellbores = tb.Button(
             frame_sql,
             text="Wellbores",
@@ -108,6 +118,17 @@ class Launcher(tb.Window):
             ),
         )
         btn_wellbores.grid(row=0, column=3, padx=10, pady=10, sticky="w")
+
+        btn_alloc = tb.Button(
+            frame_sql,
+            text="Alloc Prod&Inj",
+            bootstyle="success",
+            command=lambda: self.run_script(
+                os.path.join(self.base_dir, "SQL", "Prod_Inj_Alloc.py"),
+                name="Alloc Prod&Inj"
+            ),
+        )
+        btn_alloc.grid(row=0, column=4, padx=10, pady=10, sticky="w")
 
         tk.Frame(frame_sql).grid(row=1, column=0, pady=(pane_height//2, 0))
 
@@ -122,7 +143,7 @@ class Launcher(tb.Window):
             text="Copy WBDs",
             bootstyle="warning",
             command=lambda: self.run_script(
-                os.path.join(self.base_dir, "WBDs", "CopyFiles.py"), 
+                os.path.join(self.base_dir, "WBDs", "CopyFiles.py"),
                 name="Copy WBDs"
             ),
         )
@@ -197,6 +218,16 @@ class Launcher(tb.Window):
 
         t = threading.Thread(target=reader, daemon=True)
         t.start()
+
+    # ----------------------
+    # Website launcher
+    # ----------------------
+    def open_website(self, url: str, name: str):
+        self.log_line(f"Opening website: {name} → {url}")
+        try:
+            webbrowser.open(url)
+        except Exception as e:
+            self.log_line(f"ERROR opening {name}: {e}")
 
 
 if __name__ == "__main__":
