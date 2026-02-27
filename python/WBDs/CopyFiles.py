@@ -5,7 +5,7 @@ import shutil
 import threading
 from datetime import datetime
 import csv
-import cx_Oracle
+import oracledb
 import pandas as pd
 import queue
 
