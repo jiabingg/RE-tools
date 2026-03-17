@@ -1,4 +1,16 @@
 {
+    "PO(1)": {
+        "description": "Project summary, including:\n- Statement of primary purpose of the project\n- Location details, including principal meridian(s), section(s), township(s), and range(s)\n- UIC project number, if any\n- Current PAL date, if any\n- Injection zone name(s)\n- Clearly stated method used to define the AOR (e.g., fixed \u00bc-mile radius, calculated ZEI, or other)\n- Project duration\n- Volume (including historical, if applicable)\n- Number of injection wells\n- Presence or absence of freshwater and/or USDW\n- A regional location map showing oilfield and other significant boundaries, if any, is recommended to aid reviews\n- Map of the AOR showing:\n(The historical term 'project area' may be shown as the map view projection of the injection zone defined in 1720.1(g). The 'project area' can include a single AOR, multiple AORs, or any overlapping cumulative effects of the AORs.)\n- All wells within and adjacent to the boundary of the AOR, including surface and bottom-hole locations, wellbore paths, well identifiers, and symbols which display their well type and status (e.g. active steamflood injector)\n- All water supply wells that are within the AOR and identified in public records or known to operator\n- All wells which have been identified as potential conduits to a USDW\n- Any underground disposal horizons, mining, and other subsurface industrial activities not associated with oil and gas production within the AOR, to the extent such information is publicly available\n- Traces of the geologic cross-sections provided as part of the Geologic Study\n- All faults within the project area",
+        "projects": {
+            "Dummy Project": "This is a dummy response for PO(1)."
+        }
+    },
+    "CL(1)": {
+        "description": "Cover letter including a statement that appropriate California-licensed professional(s) are responsible for all data, interpretations, and calculations,  if any, in accordance with Business and Professions Code sections (BPC) 6730-6749, 7835 and, 7835.1 as applicable. Include the following:\n- A statement with supporting rationale identifying whether injected Class II fluids have migrated beyond the exempt aquifer or into a USDW for ongoing projects, and demonstrating that such migration will not occur for any project.\n- Stamp and signature of appropriate licensed professional(s) at bottom of page.\n- If the operator determines that the submission does not include data, interpretations, or calculations subject to the requirements of BPC sections 7835 and 7835.1, the cover page must so indicate, and must provide the name(s) and signature(s) of the individual(s) responsible for preparing the submission.",
+        "projects": {
+            "Dummy Project": "This is a dummy response for CL(1)."
+        }
+    },
     "DF(1)": {
         "description": "All data supporting the underground injection project are in digital format.",
         "projects": {
@@ -9,18 +21,6 @@
         "description": "Maps are clearly and appropriately labeled with:\n- Title\n- Scale\n- North arrow\n- UIC project number, if any\n- Legend describing symbols, colors, and other key features shown on map\n- Well symbols and well identifiers are clearly posted on each map\n- Significant Boundaries, including the area of review, project area, and existing exemption boundaries\n- Other relevant data\n- Diagrams and exhibits are clearly and appropriately labeled.",
         "projects": {
             "Dummy Project": "This is a dummy response for DF(2)."
-        }
-    },
-    "CL(1)": {
-        "description": "Cover letter including a statement that appropriate California-licensed professional(s) are responsible for all data, interpretations, and calculations,  if any, in accordance with Business and Professions Code sections (BPC) 6730-6749, 7835 and, 7835.1 as applicable. Include the following:\n- A statement with supporting rationale identifying whether injected Class II fluids have migrated beyond the exempt aquifer or into a USDW for ongoing projects, and demonstrating that such migration will not occur for any project.\n- Stamp and signature of appropriate licensed professional(s) at bottom of page.\n- If the operator determines that the submission does not include data, interpretations, or calculations subject to the requirements of BPC sections 7835 and 7835.1, the cover page must so indicate, and must provide the name(s) and signature(s) of the individual(s) responsible for preparing the submission.",
-        "projects": {
-            "Dummy Project": "This is a dummy response for CL(1)."
-        }
-    },
-    "PO(1)": {
-        "description": "Project summary, including:\n- Statement of primary purpose of the project\n- Location details, including principal meridian(s), section(s), township(s), and range(s)\n- UIC project number, if any\n- Current PAL date, if any\n- Injection zone name(s)\n- Clearly stated method used to define the AOR (e.g., fixed \u00bc-mile radius, calculated ZEI, or other)\n- Project duration\n- Volume (including historical, if applicable)\n- Number of injection wells\n- Presence or absence of freshwater and/or USDW\n- A regional location map showing oilfield and other significant boundaries, if any, is recommended to aid reviews\n- Map of the AOR showing:\n(The historical term 'project area' may be shown as the map view projection of the injection zone defined in 1720.1(g). The 'project area' can include a single AOR, multiple AORs, or any overlapping cumulative effects of the AORs.)\n- All wells within and adjacent to the boundary of the AOR, including surface and bottom-hole locations, wellbore paths, well identifiers, and symbols which display their well type and status (e.g. active steamflood injector)\n- All water supply wells that are within the AOR and identified in public records or known to operator\n- All wells which have been identified as potential conduits to a USDW\n- Any underground disposal horizons, mining, and other subsurface industrial activities not associated with oil and gas production within the AOR, to the extent such information is publicly available\n- Traces of the geologic cross-sections provided as part of the Geologic Study\n- All faults within the project area",
-        "projects": {
-            "Dummy Project": "This is a dummy response for PO(1)."
         }
     },
     "GS(1)": {
