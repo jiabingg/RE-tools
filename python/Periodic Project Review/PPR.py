@@ -61,6 +61,27 @@ class OracleConnectionManager:
         """Returns a list of available connection names."""
         return list(self._connections.keys())
 
+
+def format_well_api_list(raw_api_list):
+    """Convert list of user-supplied APIs to a safe SQL IN list string."""
+    cleaned = []
+    for item in raw_api_list:
+        if item is None:
+            continue
+        api = str(item).strip()
+        if not api:
+            continue
+        if api not in cleaned:
+            cleaned.append(api)
+
+    if not cleaned:
+        return None
+
+    # Prevent SQL injection by escaping single quotes
+    escaped = [f"'{x.replace("'", "''")}'" for x in cleaned]
+    return ", ".join(escaped)
+
+
 # Abstract Base Class for Application Pages
 class Page(tk.Frame):
     def __init__(self, parent, controller):
@@ -188,9 +209,15 @@ class WellAPIInputPage(Page):
         # --- END BUTTON FONT SIZE CHANGE ---
 
     def go_to_next_page(self):
-        well_apis = self.well_api_text.get("1.0", tk.END).strip().split('\n')
-        well_apis = [api.strip() for api in well_apis if api.strip()]
+        raw_apis = self.well_api_text.get("1.0", tk.END).strip().split('\n')
+        well_apis = [api.strip() for api in raw_apis if api.strip()]
+        well_apis = list(dict.fromkeys(well_apis))  # remove duplicates while keeping order
         self.controller.shared_data["well_apis"] = well_apis
+
+        if not well_apis:
+            messagebox.showwarning("Input Error", "Please enter at least one Well API number.")
+            return
+
         # Navigate to the new WellBasicDataPage (now Page 2)
         self.controller.show_page(WellBasicDataPage)
 
@@ -250,20 +277,28 @@ class WellBasicDataPage(Page):
             self.clear_results()
             return
 
-        # Format Well APIs for SQL IN clause
-        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+        formatted_well_apis = format_well_api_list(well_apis_to_query)
+        if not formatted_well_apis:
+            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
+            self.clear_results()
+            return
 
         sql_query = f"""
-        select wd.well_nme,wd.well_api_nbr,wd.fld_nme,
-        cd.prim_purp_type_cde,
-        cd.ENGR_STRG_NME, cd.CMPL_STATE_TYPE_DESC, cd.CMPL_STATE_EFTV_DTTM
-        from well_dmn wd
-        join cmpl_dmn cd
-        on wd.well_fac_id = cd.well_fac_id
-        where cd.actv_indc= 'Y' and wd.actv_indc = 'Y' and cd.cmpl_state_type_cde not in ('PRPO','FUTR')
-        and wd.well_api_nbr in ({formatted_well_apis})
-        and cd.CMPL_SEQ_NBR is not null
-        """
+SELECT
+    wd.wlbr_nme                    AS well_name,
+    cd.opnl_fld                    AS field_name,
+    cd.cmpl_nme                    AS completion_name,
+    cd.well_api_nbr                AS api_number,
+    wd.wlbr_api_suff_nbr           AS wellbore_suffix,
+    wd.wlbr_incl_type_desc         AS wellbore_type,
+    cd.cmpl_state_type_cde         AS status,
+    cd.in_svc_indc                 AS in_service,
+    cd.init_prod_dte               AS initial_prod_date
+FROM dwrptg.cmpl_dmn cd
+JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
+WHERE cd.actv_indc = 'Y' AND cd.well_api_nbr IN ({formatted_well_apis})
+ORDER BY cd.well_api_nbr, wd.wlbr_api_suff_nbr, cd.cmpl_nme
+"""
 
         try:
             conn = self.conn_manager.get_connection('odw')
@@ -276,7 +311,7 @@ class WellBasicDataPage(Page):
                 df = pd.DataFrame(rows, columns=columns)
 
                 # Convert date columns to datetime objects for proper comparison/display
-                date_cols = ['CMPL_STATE_EFTV_DTTM']
+                date_cols = ['INITIAL_PROD_DATE']
                 for col in date_cols:
                     if col in df.columns:
                         df[col] = pd.to_datetime(df[col], errors='coerce')
@@ -358,7 +393,12 @@ class EngineeringStringPage(Page):
             messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
             self.clear_results()
             return
-        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+
+        formatted_well_apis = format_well_api_list(well_apis_to_query)
+        if not formatted_well_apis:
+            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
+            self.clear_results()
+            return
 
         sql_query = f"""
         with T as
@@ -515,7 +555,12 @@ class PerformanceSummaryPage(Page):
             messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
             self.clear_calculations()
             return
-        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+
+        formatted_well_apis = format_well_api_list(well_apis_to_query)
+        if not formatted_well_apis:
+            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
+            self.clear_calculations()
+            return
 
         sql_query = f"""
         WITH T1 AS (
@@ -717,7 +762,13 @@ class TubingPressurePage(Page):
             self.clear_results()
             self.clear_average_pressure()
             return
-        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+
+        formatted_well_apis = format_well_api_list(well_apis_to_query)
+        if not formatted_well_apis:
+            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
+            self.clear_results()
+            self.clear_average_pressure()
+            return
 
         sql_query = f"""
         select wd.well_nme, wd.well_api_nbr,cd.cmpl_nme, cd.cmpl_fac_id, 
@@ -777,17 +828,19 @@ class TubingPressurePage(Page):
         if self.avg_pressure_label is None:
             return
 
-        if 'AVG_WLHD_TBG_PRSR' in df.columns:
-            pressures = pd.to_numeric(df['AVG_WLHD_TBG_PRSR'], errors='coerce').dropna()
-            if not pressures.empty:
-                avg_pressure = pressures.mean()
-                self.avg_pressure_label.config(text=f"{avg_pressure:.1f}")
-            else:
-                self.avg_pressure_label.config(text="No valid pressure data")
-        else:
+        pressure_column = next((col for col in df.columns if col.upper() == 'AVG_WLHD_TBG_PRSR'), None)
+        if pressure_column is None:
             self.avg_pressure_label.config(text="Column not found")
             if not df.empty:
                 messagebox.showwarning("Calculation Warning", "AVG_WLHD_TBG_PRSR column not found for average calculation.")
+            return
+
+        pressures = pd.to_numeric(df[pressure_column], errors='coerce').dropna()
+        if not pressures.empty:
+            avg_pressure = pressures.mean()
+            self.avg_pressure_label.config(text=f"{avg_pressure:.1f}")
+        else:
+            self.avg_pressure_label.config(text="No valid pressure data")
 
     def clear_average_pressure(self):
         if self.avg_pressure_label: 
@@ -841,7 +894,12 @@ class ProductionInjectionPage(Page):
             messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
             self.clear_results()
             return
-        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+
+        formatted_well_apis = format_well_api_list(well_apis_to_query)
+        if not formatted_well_apis:
+            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
+            self.clear_results()
+            return
 
         # Updated query with GAS INJ Per Day and corrected WATER INJ mapping
         sql_query = f"""
@@ -950,7 +1008,12 @@ class DailyInjectionPressurePage(Page):
             messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
             self.clear_results()
             return
-        formatted_well_apis = ', '.join([f"'{api}'" for api in well_apis_to_query])
+
+        formatted_well_apis = format_well_api_list(well_apis_to_query)
+        if not formatted_well_apis:
+            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
+            self.clear_results()
+            return
 
         sql_query = f"""
         select wd.well_nme, wd.well_api_nbr,cd.cmpl_nme, cd.cmpl_fac_id, cf.eftv_dttm, 

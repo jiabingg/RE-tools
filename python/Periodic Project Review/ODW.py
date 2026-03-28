@@ -1,5 +1,5 @@
 import os
-import cx_Oracle
+import oracledb
 import pandas as pd
 from tabulate import tabulate
 
@@ -17,7 +17,7 @@ class OracleConnectionManager:
         if name not in self._connections:
             raise ValueError(f"Unknown DB connection name: {name}")
         config = self._connections[name]
-        return cx_Oracle.connect(
+        return oracledb.connect(
             user=config['user'],
             password=config['password'],
             dsn=config['dsn']

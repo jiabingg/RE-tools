@@ -1,5 +1,5 @@
 import os
-import cx_Oracle
+import oracledb
 import tkinter as tk
 from tkinter import messagebox, scrolledtext
 from tkinter import ttk
@@ -34,12 +34,12 @@ class OracleConnectionManager:
             raise ValueError(f"Unknown DB connection name: {name}")
         config = self._connections[name]
         try:
-            return cx_Oracle.connect(
+            return oracledb.connect(
                 user=config['user'],
                 password=config['password'],
                 dsn=config['dsn']
             )
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             raise ConnectionError(f"Failed to connect to Oracle DB '{name}': {error_obj.message}") from e
 
@@ -268,7 +268,7 @@ class FieldDataPage(Page):
         except ConnectionError as e:
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
             self.clear_results()
@@ -380,7 +380,7 @@ class NewWellDataPage(Page):
         except ConnectionError as e:
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
             self.clear_results()

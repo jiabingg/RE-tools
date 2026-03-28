@@ -10,7 +10,7 @@ SECTIONS_LIBRARY_FILE = os.path.join(BASE_DIR, "section_details.json")
 class ProjectReviewApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("UIC Project Manager - Injector Tracking")
+        self.root.title("UIC Project Manager - Bulk Import Mode")
         self.root.geometry("1440x1020")
         
         self.sections_library = self.load_json(SECTIONS_LIBRARY_FILE)
@@ -47,14 +47,13 @@ class ProjectReviewApp:
         proj_column = ttk.Frame(self.main_paned)
         self.main_paned.add(proj_column, weight=1)
 
-        # Projects List
         proj_frame = ttk.LabelFrame(proj_column, text="1. Projects")
         proj_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         self.proj_listbox = tk.Listbox(proj_frame, font=("Arial", 11), exportselection=False)
         self.proj_listbox.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         self.proj_listbox.bind('<<ListboxSelect>>', self.on_project_select)
 
-        # PxP Link & Injector Table
+        # PxP Link
         meta_frame = ttk.Frame(proj_frame)
         meta_frame.pack(fill=tk.X, padx=5, pady=5)
         ttk.Label(meta_frame, text="PxP App Link:").pack(anchor=tk.W)
@@ -67,15 +66,16 @@ class ProjectReviewApp:
         inj_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         cols = ("Well_Name", "API", "BH_X", "BH_Y")
-        self.inj_tree = ttk.Treeview(inj_frame, columns=cols, show='headings', height=5)
+        self.inj_tree = ttk.Treeview(inj_frame, columns=cols, show='headings', height=8)
         for col in cols:
             self.inj_tree.heading(col, text=col)
-            self.inj_tree.column(col, width=80)
+            self.inj_tree.column(col, width=85)
         self.inj_tree.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         inj_btn_frame = ttk.Frame(inj_frame)
         inj_btn_frame.pack(fill=tk.X, pady=2)
-        ttk.Button(inj_btn_frame, text="+ Add Injector", command=self.add_injector).pack(side=tk.LEFT, expand=True)
+        ttk.Button(inj_btn_frame, text="+ Add One", command=self.add_injector).pack(side=tk.LEFT, expand=True)
+        ttk.Button(inj_btn_frame, text="📋 Paste Bulk", command=self.bulk_paste_injectors).pack(side=tk.LEFT, expand=True)
         ttk.Button(inj_btn_frame, text="- Remove", command=self.remove_injector).pack(side=tk.LEFT, expand=True)
 
         # Project Controls
@@ -88,11 +88,9 @@ class ProjectReviewApp:
         # --- Pane 2: Sections ---
         sec_frame = ttk.LabelFrame(self.main_paned, text="2. Checklist Sections")
         self.main_paned.add(sec_frame, weight=1)
-        
         self.search_var = tk.StringVar()
         self.search_var.trace("w", lambda n, i, m: self.refresh_sections())
         ttk.Entry(sec_frame, textvariable=self.search_var, font=("Arial", 11)).pack(fill=tk.X, padx=5, pady=5)
-        
         self.sec_listbox = tk.Listbox(sec_frame, font=("Arial", 11), exportselection=False)
         self.sec_listbox.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         self.sec_listbox.bind('<<ListboxSelect>>', self.on_section_select)
@@ -100,30 +98,29 @@ class ProjectReviewApp:
         # --- Pane 3: Content ---
         self.content_paned = ttk.PanedWindow(self.main_paned, orient=tk.VERTICAL)
         self.main_paned.add(self.content_paned, weight=3)
-        
         desc_frame = ttk.LabelFrame(self.content_paned, text="Requirement Description")
         self.content_paned.add(desc_frame, weight=1)
         self.txt_desc = tk.Text(desc_frame, wrap=tk.WORD, bg="#f8f8f8", state=tk.DISABLED, font=("Arial", 11))
         self.txt_desc.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        
         resp_frame = ttk.LabelFrame(self.content_paned, text="Your Project Response")
         self.content_paned.add(resp_frame, weight=2)
         self.txt_resp = tk.Text(resp_frame, wrap=tk.WORD, undo=True, font=("Arial", 12))
         self.txt_resp.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        
         self.txt_resp.bind("<KeyRelease>", self.reset_save_timer)
         self.txt_resp.bind("<FocusOut>", lambda e: self.immediate_save())
+
+    # --- Methods ---
+    def refresh_projects(self, index=None):
+        self.proj_listbox.delete(0, tk.END)
+        for p in self.project_order: self.proj_listbox.insert(tk.END, p)
+        if index is not None: self.proj_listbox.selection_set(index)
 
     def on_project_select(self, event):
         sel = self.proj_listbox.curselection()
         if sel:
             self.current_project = self.project_order[sel[0]]
-            proj_data = self.projects_data[self.current_project]
-            
-            # Load Meta & Injectors
-            self.pxp_link_var.set(proj_data.get("pxp_application_link", ""))
+            self.pxp_link_var.set(self.projects_data[self.current_project].get("pxp_application_link", ""))
             self.refresh_injector_table()
-            
             self.current_section = None
             self.txt_resp.delete(1.0, tk.END)
             self.sec_listbox.selection_clear(0, tk.END)
@@ -134,13 +131,52 @@ class ProjectReviewApp:
         for inj in injectors:
             self.inj_tree.insert('', tk.END, values=(inj.get("Well_Name",""), inj.get("API",""), inj.get("BH_X",""), inj.get("BH_Y","")))
 
+    def bulk_paste_injectors(self):
+        """Opens a window to paste multiple lines of injector data."""
+        if not self.current_project: return
+        
+        paste_win = tk.Toplevel(self.root)
+        paste_win.title("Bulk Paste Wells")
+        paste_win.geometry("600x400")
+        
+        ttk.Label(paste_win, text="Paste rows from Excel (Columns: Name, API, X, Y):").pack(pady=5)
+        text_area = tk.Text(paste_win, wrap=tk.NONE)
+        text_area.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        def process_paste():
+            raw_data = text_area.get(1.0, tk.END).strip()
+            if not raw_data: return
+            
+            new_count = 0
+            if "injectors" not in self.projects_data[self.current_project]:
+                self.projects_data[self.current_project]["injectors"] = []
+                
+            for line in raw_data.split('\n'):
+                # Split by tab (Excel default) or comma
+                parts = line.split('\t') if '\t' in line else line.split(',')
+                if len(parts) >= 4:
+                    entry = {
+                        "Well_Name": parts[0].strip(),
+                        "API": parts[1].strip(),
+                        "BH_X": parts[2].strip(),
+                        "BH_Y": parts[3].strip()
+                    }
+                    self.projects_data[self.current_project]["injectors"].append(entry)
+                    new_count += 1
+            
+            self.save_all()
+            self.refresh_injector_table()
+            paste_win.destroy()
+            messagebox.showinfo("Import Success", f"Added {new_count} injectors.")
+
+        ttk.Button(paste_win, text="Import Data", command=process_paste).pack(pady=10)
+
     def add_injector(self):
         if not self.current_project: return
-        # Simple dialog-based entry for speed
         raw = simpledialog.askstring("New Injector", "Enter Well Name, API, BH_X, BH_Y (comma separated):")
         if raw:
             parts = [p.strip() for p in raw.split(',')]
-            if len(parts) == 4:
+            if len(parts) >= 4:
                 new_inj = {"Well_Name": parts[0], "API": parts[1], "BH_X": parts[2], "BH_Y": parts[3]}
                 if "injectors" not in self.projects_data[self.current_project]:
                     self.projects_data[self.current_project]["injectors"] = []
@@ -149,11 +185,12 @@ class ProjectReviewApp:
 
     def remove_injector(self):
         selected = self.inj_tree.selection()
-        if not selected or not self.current_project: return
+        if not selected: return
         idx = self.inj_tree.index(selected[0])
         self.projects_data[self.current_project]["injectors"].pop(idx)
         self.save_all(); self.refresh_injector_table()
 
+    # --- The rest of your existing logic (Section Select, Save, etc.) ---
     def on_section_select(self, event):
         sel = self.sec_listbox.curselection()
         if sel and self.current_project:
@@ -162,10 +199,8 @@ class ProjectReviewApp:
             self.txt_desc.config(state=tk.NORMAL)
             self.txt_desc.delete(1.0, tk.END); self.txt_desc.insert(tk.END, desc)
             self.txt_desc.config(state=tk.DISABLED)
-            
-            # Compatibility Logic for Responses
             proj = self.projects_data[self.current_project]
-            resp_dict = proj.get("responses", proj) # Fallback to old flat structure
+            resp_dict = proj.get("responses", proj)
             resp = resp_dict.get(self.current_section, "")
             self.txt_resp.delete(1.0, tk.END); self.txt_resp.insert(tk.END, resp)
 
@@ -179,14 +214,6 @@ class ProjectReviewApp:
         self.sec_listbox.delete(0, tk.END)
         for code in self.section_order:
             if query in code.lower(): self.sec_listbox.insert(tk.END, code)
-
-    def refresh_projects(self, index=None):
-        """Updates the project listbox and optionally selects an item."""
-        self.proj_listbox.delete(0, tk.END)
-        for p in self.project_order:
-            self.proj_listbox.insert(tk.END, p)
-        if index is not None: 
-            self.proj_listbox.selection_set(index)
 
     def add_project(self):
         name = simpledialog.askstring("New Project", "Project Name:")

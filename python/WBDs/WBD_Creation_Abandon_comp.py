@@ -14,7 +14,7 @@ Step 2:
 - Highlight those rows
 
 Requirements:
-    pip install PyMuPDF pandas cx_Oracle
+    pip install PyMuPDF pandas oracledb
 
 Environment variables for Oracle (optional overrides):
     DB_USER_ODW, DB_PASSWORD_ODW, DB_DSN_ODW
@@ -31,7 +31,7 @@ from tkinter import filedialog, messagebox, ttk
 
 import pandas as pd
 import fitz  # PyMuPDF
-import cx_Oracle
+import oracledb
 
 
 # ---------------------------
@@ -53,10 +53,10 @@ class OracleConnectionManager:
             raise ValueError(f"Unknown DB connection name: {name}")
         cfg = self._connections[name]
         try:
-            return cx_Oracle.connect(
+            return oracledb.connect(
                 user=cfg["user"], password=cfg["password"], dsn=cfg["dsn"]
             )
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             (err,) = e.args
             raise ConnectionError(f"Failed to connect to Oracle DB '{name}': {err.message}") from e
 

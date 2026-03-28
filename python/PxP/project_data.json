@@ -62,6 +62,799 @@
             "SI(3)": "No known water supply well(s) were identified within 500 feet of the UIC Project boundary (AOR radius\nboundary).",
             "OI(1)": "MASP Determination\nThe calculated Maximum Allowable Surface Injection Pressure (MASIP) is calculated via the following\nequation:\nMASIP= (0.95*IG-IFG) * TVD\nWhere IG is the injection gradient of 0.6 psi/ft\nIFG is the injected fluid gradient of 0.02 psi/ft\nTVD is the uppermost perforation depth in ft.\nThe calculated Injection Gradient is multiplied by 0.95 to appropriately account for factors such as a\nconservative allowance for friction loss, in accordance with Section 1724.10.3- Maximum Allowable Surface\nInjection Pressure.\nInjection wells pressure will not exceed its permitted limit for this project. Calculated MASP for wells is\nincluded in Appendix L \u2013 OI(1) MASP Calculations.",
             "OI(2)": "Letters to Offset Operators\nCopies of letters of notification to offset operators can be found in Appendix M \u2013 OI(2) Offset Operator\nLetters."
-        }
+        },
+        "injectors": [
+            {
+                "Well_Name": "MAIN CAMP H-7",
+                "API": "0403045719",
+                "BH_X": "-119.558568",
+                "BH_Y": "35.209503"
+            },
+            {
+                "Well_Name": "MAIN CAMP I-7",
+                "API": "0403056356",
+                "BH_X": "-119.558545",
+                "BH_Y": "35.209545"
+            },
+            {
+                "Well_Name": "MAIN CAMP B-5",
+                "API": "0403063584",
+                "BH_X": "-119.561261",
+                "BH_Y": "35.212315"
+            },
+            {
+                "Well_Name": "MAIN CAMP C-2",
+                "API": "0403063589",
+                "BH_X": "-119.562696",
+                "BH_Y": "35.211327"
+            },
+            {
+                "Well_Name": "MAIN CAMP C-3",
+                "API": "0403044831",
+                "BH_X": "-119.562532",
+                "BH_Y": "35.211438"
+            },
+            {
+                "Well_Name": "MAIN CAMP C-5",
+                "API": "0403044832",
+                "BH_X": "-119.561198",
+                "BH_Y": "35.212092"
+            },
+            {
+                "Well_Name": "MAIN CAMP D-2",
+                "API": "0403045709",
+                "BH_X": "-119.562685",
+                "BH_Y": "35.210878"
+            },
+            {
+                "Well_Name": "MAIN CAMP D-3",
+                "API": "0403044833",
+                "BH_X": "-119.562413",
+                "BH_Y": "35.211038"
+            },
+            {
+                "Well_Name": "MAIN CAMP D-4",
+                "API": "0403044834",
+                "BH_X": "-119.561652",
+                "BH_Y": "35.211282"
+            },
+            {
+                "Well_Name": "MAIN CAMP D-5",
+                "API": "0403044835",
+                "BH_X": "-119.560966",
+                "BH_Y": "35.211571"
+            },
+            {
+                "Well_Name": "MAIN CAMP D-6",
+                "API": "0403044836",
+                "BH_X": "-119.560554",
+                "BH_Y": "35.211564"
+            },
+            {
+                "Well_Name": "MAIN CAMP E-2",
+                "API": "0403045711",
+                "BH_X": "-119.562658",
+                "BH_Y": "35.21008"
+            },
+            {
+                "Well_Name": "MAIN CAMP E-5",
+                "API": "0403044837",
+                "BH_X": "-119.560857",
+                "BH_Y": "35.210972"
+            },
+            {
+                "Well_Name": "MAIN CAMP E-6",
+                "API": "0403044838",
+                "BH_X": "-119.56006",
+                "BH_Y": "35.211046"
+            },
+            {
+                "Well_Name": "MAIN CAMP F-2",
+                "API": "0403045713",
+                "BH_X": "-119.562682",
+                "BH_Y": "35.209628"
+            },
+            {
+                "Well_Name": "MAIN CAMP F-3",
+                "API": "0403044839",
+                "BH_X": "-119.561836",
+                "BH_Y": "35.209833"
+            },
+            {
+                "Well_Name": "MAIN CAMP F-4",
+                "API": "0403044840",
+                "BH_X": "-119.56107",
+                "BH_Y": "35.210146"
+            },
+            {
+                "Well_Name": "MAIN CAMP F-5",
+                "API": "0403044841",
+                "BH_X": "-119.560362",
+                "BH_Y": "35.210313"
+            },
+            {
+                "Well_Name": "MAIN CAMP F-6",
+                "API": "0403044842",
+                "BH_X": "-119.559571",
+                "BH_Y": "35.210475"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-2",
+                "API": "0403045715",
+                "BH_X": "-119.562106",
+                "BH_Y": "35.209432"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-3",
+                "API": "0403044843",
+                "BH_X": "-119.561525",
+                "BH_Y": "35.209489"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-4",
+                "API": "0403044844",
+                "BH_X": "-119.560861",
+                "BH_Y": "35.20957"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-5",
+                "API": "0403044845",
+                "BH_X": "-119.560159",
+                "BH_Y": "35.209726"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-6",
+                "API": "0403044846",
+                "BH_X": "-119.55926",
+                "BH_Y": "35.209959"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-7A",
+                "API": "0403045716",
+                "BH_X": "-119.559009",
+                "BH_Y": "35.209994"
+            },
+            {
+                "Well_Name": "MAIN CAMP H-4",
+                "API": "0403056355",
+                "BH_X": "-119.56046",
+                "BH_Y": "35.20945"
+            },
+            {
+                "Well_Name": "MAIN CAMP H-5",
+                "API": "0403045717",
+                "BH_X": "-119.559765",
+                "BH_Y": "35.2094"
+            },
+            {
+                "Well_Name": "MAIN CAMP H-6",
+                "API": "0403045718",
+                "BH_X": "-119.559096",
+                "BH_Y": "35.209414"
+            },
+            {
+                "Well_Name": "MAIN CAMP 310",
+                "API": "0403020495",
+                "BH_X": "-119.561973",
+                "BH_Y": "35.211947"
+            },
+            {
+                "Well_Name": "MAIN CAMP 314",
+                "API": "0403015826",
+                "BH_X": "-119.56136",
+                "BH_Y": "35.210686"
+            },
+            {
+                "Well_Name": "MAIN CAMP 350",
+                "API": "0403020498",
+                "BH_X": "-119.562234",
+                "BH_Y": "35.210286"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-9",
+                "API": "0403064076",
+                "BH_X": "-119.560299",
+                "BH_Y": "35.209435"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-13U",
+                "API": "0403064066",
+                "BH_X": "-119.558858",
+                "BH_Y": "35.209648"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-13",
+                "API": "0403053033",
+                "BH_X": "-119.558961",
+                "BH_Y": "35.20981"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-11",
+                "API": "0403052874",
+                "BH_X": "-119.559799",
+                "BH_Y": "35.209642"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-11U",
+                "API": "0403064019",
+                "BH_X": "-119.5596",
+                "BH_Y": "35.209535"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-9U",
+                "API": "0403064067",
+                "BH_X": "-119.560614",
+                "BH_Y": "35.20989"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-9",
+                "API": "0403053031",
+                "BH_X": "-119.560562",
+                "BH_Y": "35.209927"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-7R",
+                "API": "0403055803",
+                "BH_X": "-119.56124",
+                "BH_Y": "35.209684"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-7",
+                "API": "0403051921",
+                "BH_X": "-119.56128",
+                "BH_Y": "35.209663"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-5",
+                "API": "0403064005",
+                "BH_X": "-119.561729",
+                "BH_Y": "35.2094"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-11U",
+                "API": "0403064078",
+                "BH_X": "-119.559889",
+                "BH_Y": "35.210118"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-11",
+                "API": "0403053032",
+                "BH_X": "-119.559882",
+                "BH_Y": "35.210177"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-5",
+                "API": "0403064018",
+                "BH_X": "-119.562023",
+                "BH_Y": "35.210025"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-11U",
+                "API": "0403064068",
+                "BH_X": "-119.560078",
+                "BH_Y": "35.210854"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-11",
+                "API": "0403051920",
+                "BH_X": "-119.560054",
+                "BH_Y": "35.210822"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-9U",
+                "API": "0403064069",
+                "BH_X": "-119.560834",
+                "BH_Y": "35.210368"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-9",
+                "API": "0403051919",
+                "BH_X": "-119.560698",
+                "BH_Y": "35.210297"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-7U",
+                "API": "0403064075",
+                "BH_X": "-119.561455",
+                "BH_Y": "35.210181"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-7",
+                "API": "0403051918",
+                "BH_X": "-119.561538",
+                "BH_Y": "35.210237"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-9U",
+                "API": "0403064065",
+                "BH_X": "-119.561348",
+                "BH_Y": "35.211449"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-9",
+                "API": "0403051916",
+                "BH_X": "-119.560614",
+                "BH_Y": "35.20989"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-7U",
+                "API": "0403064006",
+                "BH_X": "-119.560562",
+                "BH_Y": "35.209927"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-7",
+                "API": "0403051915",
+                "BH_X": "-119.56124",
+                "BH_Y": "35.209684"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-5",
+                "API": "0403064064",
+                "BH_X": "-119.56128",
+                "BH_Y": "35.209663"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-11",
+                "API": "0403051917",
+                "BH_X": "-119.561729",
+                "BH_Y": "35.2094"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-11U",
+                "API": "0403064077",
+                "BH_X": "-119.559889",
+                "BH_Y": "35.210118"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-9R",
+                "API": "0403055804",
+                "BH_X": "-119.559882",
+                "BH_Y": "35.210177"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-9",
+                "API": "0403051913",
+                "BH_X": "-119.562023",
+                "BH_Y": "35.210025"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-7R",
+                "API": "0403055805",
+                "BH_X": "-119.560078",
+                "BH_Y": "35.210854"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-7",
+                "API": "0403051912",
+                "BH_X": "-119.560054",
+                "BH_Y": "35.210822"
+            },
+            {
+                "Well_Name": "MAIN CAMP B-6",
+                "API": "N/A",
+                "BH_X": "-119.560665",
+                "BH_Y": "35.212815"
+            },
+            {
+                "Well_Name": "MAIN CAMP B-7",
+                "API": "N/A",
+                "BH_X": "-119.559841",
+                "BH_Y": "35.212839"
+            },
+            {
+                "Well_Name": "MAIN CAMP BC-11",
+                "API": "N/A",
+                "BH_X": "-119.56095",
+                "BH_Y": "35.212526"
+            },
+            {
+                "Well_Name": "MAIN CAMP BC-11U",
+                "API": "N/A",
+                "BH_X": "-119.560882",
+                "BH_Y": "35.212472"
+            },
+            {
+                "Well_Name": "MAIN CAMP BC-13",
+                "API": "N/A",
+                "BH_X": "-119.560222",
+                "BH_Y": "35.212755"
+            },
+            {
+                "Well_Name": "MAIN CAMP BC-13U",
+                "API": "N/A",
+                "BH_X": "-119.560154",
+                "BH_Y": "35.212701"
+            },
+            {
+                "Well_Name": "MAIN CAMP C-6",
+                "API": "N/A",
+                "BH_X": "-119.560458",
+                "BH_Y": "35.212342"
+            },
+            {
+                "Well_Name": "MAIN CAMP C-7",
+                "API": "N/A",
+                "BH_X": "-119.559723",
+                "BH_Y": "35.212574"
+            },
+            {
+                "Well_Name": "MAIN CAMP C-8",
+                "API": "N/A",
+                "BH_X": "-119.558987",
+                "BH_Y": "35.212804"
+            },
+            {
+                "Well_Name": "MAIN CAMP C-9",
+                "API": "N/A",
+                "BH_X": "-119.55816",
+                "BH_Y": "35.212817"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-11",
+                "API": "N/A",
+                "BH_X": "-119.560675",
+                "BH_Y": "35.211925"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-11U",
+                "API": "N/A",
+                "BH_X": "-119.560607",
+                "BH_Y": "35.211871"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-13",
+                "API": "N/A",
+                "BH_X": "-119.559942",
+                "BH_Y": "35.212154"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-13U",
+                "API": "N/A",
+                "BH_X": "-119.559874",
+                "BH_Y": "35.2121"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-15",
+                "API": "N/A",
+                "BH_X": "-119.559213",
+                "BH_Y": "35.212383"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-15U",
+                "API": "N/A",
+                "BH_X": "-119.559145",
+                "BH_Y": "35.212329"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-17",
+                "API": "N/A",
+                "BH_X": "-119.558474",
+                "BH_Y": "35.212612"
+            },
+            {
+                "Well_Name": "MAIN CAMP CD-17U",
+                "API": "N/A",
+                "BH_X": "-119.558406",
+                "BH_Y": "35.212558"
+            },
+            {
+                "Well_Name": "MAIN CAMP D-7",
+                "API": "N/A",
+                "BH_X": "-119.559437",
+                "BH_Y": "35.211973"
+            },
+            {
+                "Well_Name": "MAIN CAMP D-8",
+                "API": "N/A",
+                "BH_X": "-119.558711",
+                "BH_Y": "35.212203"
+            },
+            {
+                "Well_Name": "MAIN CAMP D-9",
+                "API": "N/A",
+                "BH_X": "-119.557972",
+                "BH_Y": "35.212434"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-13",
+                "API": "N/A",
+                "BH_X": "-119.55966",
+                "BH_Y": "35.211556"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-13U",
+                "API": "N/A",
+                "BH_X": "-119.559592",
+                "BH_Y": "35.211502"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-15",
+                "API": "N/A",
+                "BH_X": "-119.558941",
+                "BH_Y": "35.211779"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-15U",
+                "API": "N/A",
+                "BH_X": "-119.558873",
+                "BH_Y": "35.211725"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-17",
+                "API": "N/A",
+                "BH_X": "-119.558202",
+                "BH_Y": "35.212011"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-17U",
+                "API": "N/A",
+                "BH_X": "-119.558134",
+                "BH_Y": "35.211957"
+            },
+            {
+                "Well_Name": "MAIN CAMP DE-5R",
+                "API": "N/A",
+                "BH_X": "-119.562572",
+                "BH_Y": "35.210634"
+            },
+            {
+                "Well_Name": "MAIN CAMP E-2 ST1",
+                "API": "N/A",
+                "BH_X": "-119.562815",
+                "BH_Y": "35.210078"
+            },
+            {
+                "Well_Name": "MAIN CAMP E-7",
+                "API": "N/A",
+                "BH_X": "-119.559374",
+                "BH_Y": "35.211298"
+            },
+            {
+                "Well_Name": "MAIN CAMP E-8",
+                "API": "N/A",
+                "BH_X": "-119.558628",
+                "BH_Y": "35.21153"
+            },
+            {
+                "Well_Name": "MAIN CAMP E-9",
+                "API": "N/A",
+                "BH_X": "-119.557696",
+                "BH_Y": "35.211831"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-13",
+                "API": "N/A",
+                "BH_X": "-119.559326",
+                "BH_Y": "35.210884"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-13U",
+                "API": "N/A",
+                "BH_X": "-119.559467",
+                "BH_Y": "35.21091"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-15",
+                "API": "N/A",
+                "BH_X": "-119.558661",
+                "BH_Y": "35.211148"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-15U",
+                "API": "N/A",
+                "BH_X": "-119.558772",
+                "BH_Y": "35.211177"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-17",
+                "API": "N/A",
+                "BH_X": "-119.557919",
+                "BH_Y": "35.21141"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-17U",
+                "API": "N/A",
+                "BH_X": "-119.557851",
+                "BH_Y": "35.211356"
+            },
+            {
+                "Well_Name": "MAIN CAMP EF-5R",
+                "API": "N/A",
+                "BH_X": "-119.562302",
+                "BH_Y": "35.209983"
+            },
+            {
+                "Well_Name": "MAIN CAMP F-7",
+                "API": "N/A",
+                "BH_X": "-119.558709",
+                "BH_Y": "35.210823"
+            },
+            {
+                "Well_Name": "MAIN CAMP F-8",
+                "API": "N/A",
+                "BH_X": "-119.55803",
+                "BH_Y": "35.211035"
+            },
+            {
+                "Well_Name": "MAIN CAMP F-9",
+                "API": "N/A",
+                "BH_X": "-119.557417",
+                "BH_Y": "35.21123"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-13",
+                "API": "N/A",
+                "BH_X": "-119.558999",
+                "BH_Y": "35.210424"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-13U",
+                "API": "N/A",
+                "BH_X": "-119.559199",
+                "BH_Y": "35.210377"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-15",
+                "API": "N/A",
+                "BH_X": "-119.558364",
+                "BH_Y": "35.210668"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-15U",
+                "API": "N/A",
+                "BH_X": "-119.558521",
+                "BH_Y": "35.210474"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-17",
+                "API": "N/A",
+                "BH_X": "-119.557647",
+                "BH_Y": "35.210809"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-17U",
+                "API": "N/A",
+                "BH_X": "-119.557579",
+                "BH_Y": "35.210755"
+            },
+            {
+                "Well_Name": "MAIN CAMP FG-5R",
+                "API": "N/A",
+                "BH_X": "-119.561959",
+                "BH_Y": "35.209543"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-6 ST1",
+                "API": "N/A",
+                "BH_X": "-119.559338",
+                "BH_Y": "35.209958"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-8",
+                "API": "N/A",
+                "BH_X": "-119.558175",
+                "BH_Y": "35.210231"
+            },
+            {
+                "Well_Name": "MAIN CAMP G-9",
+                "API": "N/A",
+                "BH_X": "-119.557138",
+                "BH_Y": "35.210632"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-15",
+                "API": "N/A",
+                "BH_X": "-119.558024",
+                "BH_Y": "35.209881"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-15U",
+                "API": "N/A",
+                "BH_X": "-119.558135",
+                "BH_Y": "35.209869"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-17",
+                "API": "N/A",
+                "BH_X": "-119.557364",
+                "BH_Y": "35.210208"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-17U",
+                "API": "N/A",
+                "BH_X": "-119.557296",
+                "BH_Y": "35.210154"
+            },
+            {
+                "Well_Name": "MAIN CAMP GH-9R",
+                "API": "N/A",
+                "BH_X": "-119.560293",
+                "BH_Y": "35.209432"
+            },
+            {
+                "Well_Name": "MAIN CAMP H-8",
+                "API": "N/A",
+                "BH_X": "-119.557527",
+                "BH_Y": "35.209786"
+            },
+            {
+                "Well_Name": "MAIN CAMP H-9",
+                "API": "N/A",
+                "BH_X": "-119.556859",
+                "BH_Y": "35.210028"
+            },
+            {
+                "Well_Name": "MAIN CAMP HI-15",
+                "API": "N/A",
+                "BH_X": "-119.557689",
+                "BH_Y": "35.209484"
+            },
+            {
+                "Well_Name": "MAIN CAMP HI-15U",
+                "API": "N/A",
+                "BH_X": "-119.557783",
+                "BH_Y": "35.209486"
+            },
+            {
+                "Well_Name": "MAIN CAMP HI-17",
+                "API": "N/A",
+                "BH_X": "-119.557079",
+                "BH_Y": "35.20961"
+            },
+            {
+                "Well_Name": "MAIN CAMP HI-17U",
+                "API": "N/A",
+                "BH_X": "-119.557011",
+                "BH_Y": "35.209556"
+            },
+            {
+                "Well_Name": "MAIN CAMP I-8",
+                "API": "N/A",
+                "BH_X": "-119.557169",
+                "BH_Y": "35.209233"
+            },
+            {
+                "Well_Name": "MAIN CAMP I-9",
+                "API": "N/A",
+                "BH_X": "-119.556583",
+                "BH_Y": "35.20943"
+            }
+        ]
+    },
+    "Ventura GRP 1 - 8140012": {
+        "pxp_application_link": "",
+        "responses": {
+            "PO(1)": "Aera Energy LLC (Aera Energy, Aera), a subsidiary of California Resources Corporation, is requesting a review of Underground Injection Control (UIC) Class II Water Injection Project(s) with the intent to consolidate all Aera operated active water injection projects for the Pico Formation in the Ventura Avenue Oil Field (Ventura Field). The primary purpose of these waterflood injection projects is to provide injection support to the hydrocarbon producing sands located in the Ventura Field.\nAll active and inactive injection wells are contained within the existing UIC project(s). Currently, Aera Energy recognizes 18 active UIC projects; however, this project review is to consolidate three projects into one. The consolidation projects include 8140012, 8140016, and 8140024, which are all within the T410 fault block discussed throughout this project review document and highlighted in the regional map of the Ventura Oil Field in\nFigure 1\n. These projects are also listed in\nTable 1\n. This project review has been prepared following the project data requirements specified in the California Code of Regulations, Title 14, Section 1724.7 and the format outlined in the UIC Project Data Requirements Checklist from the Department of Conservation, California Geologic Energy Management Division (CalGEM)."
+        },
+        "injectors": []
+    },
+    "Coles Levee - 15600003": {
+        "pxp_application_link": "",
+        "responses": {},
+        "injectors": []
+    },
+    "HPSC - 05200053": {
+        "pxp_application_link": "https://californiaresources.sharepoint.com/:f:/s/AssetStrategy/IgBLMEEPrTsDS4ZuMLW0im46AbkK6uZAxv65kfcYe2JJoVQ?email=Bin.Jia%40crc.com&e=bPFHFt",
+        "responses": {
+            "ES(1)": "The project area of review was determined by plotting all existing and future development Diatomite cyclic well locations on a map. Then, one ZEI was calculated for all locations utilizing the Neuman method and the associated input values for a \u201cDiatomite Representative Cyclic Producer\u201d.  The properties for a \u201cDiatomite Representative Cyclic Producer\u201d were derived by evaluating all existing cyclic producers in the project area, which are also analogous for future development Diatomite cyclic wells. \nThe Neuman method calculates a circular steam zone area as the ZEI. The steam zone area as a function of time is calculated using the following equation:\nA(t)=(x_SQ*(m_s ) \u0307*5.615*\u03c1_w*L_v*\u221a(\u03b1t/\u03c0)*\u3016(1-x\u3017_HP))/(k_hr*(T_s-T_r )*43,560)\n\nThe input variable ranges for a representative diatomite cyclic producer are presented in Table ES-1-1. Detailed calculations are provided in Appendix ES-1 (ZEI Spreadsheet). \nThe calculated individual ZEI for a representative cyclic producer is 82 feet, corresponding to an area of 0.48 acres.  This calculation assumes a maximum cyclic steam injection rate of 2,000 barrels per day cold-water-equivalent (bbl/d-cwe) per completed interval, injected at 90% steam quality. Each injection cycle consists of a five-day injection period, followed by a two-day soak period, and a production phase lasting approximately 14 to 21 days, or until the well ceases to flow.\nUnder these operating assumptions, each well would undergo approximately 12 to 15 injection cycles per year over a 10-year period. Based on individual steam cycles of approximately 10,000 bbl-cwe, the maximum cumulative injected steam per completed interval over 10 years is estimated to be 1,500,000 bbl-cwe.\nThe resulting ZEI is larger than that derived from fracture design data. The Area of Review for the project was established by combining the individual ZEIs associated with all existing and proposed cyclic producers within the project area.",
+            "ES(3)": "",
+            "ES(2)": "",
+            "PO(1)": "Aera Energy LLC (Aera) puts forth this project with a primary purpose to inject steam into the Miocene-aged Reef Ridge Diatomite at the subject Sections in the Belridge Field (Township 28S, Range 21E).  The proposed project is in an area where the target injection zones are not an Underground Source of Drinking Water (USDW).  The project entails drilling 1329 cyclic steam producers and cyclic operations on an existing 64 wells.\n\n\nFigure ES-2-1 below contains items (1) an (4). To maintain map legibility, wells within the project area are posted on these maps, as well as wells within 300 feet of the project area. Any further posting would make the maps illegible. For better readability, higher resolution maps may be found in Appendix ES-2-1. Items (2) and (3) do not exist in the project area.",
+            "ES(4)": "",
+            "ES(5)": "In February 2026,   Aera conducted an electronic search to identify the location of water wells within 1 mile of the UIC project boundary. The data sources utilized include the Department of Water Resources (DWR) well completion reports (WCR), the State Water Resources Control Board - Groundwater Ambient Monitoring and Assessment (GAMA) information system, and the USGS. These data were filtered to include wells within 1 mile of the UIC project boundary and eliminated destroyed wells, monitoring wells, and cathodic protection wells. The data from the DWR and GAMA systems are incomplete, and the well types are not specified. The latitude and longitude coordinates are approximate, so the well locations shown on the DWR and GAMA site maps are imprecise. For wells that included alphanumeric identifiers, the California well numbering system was used for the well locations instead plotting them in the center of the sections.\nThere are a total of 21 wells located within 1 mile of the UIC project boundary. The information for these wells is tabulated in Appendix W-ES-6 and displayed on Figure W-ES-6-1. The majority of the wells are monitoring wells associated with oil field activities. There are two industrial use wells identified in Section 34, T28S 21E. The status of all wells is not available. Historical and current land use of the area would indicate that the remaining unknown well types are likely industrial supply use rather than irrigation or domestic use. A higher resolution map may also be found in Appendix W-ES-6.",
+            "GS(1)": "Table GS-1-1: Average Reservoir Properties\nAverage Porosity (%) \t57.9\nAverage Permeability (mD) \t2.02\nAverage Thickness of Reservoir (ft)\t1,450 \nAverage Thickness Between Top Perf and Top of Injection Interval (ft)\t155 \nProject Area (acres)\t630 \nAverage Fracture Gradient  (psi/ft)\t0.873\nOriginal Reservoir Temperature (\u00b0F) \t113\nCurrent Reservoir Temperature (\u00b0F)\t113 - 440 \nOriginal Oil Saturation (%) \t40 - 60\nCurrent Water Saturation (%) \t60 - 40\nCurrent Gas Saturation (%) \t0\nResidual Oil Saturation (%)\t30-35\nOriginal Reservoir Pressure (psi)\t549-656\nCurrent Reservoir Pressure (psi)\t549-656",
+            "GS(2)": "Representative viscosity and API gravity data from five wells are included  in Table GS-2-1 below. It is important to note that this is raw, lab-derived data. Therefore, it is not completely reflective of the actual viscosity and API of subsurface oil due to the inevitable loss of lighter-end oil while retrieving the sample. Therefore, these values represent higher viscosity and lower API than actual reservoir conditions. Corrections can be applied to account for the loss of the lighter-end oil, hence why the average values for viscosity and API shown in Table GS-2-2 are higher than the ones shown below. \n\n\nTable GS-2- 2: Average Oil Gravity and Viscosity Data from East-Flank South Belridge Reef Ridge Diatomite\nOil Gravity (API)\t10.6  \u2013 19.1\nOil Viscosity (cp. @122oF)\t145 \u2013  5,683\nGas Gravity\t1.34 \nH2S Concentration (ppm)\t9,800\nWater Salinity (TDS)\t33k \u2013 34k \n\n\nIn 2012, Aera collected water samples from Reef Ridge Diatomite producers within the UIC project area. Full geochemical analyses were run for these wells with evaporated total dissolved solids (TDS) values ranging from 39,170 to 40,619 mg/L and an average TDS of 39,746 mg/L (Table GS-2-3). Figure GS-2-1 shows the location of the Diatomite injection zone water sample wells. The samples near the perimeter of the injection patterns are least impacted by current and historical water injection, and thus, are the most reflective of native water conditions in the reservoir. The full lab analyses for these wells can be found in Appendix GS-2   Formation Fluid Data. \n\n\nTable GS-2-3: Reef Ridge Diatomite Injection Zone TDS Samples\nWell Number\tAPI Number\tSample Date\tTDS (mg/L)\n537N1-28\t0403044873\t12/7/2012\t40,619\n585E-29\t0403044878\t12/7/2012\t39,170\n916H-28\t0403035176\t12/7/2012\t39,450\n\t\tAverage\t39,746",
+            "GS(3)": "",
+            "IP(2)": "",
+            "IP(1)": "The anticipated project duration is 10 years. The anticipated daily rate of injection is 2,000 B/D-CWE, and anticipated cumulative injected steam per completed interval per well over 10 years is estimated to be 1,500,000 BBLS-CWE.",
+            "CL(1)": "Table IP-8-1 is a summary of the geochemical analyses for the feedwater to steam generator for this project.  \n\nTable IP-8-1 Injectate Analysis \nSource\tTDS (mg/L)\tSodium (mg/L)\tChloride (mg/L)\tBoron (mg/L)\nBelridge Water Softening Plant\t11,000\t3,700\t5,700\t52\n\nAppendix IP-8-1 includes the laboratory analytical reports for the injectate analysis.",
+            "IP(3)": "Table IP-8-1 is a summary of the geochemical analyses for the feedwater to steam generator for this project.  \n\nTable IP-8-1 Injectate Analysis \nSource\tTDS (mg/L)\tSodium (mg/L)\tChloride (mg/L)\tBoron (mg/L)\nBelridge Water Softening Plant\t11,000\t3,700\t5,700\t52\n\nAppendix IP-8-1 includes the laboratory analytical reports for the injectate analysis.",
+            "IP(4)": "Aera employs a robust well design fit-for-purpose for Diatomite cyclic steaming.  Some of the details of this design include: \n\u2022\tSurface casing to ~450 feet \n\u2022\t7\u201d L-80 production casing with premium casing connections MO-4ST  \n\u2022\tPerforated or frac-pack completion with wire-wrapped screen. Frac pack is only utilized if higher solids production is expected (Frac pack completion is for solids control not for productivity improvement) \n\u2022\tPremium wellhead and components rated to 600oF \n\u2022\tHaliburton premium \"Well Life \" high temperature cement blend  \nFor wells with frac-pack (fracturing and gravel packing) completion designs, a hydraulic fracture is created in the rock and an Inconel 825 wire-wrapped screen is set across the fractured completion interval to hydraulically isolate the perforation interval and minimize solids inflow into the well.  Wells with frac-pack completions require WST permits to accomplish the frac-pack portion of the well completion procedure.  Subsequent steaming operations are through the frac-packed Inconel wire-wrapped screen.    \nThis casing design has proven to be effective in the Diatomite cyclic steaming operations in Belridge East Flank.  Because of the success in initial well completions and continuing operation, no significant changes to this design are planned in the future.  A generic South Belridge East Flank cyclic wellbore diagram is shown in\n\n\n\n\n\n\nFigure IP-6-1: Generic East Flank Cyclic Wellbore Diagram (Gravel-pack completion)",
+            "IP(6)": "For surveillance, each Cyclic well in the project area has digital pressure and flow rate meters, in addition to an automated flow valve programmed to keep injection pressure below the MASIP (Maximum allowable surface injection pressure). The data is available to remotely monitor in real time and is aggregated into a daily average pressure and injection rate.  Daily injection pressure records are kept for the lifetime of the injector. A daily surveillance process flags cyclic wells with abnormal behavior for further evaluation.  \n\n\nMechanical Integrity Testing (MIT I and II) will occur as required by the CalGEM to ensure steam injected is confined to the approved zone(s) of injection. If there is evidence a well lacks mechanical integrity CalGEM will be notified, and the well will be disconnected from the injection system. \nCRC is also committed to implement active tiltmeter monitoring and enhanced wellbore surveillance as part of the project. Tiltmeter arrays will be installed to monitor for surface deformation associated with dilation resulting from pressure, temperature, or fluid accumulation during injection operations. In addition, periodic temperature logging will be conducted in selected observation and offset wells to identify any anomalous heat signatures indicative of steam or fluid migration beyond the approved injection zone. These monitoring measures will provide real-time and diagnostic data to verify fracture containment and ensure early detection of any out-of-zone growth or unintended fluid movement.\nINSAR (Interferometric Synthetic Aperture Radar) is another tool Aera uses to monitor ground movement to help manage subsidence or dilation. This data is received every 24 days as satellites fly over the Belridge field. The INSAR data has historically shown little ground movement in the East Flank cyclic area. Figure IP-5-1 shows the high, average, and low subsidence rates in inches per year on the Y-axis and time on the X-axis. As can be seen in the graph, subsidence has been well controlled over the last 10 years near the cyclic area. Aera attempts to keep subsidence in the range of 5 to \u20135 inches per year to minimize risk of shear failures.\n\n\n\nFigure IP-5-1: East Flank Cyclic area subsidence history (Feb-01 through Feb-20)\n \n\nFracture Parameters and Vertical Stand Off\nFracture containment within the approved Diatomite injection zone has been verified using field-measured tiltmeter mapping data from 45 South Belridge wells.  \nTiltmeter monitoring provides direct measurements of fracture geometry, including azimuth, depth, and vertical height growth during injection. Results show that upward fracture growth from the top perforation in the upper Opal A stages averages approximately 10 feet, with a maximum observed average of 40 feet, as shown in Figure IP-5-2.  \nComparison of mapped fracture tops to the geologic Top of Diatomite confirms that all fractures remain below the Top of Diatomite, maintaining positive vertical stand-off. These field measurements demonstrate that fracture propagation is contained within the approved injection interval and does not extend outside the injection zone. \nFigure IP-5-2: Top of Diatomite to Top of Fracture Distance \n \n\nIn addition, Aera performed net pressure matching analyses on more than 300 wells to independently evaluate fracture geometry and vertical growth. Net pressure modeling provides analytical estimates of fracture height and extent based on injection pressures and formation mechanical properties. Results indicate that the modeled fracture top distance did not exceed the Top of the stimulation formation. As shown in Figure IP-5-3, the calculated separation between the fracture top and the formation top remains positive across the dataset, confirming vertical containment within the approved injection interval. These analytical results are consistent with the field-measured tiltmeter data and further demonstrate that fracture propagation does not extend beyond the injection zone.\n\n\n\nFigure IP-5-3: Top of Fracture to Top of Formation from Net Pressure Match\n \n\nAn independent study was performed by Lawrence Livermore National Laboratory (LLNL) to investigate risk factors for surface expressions. LLNL also noted, \u201cThe South Belridge study area has deep diatomite and deep injection. No surface expressions have emerged in this area\u201d (LLNL-TR-819790 P. 72).\nThe high pressure cyclic steam (HPCS) diatomite formation at Belridge is considered \u201cdeep\u201d where all current active wells are perforated deeper than 1,000 feet of true vertical depth (TVD) from ground elevation to top perforation. In addition, there are several stratigraphic intervals present, such as, the San Joaquin/Etchegion (undifferentiated) and the Tulare Formation, between the zone of injection (i.e. the diatomite) and surface. All proposed wells are also considered \u201cdeep\u201d diatomite being 700 feet of TVD.\nLLNL also summarizes that \u201csurface expressions are expected to be connected to either cumulative or immediate injection intensity, a simple connection, particularly a connection to the injection intensity in the vicinity of the surface expressions, cannot be established in a definitive way\u201d (LLNL-TR-819790 P. 84). Therefore, increasing or decreasing injection intensity in no way explains surface expression causation. The injection intensity in Belridge Diatomite HPCS would be considered as \u201clow\u201d injection intensity by comparison to other operators. The proposed future HPCS wells would operate under the same injection intensity as our current operating wells but have room to increase injection intensity as more heat is needed early on.",
+            "IP(7)": "",
+            "IP(5)": "Aera Energy\u2019s first priority is safety for people and the environment.  Policies and guidelines are in place and the staff are fully committed to implement such policies. The corrosion inhibition plan starts at the well level where corrosion inhibition chemicals are applied in selected wells to protect the casing and downhole equipment from corrosion. Produced fluids are pumped to a dehydration facility where the oil is separated from water and custody transfer occurs at the sales meter. A portion of the produced water is then cleaned further and softened for the purpose of steam generation while the remaining water is transported throughout the water disposal system. The soft water distribution system is constructed mainly of bare carbon steel pipelines. A corrosion inhibition chemical is added in order to protect the bare carbon steel from corrosion. \nAera Pipeline Management Plan has been prepared pursuant to CCR Title 8 - Section 6533.\nAera's inspection program for all service classes is that as part of routine field and facility surveillance, all pipelines are visually inspected for evidence of leakage, clamps, or excessive corrosion.\nDocumentation of inspections is provided on an \"exception-only\" basis, meaning that work orders for piping repair or replacement will be the form of inspection documentation to satisfy Title 14 Ch. 4, Section 1777.3. Aera Belridge, Cymric/McKittrick, and Lost Hills compiles type, grade, and design information and stores it in a computer-based data management system on a limited set of regulated pipelines (including the pipes tested to represent the service class) but not all lines greater than 1\" nominal diameter. NDE Testing on any line designated as an Environmentally Sensitive Gathering Line greater than 10 years old or Urban pipeline over 4\" in diameter and greater than 10 years old or active gas pipelines in sensitive areas greater than 10 years old per Title 14 Ch. 4, Section 1774.1 (f) shall be completed every two years regardless of Class.\nAera\u2019s testing program varies by service class:\n\u2022\tClass 1: Thickness monitoring inspections are performed on a representative sample of the service class. Inspections are completed for each representative line at 5 years or half (1/2) the remaining life, whichever is less. In cases where the remaining life is estimated to be less than 4 years, the inspection interval may be the full remaining life up to 2 years maximum and the number of piping systems inspected shall be increased within that class to detect worst case deterioration rates.\n\u2022\tClass 2: Thickness monitoring inspections are performed on a representative sample of the service class. Inspections are completed for each representative line at 10 years or half (1/2) the remaining life, whichever is less.\n\u2022\tClass 3: Thickness monitoring inspections are performed on a representative sample of the service class. Inspections are completed for each representative line at 15 years or three quarters (3/4) the remaining life, whichever is less.\n\u2022\tClass 4: Piping systems within this class are visually inspected annually and tested by exception only, including pressure testing performed in accordance with Title 14, Ch. 4 Section 1774.1 (c).\n\n\u2003\nPipeline Management Plan\nField: Belridge, Cymric/McKittrick, and Lost Hills"
+        },
+        "injectors": []
     }
 }

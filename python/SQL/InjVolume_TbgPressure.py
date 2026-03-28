@@ -1,6 +1,6 @@
 
 import os
-import cx_Oracle
+import oracledb
 import tkinter as tk
 from tkinter import messagebox, scrolledtext
 from tkinter import ttk
@@ -18,7 +18,7 @@ class OracleConnectionManager:
             "odw": {
                 "user": os.getenv("DB_USER_ODW", "rptguser"),
                 "password": os.getenv("DB_PASSWORD_ODW", "allusers"),
-                "dsn": "odw"  # lower-case for cx_Oracle compatibility
+                "dsn": "odw"  # lower-case for oracledb compatibility
             },
             "sandbox": {
                 "user": os.getenv("DB_USER_SANDBOX", "engsb"),
@@ -41,12 +41,12 @@ class OracleConnectionManager:
             raise ValueError(f"Unknown DB connection name: {name}")
         config = self._connections[name]
         try:
-            return cx_Oracle.connect(
+            return oracledb.connect(
                 user=config['user'],
                 password=config['password'],
                 dsn=config['dsn']
             )
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             raise ConnectionError(f"Failed to connect to Oracle DB '{name}': {error_obj.message}") from e
 
@@ -275,7 +275,7 @@ class WellBasicDataPage(Page):
         except ConnectionError as e:
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
             self.clear_results()
@@ -378,7 +378,7 @@ class EngineeringStringPage(Page):
         except ConnectionError as e:
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
             self.clear_results()
@@ -550,7 +550,7 @@ class PerformanceSummaryPage(Page):
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
             self.clear_calculations()
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
             self.clear_results()
@@ -724,7 +724,7 @@ class TubingPressurePage(Page):
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
             self.clear_average_pressure()
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
             self.clear_results()
@@ -857,7 +857,7 @@ class ProductionInjectionPage(Page):
         except ConnectionError as e:
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
             self.clear_results()
@@ -954,7 +954,7 @@ class InjectionPressurePage(Page):
         except ConnectionError as e:
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
-        except cx_Oracle.Error as e:
+        except oracledb.Error as e:
             error_obj, = e.args
             messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
             self.clear_results()

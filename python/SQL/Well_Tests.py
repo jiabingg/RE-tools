@@ -1,6 +1,6 @@
 # file: Last3Tests_ByAPI.py
 import os
-import cx_Oracle
+import oracledb
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
@@ -28,7 +28,7 @@ class OracleConnectionManager:
 
     def connect(self):
         cfg = self._connections[self._active]
-        return cx_Oracle.connect(cfg["user"], cfg["password"], cfg["dsn"])
+        return oracledb.connect(cfg["user"], cfg["password"], cfg["dsn"])
 
 # ---------------------------
 # Query Builder
@@ -210,7 +210,7 @@ class App(tb.Window):
             self.btn_export.config(state="normal")
             self.status.config(text=f"Returned {len(self.df_results)} rows. Completed {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-        except cx_Oracle.DatabaseError as e:
+        except oracledb.DatabaseError as e:
             err = str(e)
             messagebox.showerror("Database Error", err)
             self.status.config(text="Database error.")
