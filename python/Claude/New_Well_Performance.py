@@ -1,33 +1,22 @@
 """
-Recent Drilled Wells Performance Viewer
-=========================================
-A Python GUI application for CRC reservoir engineers to review performance
-of recently drilled wells from the Oracle Data Warehouse (ODW).
-
+Recent Drilled Wells Performance Viewer  (v4)
+===============================================
 Tabs:
-  1. Well Inventory — basic data for all wells drilled after a user-selected date
-  2. Well Tests     — latest & peak oil well test for producers
-  3. Prod & Inj     — monthly production/injection charts for selected wells
+  1. Well Inventory   — one row per well (largest cmpl_fac_id), P&A excluded
+  2. Well Tests       — latest + peak allocated tests (after spud date only)
+  3. Well Test Chart  — producer: well-test scatter; injector: daily measured inj
 
-Requirements:
-  pip install oracledb matplotlib
-
-Run:
-  python recent_wells_performance.py
+Requirements:   pip install oracledb matplotlib
+Run:            python recent_wells_performance.py
 """
 
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import threading
-import csv
-import os
-import sys
-from datetime import datetime, date
+import threading, csv, sys
+from datetime import datetime
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CONNECTION CONFIG
-# ═══════════════════════════════════════════════════════════════════════════════
-TNS_ALIAS = "ODW"
+TNS_ALIAS   = "ODW"
 DB_USERNAME = "rptguser"
 DB_PASSWORD = "allusers"
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -35,8 +24,7 @@ DB_PASSWORD = "allusers"
 try:
     import oracledb
 except ImportError:
-    print("ERROR: oracledb not installed.  Run:  pip install oracledb")
-    sys.exit(1)
+    sys.exit("ERROR: oracledb not installed.  Run:  pip install oracledb")
 
 try:
     import matplotlib
@@ -47,141 +35,210 @@ try:
     HAS_MPL = True
 except ImportError:
     HAS_MPL = False
-    print("WARNING: matplotlib not installed — chart tab will be disabled.")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SQL Queries
+# SQL — Tab 1: Inventory (one row per API — largest cmpl_fac_id)
 # ─────────────────────────────────────────────────────────────────────────────
-
 SQL_WELL_INVENTORY = """
-SELECT
-    cd.cmpl_nme           AS WELL_NME,
-    cd.well_api_nbr       AS WELL_API_NBR,
-    cd.opnl_fld           AS FLD_NME,
-    cd.prim_purp_type_cde AS PRIM_PURP_TYPE_CDE,
-    cd.engr_strg_nme      AS ENGR_STRG_NME,
-    cd.cmpl_state_type_desc AS CMPL_STATE_TYPE_DESC,
-    cd.cmpl_state_eftv_dttm AS CMPL_STATE_EFTV_DTTM,
-    wd.bore_start_dttm    AS SPUD_DATE,
-    cd.init_prod_dte      AS INIT_PROD_DTE,
-    cd.cmpl_fac_id        AS CMPL_FAC_ID,
-    cd.cmpl_dmn_key       AS CMPL_DMN_KEY
-FROM dwrptg.cmpl_dmn cd
-JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
-WHERE wd.bore_start_dttm >= :spud_date
-  AND cd.actv_indc = 'Y'
-ORDER BY wd.bore_start_dttm DESC, cd.cmpl_nme
-"""
-
-SQL_WELL_TESTS_LATEST = """
-WITH ranked_tests AS (
+WITH base AS (
     SELECT
-        cd.cmpl_nme          AS WELL_NME,
-        cd.well_api_nbr      AS WELL_API_NBR,
-        cd.opnl_fld          AS FLD_NME,
-        cd.engr_strg_nme     AS ENGR_STRG_NME,
-        f.prod_msmt_strt_dttm AS TEST_DATE,
-        f.bopd_qty           AS OIL_BOPD,
-        f.gros_wtr_prod_vol_qty AS WTR_BWPD,
-        ROUND(f.bopd_qty * NVL(f.prod_gas_oil_rat_qty, 0) / 1000, 2) AS GAS_MCFD,
-        f.prod_wtr_cut_pct   AS WC_PCT,
-        ROW_NUMBER() OVER (PARTITION BY cd.cmpl_fac_id
-                           ORDER BY f.prod_msmt_strt_dttm DESC) AS rn
+        cd.cmpl_nme, cd.well_api_nbr, cd.opnl_fld,
+        cd.prim_purp_type_cde, cd.prim_matl_desc, cd.engr_strg_nme,
+        cd.cmpl_state_type_desc, cd.cmpl_state_eftv_dttm,
+        wd.bore_start_dttm, cd.init_prod_dte, cd.init_inj_dte,
+        cd.cmpl_fac_id, cd.cmpl_dmn_key,
+        ROW_NUMBER() OVER (PARTITION BY cd.well_api_nbr
+                           ORDER BY cd.cmpl_fac_id DESC) AS rn
     FROM dwrptg.cmpl_dmn cd
     JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
-    JOIN dwrptg.cmpl_prod_tst_fact f ON cd.cmpl_fac_id = f.cmpl_fac_id
-    JOIN dwrptg.cmpl_prod_tst_dmn d ON d.cmpl_prod_tst_dmn_key = f.cmpl_prod_tst_dmn_key
+    WHERE wd.bore_start_dttm >= :spud_date
+      AND cd.actv_indc = 'Y'
+      AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
+)
+SELECT cmpl_nme           AS WELL_NME,
+       well_api_nbr       AS WELL_API_NBR,
+       opnl_fld           AS FLD_NME,
+       prim_purp_type_cde AS PRIM_PURP_TYPE_CDE,
+       prim_matl_desc     AS PRIM_MATL_DESC,
+       engr_strg_nme      AS ENGR_STRG_NME,
+       cmpl_state_type_desc AS CMPL_STATE_TYPE_DESC,
+       cmpl_state_eftv_dttm AS CMPL_STATE_EFTV_DTTM,
+       bore_start_dttm    AS SPUD_DATE,
+       init_prod_dte      AS INIT_PROD_DTE,
+       init_inj_dte       AS INIT_INJ_DTE,
+       cmpl_fac_id        AS CMPL_FAC_ID,
+       cmpl_dmn_key       AS CMPL_DMN_KEY
+FROM base WHERE rn = 1
+ORDER BY prim_purp_type_cde DESC, bore_start_dttm DESC
+"""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SQL — Tab 2: Well Tests (allocated only, after spud date)
+# ─────────────────────────────────────────────────────────────────────────────
+SQL_WELL_TESTS_LATEST = """
+WITH dedup AS (
+    SELECT cd.cmpl_nme, cd.well_api_nbr, cd.opnl_fld, cd.engr_strg_nme,
+           cd.cmpl_fac_id,
+           ROW_NUMBER() OVER (PARTITION BY cd.well_api_nbr
+                              ORDER BY cd.cmpl_fac_id DESC) AS drn
+    FROM dwrptg.cmpl_dmn cd
+    JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
     WHERE wd.bore_start_dttm >= :spud_date
       AND cd.actv_indc = 'Y'
       AND cd.prim_purp_type_cde = 'PROD'
-      AND d.use_for_aloc_indc = 'Y'
+      AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
+),
+ranked AS (
+    SELECT dd.cmpl_nme AS WELL_NME, dd.well_api_nbr AS WELL_API_NBR,
+           dd.opnl_fld AS FLD_NME, dd.engr_strg_nme AS ENGR_STRG_NME,
+           f.prod_msmt_strt_dttm AS TEST_DATE,
+           f.bopd_qty AS OIL_BOPD,
+           f.gros_wtr_prod_vol_qty AS WTR_BWPD,
+           ROUND(f.bopd_qty * NVL(f.prod_gas_oil_rat_qty,0)/1000, 2) AS GAS_MCFD,
+           f.prod_wtr_cut_pct AS WC_PCT,
+           ROW_NUMBER() OVER (PARTITION BY dd.cmpl_fac_id
+                              ORDER BY f.prod_msmt_strt_dttm DESC) AS rn
+    FROM dedup dd
+    JOIN dwrptg.cmpl_prod_tst_fact f ON dd.cmpl_fac_id = f.cmpl_fac_id
+    JOIN dwrptg.cmpl_prod_tst_dmn  d ON d.cmpl_prod_tst_dmn_key = f.cmpl_prod_tst_dmn_key
+    WHERE dd.drn = 1 AND d.use_for_aloc_indc = 'Y'
+      AND f.prod_msmt_strt_dttm >= :spud_date
 )
 SELECT WELL_NME, WELL_API_NBR, FLD_NME, ENGR_STRG_NME,
        TEST_DATE, OIL_BOPD, WTR_BWPD, GAS_MCFD, WC_PCT
-FROM ranked_tests
-WHERE rn = 1
+FROM ranked WHERE rn = 1
 ORDER BY OIL_BOPD DESC NULLS LAST
 """
 
 SQL_WELL_TESTS_PEAK = """
-WITH ranked_peak AS (
-    SELECT
-        cd.cmpl_nme          AS WELL_NME,
-        cd.well_api_nbr      AS WELL_API_NBR,
-        f.prod_msmt_strt_dttm AS PEAK_TEST_DATE,
-        f.bopd_qty           AS PEAK_OIL_BOPD,
-        ROW_NUMBER() OVER (PARTITION BY cd.cmpl_fac_id
-                           ORDER BY f.bopd_qty DESC NULLS LAST) AS rn
+WITH dedup AS (
+    SELECT cd.cmpl_nme, cd.well_api_nbr, cd.cmpl_fac_id,
+           ROW_NUMBER() OVER (PARTITION BY cd.well_api_nbr
+                              ORDER BY cd.cmpl_fac_id DESC) AS drn
     FROM dwrptg.cmpl_dmn cd
     JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
-    JOIN dwrptg.cmpl_prod_tst_fact f ON cd.cmpl_fac_id = f.cmpl_fac_id
-    JOIN dwrptg.cmpl_prod_tst_dmn d ON d.cmpl_prod_tst_dmn_key = f.cmpl_prod_tst_dmn_key
     WHERE wd.bore_start_dttm >= :spud_date
-      AND cd.actv_indc = 'Y'
-      AND cd.prim_purp_type_cde = 'PROD'
-      AND d.use_for_aloc_indc = 'Y'
-      AND f.bopd_qty > 0
+      AND cd.actv_indc = 'Y' AND cd.prim_purp_type_cde = 'PROD'
+      AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
+),
+ranked AS (
+    SELECT dd.cmpl_nme AS WELL_NME, dd.well_api_nbr AS WELL_API_NBR,
+           f.prod_msmt_strt_dttm AS PEAK_TEST_DATE,
+           f.bopd_qty AS PEAK_OIL_BOPD,
+           ROW_NUMBER() OVER (PARTITION BY dd.cmpl_fac_id
+                              ORDER BY f.bopd_qty DESC NULLS LAST) AS rn
+    FROM dedup dd
+    JOIN dwrptg.cmpl_prod_tst_fact f ON dd.cmpl_fac_id = f.cmpl_fac_id
+    JOIN dwrptg.cmpl_prod_tst_dmn  d ON d.cmpl_prod_tst_dmn_key = f.cmpl_prod_tst_dmn_key
+    WHERE dd.drn = 1 AND d.use_for_aloc_indc = 'Y'
+      AND f.prod_msmt_strt_dttm >= :spud_date AND f.bopd_qty > 0
 )
 SELECT WELL_NME, WELL_API_NBR, PEAK_TEST_DATE, PEAK_OIL_BOPD
-FROM ranked_peak
-WHERE rn = 1
+FROM ranked WHERE rn = 1
 ORDER BY PEAK_OIL_BOPD DESC NULLS LAST
 """
 
-SQL_MONTHLY_PROD_INJ = """
-SELECT
-    cd.cmpl_nme                           AS WELL_NME,
-    cd.prim_purp_type_cde                 AS PURP,
-    cmf.eftv_dttm                         AS MONTH,
-    ROUND(cmf.aloc_oil_prod_dly_rte_qty, 1)       AS OIL_BOPD,
-    ROUND(cmf.aloc_wtr_prod_dly_rte_qty, 1)       AS WTR_BWPD,
-    ROUND(cmf.aloc_gas_prod_dly_rte_qty, 1)       AS GAS_MCFD,
-    ROUND(cmf.aloc_wtr_inj_dly_rte_qty, 1)        AS WTR_INJ_BWIPD,
-    ROUND(cmf.aloc_stm_inj_dly_rte_qty, 1)        AS STM_INJ_BSPD
-FROM dwrptg.cmpl_dmn cd
-JOIN dwrptg.cmpl_mnly_fact cmf ON cd.cmpl_dmn_key = cmf.cmpl_dmn_key
-WHERE cd.cmpl_nme IN ({placeholders})
-  AND cd.actv_indc = 'Y'
-ORDER BY cd.cmpl_nme, cmf.eftv_dttm
+# ─────────────────────────────────────────────────────────────────────────────
+# SQL — Tab 3: producers with >=1 allocated test after spud date
+# ─────────────────────────────────────────────────────────────────────────────
+SQL_PRODUCERS_WITH_TESTS = """
+WITH dedup AS (
+    SELECT cd.cmpl_nme, cd.well_api_nbr, cd.opnl_fld,
+           cd.prim_purp_type_cde, cd.prim_matl_desc, cd.cmpl_fac_id,
+           ROW_NUMBER() OVER (PARTITION BY cd.well_api_nbr
+                              ORDER BY cd.cmpl_fac_id DESC) AS drn
+    FROM dwrptg.cmpl_dmn cd
+    JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
+    WHERE wd.bore_start_dttm >= :spud_date
+      AND cd.actv_indc = 'Y' AND cd.prim_purp_type_cde = 'PROD'
+      AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
+)
+SELECT DISTINCT dd.cmpl_nme, dd.opnl_fld, dd.prim_purp_type_cde,
+       dd.prim_matl_desc, dd.cmpl_fac_id
+FROM dedup dd
+JOIN dwrptg.cmpl_prod_tst_fact f ON dd.cmpl_fac_id = f.cmpl_fac_id
+JOIN dwrptg.cmpl_prod_tst_dmn  d ON d.cmpl_prod_tst_dmn_key = f.cmpl_prod_tst_dmn_key
+WHERE dd.drn = 1 AND d.use_for_aloc_indc = 'Y'
+  AND f.prod_msmt_strt_dttm >= :spud_date
+ORDER BY dd.opnl_fld, dd.cmpl_nme
+"""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SQL — Tab 3: injectors with >=1 daily record after spud date
+# ─────────────────────────────────────────────────────────────────────────────
+SQL_INJECTORS_WITH_DATA = """
+WITH dedup AS (
+    SELECT cd.cmpl_nme, cd.well_api_nbr, cd.opnl_fld,
+           cd.prim_purp_type_cde, cd.prim_matl_desc, cd.cmpl_fac_id,
+           ROW_NUMBER() OVER (PARTITION BY cd.well_api_nbr
+                              ORDER BY cd.cmpl_fac_id DESC) AS drn
+    FROM dwrptg.cmpl_dmn cd
+    JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
+    WHERE wd.bore_start_dttm >= :spud_date
+      AND cd.actv_indc = 'Y' AND cd.prim_purp_type_cde = 'INJ'
+      AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
+)
+SELECT DISTINCT dd.cmpl_nme, dd.opnl_fld, dd.prim_purp_type_cde,
+       dd.prim_matl_desc, dd.cmpl_fac_id
+FROM dedup dd
+JOIN dwrptg.cmpl_dly_fact cdf ON dd.cmpl_fac_id = cdf.cmpl_fac_id
+WHERE dd.drn = 1 AND cdf.eftv_dttm >= :spud_date
+  AND (NVL(cdf.aloc_stm_inj_vol_qty,0) > 0 OR NVL(cdf.aloc_wtr_inj_vol_qty,0) > 0)
+  AND ROWNUM <= 1000
+ORDER BY dd.opnl_fld, dd.cmpl_nme
+"""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SQL — Tab 3 chart data
+# ─────────────────────────────────────────────────────────────────────────────
+SQL_PROD_WELL_TESTS = """
+SELECT f.prod_msmt_strt_dttm AS TEST_DATE,
+       f.bopd_qty            AS OIL_BOPD,
+       f.gros_wtr_prod_vol_qty AS WTR_BWPD,
+       ROUND(f.bopd_qty * NVL(f.prod_gas_oil_rat_qty,0)/1000, 2) AS GAS_MCFD
+FROM dwrptg.cmpl_prod_tst_fact f
+JOIN dwrptg.cmpl_prod_tst_dmn  d ON d.cmpl_prod_tst_dmn_key = f.cmpl_prod_tst_dmn_key
+WHERE f.cmpl_fac_id = :cmpl_fac_id
+  AND d.use_for_aloc_indc = 'Y'
+  AND f.prod_msmt_strt_dttm >= :spud_date
+ORDER BY f.prod_msmt_strt_dttm
+"""
+
+SQL_INJ_DAILY = """
+SELECT cdf.eftv_dttm                       AS INJ_DATE,
+       ROUND(cdf.aloc_stm_inj_vol_qty, 1)  AS STEAM_BBL,
+       ROUND(cdf.aloc_wtr_inj_vol_qty, 1)  AS WATER_BBL
+FROM dwrptg.cmpl_dly_fact cdf
+WHERE cdf.cmpl_fac_id = :cmpl_fac_id
+  AND cdf.eftv_dttm >= :start_date
+ORDER BY cdf.eftv_dttm
 """
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Database helpers
+# DB helpers
 # ─────────────────────────────────────────────────────────────────────────────
 def get_connection():
-    """Create and return an Oracle connection."""
     try:
         oracledb.init_oracle_client()
     except Exception:
-        pass  # Already initialized or thin mode
-    conn = oracledb.connect(user=DB_USERNAME, password=DB_PASSWORD, dsn=TNS_ALIAS)
-    return conn
-
+        pass
+    return oracledb.connect(user=DB_USERNAME, password=DB_PASSWORD, dsn=TNS_ALIAS)
 
 def run_query(sql, params=None):
-    """Execute SQL, return (columns, rows)."""
     conn = get_connection()
     cur = conn.cursor()
-    if params:
-        cur.execute(sql, params)
-    else:
-        cur.execute(sql)
+    cur.execute(sql, params or {})
     cols = [d[0] for d in cur.description]
     rows = cur.fetchall()
-    cur.close()
-    conn.close()
+    cur.close(); conn.close()
     return cols, rows
 
-
 def fmt(val):
-    """Format a cell value for display."""
-    if val is None:
-        return ""
-    if isinstance(val, datetime):
-        return val.strftime("%Y-%m-%d")
+    if val is None: return ""
+    if isinstance(val, datetime): return val.strftime("%Y-%m-%d")
     if isinstance(val, float):
-        return f"{val:,.1f}"
+        return f"{int(val):,}" if val == int(val) else f"{val:,.1f}"
     return str(val)
 
 
@@ -189,501 +246,479 @@ def fmt(val):
 # Treeview helpers
 # ─────────────────────────────────────────────────────────────────────────────
 def populate_tree(tree, columns, rows, col_widths=None):
-    """Clear and populate a Treeview."""
     tree.delete(*tree.get_children())
-    tree["columns"] = columns
-    tree["show"] = "headings"
-    for col in columns:
-        tree.heading(col, text=col, anchor="w",
-                     command=lambda c=col: _sort_tree(tree, c, False))
-        w = (col_widths or {}).get(col, max(80, len(col) * 9))
-        tree.column(col, width=w, anchor="w")
+    dcols = ["#"] + list(columns)
+    tree["columns"] = dcols; tree["show"] = "headings"
+    tree.heading("#", text="#", anchor="center")
+    tree.column("#", width=45, anchor="center", stretch=False)
+    for c in columns:
+        tree.heading(c, text=c, anchor="w",
+                     command=lambda col=c: _sort_tree(tree, col, False))
+        tree.column(c, width=(col_widths or {}).get(c, max(80, len(c)*9)), anchor="w")
     for i, row in enumerate(rows):
-        tag = "even" if i % 2 == 0 else "odd"
-        tree.insert("", "end", values=[fmt(v) for v in row], tags=(tag,))
+        tree.insert("", "end", values=[i+1]+[fmt(v) for v in row],
+                    tags=("even" if i%2==0 else "odd",))
 
-
-def _sort_tree(tree, col, reverse):
-    """Sort treeview by column when header is clicked."""
+def _sort_tree(tree, col, rev):
     data = [(tree.set(k, col), k) for k in tree.get_children("")]
-    try:
-        data.sort(key=lambda t: float(t[0].replace(",", "")), reverse=reverse)
-    except ValueError:
-        data.sort(key=lambda t: t[0], reverse=reverse)
-    for idx, (_, k) in enumerate(data):
-        tree.move(k, "", idx)
-        tree.item(k, tags=("even" if idx % 2 == 0 else "odd",))
-    tree.heading(col, command=lambda: _sort_tree(tree, col, not reverse))
-
+    try:    data.sort(key=lambda t: float(t[0].replace(",","")), reverse=rev)
+    except: data.sort(key=lambda t: t[0], reverse=rev)
+    for i,(_, k) in enumerate(data):
+        tree.move(k,"",i); tree.item(k, tags=("even" if i%2==0 else "odd",))
+        tree.set(k,"#",i+1)
+    tree.heading(col, command=lambda: _sort_tree(tree, col, not rev))
 
 def export_tree(tree, title="export"):
-    """Export Treeview contents to CSV."""
-    children = tree.get_children()
-    if not children:
-        messagebox.showinfo("No Data", "No data to export.")
-        return
+    ch = tree.get_children()
+    if not ch: messagebox.showinfo("No Data","Nothing to export."); return
     path = filedialog.asksaveasfilename(
-        defaultextension=".csv",
-        filetypes=[("CSV", "*.csv")],
+        defaultextension=".csv", filetypes=[("CSV","*.csv")],
         initialfile=f"{title}_{datetime.now():%Y%m%d_%H%M%S}.csv")
-    if not path:
-        return
-    cols = tree["columns"]
-    with open(path, "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(cols)
-        for ch in children:
-            w.writerow(tree.item(ch, "values"))
-    messagebox.showinfo("Saved", f"{len(children)} rows → {path}")
+    if not path: return
+    cols = [c for c in tree["columns"] if c!="#"]
+    with open(path,"w",newline="",encoding="utf-8") as f:
+        w = csv.writer(f); w.writerow(cols)
+        for c in ch: w.writerow(tree.item(c,"values")[1:])
+    messagebox.showinfo("Saved",f"{len(ch)} rows -> {path}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Main Application
+# Application
 # ─────────────────────────────────────────────────────────────────────────────
-class RecentWellsApp:
+class App:
+    BG      = "#f4f6f8"
+    ACCENT  = "#1a5276"
+    PANEL   = "#ffffff"
+    BORDER  = "#d5dde5"
+
     def __init__(self, root):
         self.root = root
         self.root.title("Recent Drilled Wells — Performance Viewer")
-        self.root.geometry("1300x800")
-        self.root.minsize(1000, 600)
+        self.root.geometry("1400x850")
+        self.root.minsize(1100, 650)
 
-        # Data caches
-        self.inventory_rows = []
-        self.inventory_cols = []
-        self.well_names = []         # for chart selection
+        self.inv_data = []
+        self.chart_wells = []
         self.spud_date_val = None
 
         self._style()
-        self._build_topbar()
-        self._build_notebook()
-        self._build_tab_inventory()
-        self._build_tab_welltests()
-        self._build_tab_prodchart()
-        self._build_statusbar()
-
+        self._topbar()
+        self._notebook()
+        self._tab1_inventory()
+        self._tab2_welltests()
+        self._tab3_chart()
+        self._statusbar()
         self._set_status("Ready — select a spud date and click Pull Data.")
 
     # ── Style ────────────────────────────────────────────────────────────────
     def _style(self):
-        s = ttk.Style()
-        s.theme_use("clam")
-        BG = "#f4f6f8"
-        ACCENT = "#1a5276"
-        self.root.configure(bg=BG)
+        s = ttk.Style(); s.theme_use("clam")
+        self.root.configure(bg=self.BG)
+        cfg = {
+            "TFrame":        dict(background=self.BG),
+            "TLabel":        dict(background=self.BG, font=("Segoe UI",10)),
+            "TButton":       dict(font=("Segoe UI",10)),
+            "TNotebook":     dict(background=self.BG),
+            "TNotebook.Tab": dict(padding=[14,6], font=("Segoe UI",10)),
+            "Header.TLabel": dict(font=("Segoe UI",13,"bold"), foreground=self.ACCENT, background=self.BG),
+            "Sub.TLabel":    dict(font=("Segoe UI",9), foreground="#666", background=self.BG),
+            "Status.TLabel": dict(font=("Segoe UI",9), background="#dde4ea", padding=(8,4)),
+            "Accent.TButton":dict(font=("Segoe UI",11,"bold"), padding=[18,6]),
+            "Treeview":      dict(font=("Consolas",9), rowheight=24),
+            "Treeview.Heading": dict(font=("Segoe UI",9,"bold"), foreground="white", background=self.ACCENT),
+        }
+        for name, kw in cfg.items(): s.configure(name, **kw)
+        s.map("Treeview.Heading", background=[("active","#1a6b9c")])
+        s.map("Treeview", background=[("selected","#d4e6f1")])
 
-        s.configure("TFrame", background=BG)
-        s.configure("TLabel", background=BG, font=("Segoe UI", 10))
-        s.configure("TButton", font=("Segoe UI", 10))
-        s.configure("TNotebook", background=BG)
-        s.configure("TNotebook.Tab", padding=[14, 6], font=("Segoe UI", 10))
-        s.configure("Header.TLabel", font=("Segoe UI", 13, "bold"),
-                     foreground=ACCENT, background=BG)
-        s.configure("Sub.TLabel", font=("Segoe UI", 9), foreground="#666",
-                     background=BG)
-        s.configure("Status.TLabel", font=("Segoe UI", 9), background="#dde4ea",
-                     padding=(8, 4))
-        s.configure("Accent.TButton", font=("Segoe UI", 11, "bold"),
-                     padding=[18, 6])
-        s.configure("Treeview", font=("Consolas", 9), rowheight=24)
-        s.configure("Treeview.Heading", font=("Segoe UI", 9, "bold"),
-                     foreground="white", background=ACCENT)
-        s.map("Treeview.Heading", background=[("active", "#1a6b9c")])
-        s.map("Treeview", background=[("selected", "#d4e6f1")])
+    # ── Top bar ──────────────────────────────────────────────────────────────
+    def _topbar(self):
+        bar = ttk.Frame(self.root, padding=(12,10)); bar.pack(fill="x")
+        ttk.Label(bar, text="Recent Drilled Wells Performance", style="Header.TLabel").pack(side="left")
+        r = ttk.Frame(bar); r.pack(side="right")
+        ttk.Label(r, text="Spud Date >= ").pack(side="left")
+        self.yr = tk.StringVar(value="2024")
+        ttk.Combobox(r, textvariable=self.yr, width=6,
+                     values=[str(y) for y in range(2015,2028)], state="readonly").pack(side="left",padx=2)
+        ttk.Label(r,text="-").pack(side="left")
+        self.mo = tk.StringVar(value="01")
+        ttk.Combobox(r, textvariable=self.mo, width=4,
+                     values=[f"{m:02d}" for m in range(1,13)], state="readonly").pack(side="left",padx=2)
+        ttk.Label(r,text="-").pack(side="left")
+        self.dy = tk.StringVar(value="01")
+        ttk.Combobox(r, textvariable=self.dy, width=4,
+                     values=[f"{d:02d}" for d in range(1,32)], state="readonly").pack(side="left",padx=2)
+        self.pull_btn = ttk.Button(r, text="  Pull Data  ", style="Accent.TButton", command=self._on_pull)
+        self.pull_btn.pack(side="left", padx=(15,0))
 
-    # ── Top bar (date picker + pull button) ──────────────────────────────────
-    def _build_topbar(self):
-        bar = ttk.Frame(self.root, padding=(12, 10))
-        bar.pack(fill="x")
-
-        ttk.Label(bar, text="Recent Drilled Wells Performance",
-                  style="Header.TLabel").pack(side="left")
-
-        # Right side controls
-        right = ttk.Frame(bar)
-        right.pack(side="right")
-
-        ttk.Label(right, text="Spud Date ≥ ").pack(side="left")
-
-        # Year
-        self.year_var = tk.StringVar(value="2024")
-        year_cb = ttk.Combobox(right, textvariable=self.year_var, width=6,
-                               values=[str(y) for y in range(2015, 2027)],
-                               state="readonly")
-        year_cb.pack(side="left", padx=2)
-
-        ttk.Label(right, text="-").pack(side="left")
-
-        # Month
-        self.month_var = tk.StringVar(value="01")
-        month_cb = ttk.Combobox(right, textvariable=self.month_var, width=4,
-                                values=[f"{m:02d}" for m in range(1, 13)],
-                                state="readonly")
-        month_cb.pack(side="left", padx=2)
-
-        ttk.Label(right, text="-").pack(side="left")
-
-        # Day
-        self.day_var = tk.StringVar(value="01")
-        day_cb = ttk.Combobox(right, textvariable=self.day_var, width=4,
-                              values=[f"{d:02d}" for d in range(1, 32)],
-                              state="readonly")
-        day_cb.pack(side="left", padx=2)
-
-        self.pull_btn = ttk.Button(right, text="  Pull Data  ",
-                                   style="Accent.TButton",
-                                   command=self._on_pull)
-        self.pull_btn.pack(side="left", padx=(15, 0))
-
-    # ── Notebook ─────────────────────────────────────────────────────────────
-    def _build_notebook(self):
+    def _notebook(self):
         self.nb = ttk.Notebook(self.root)
-        self.nb.pack(fill="both", expand=True, padx=10, pady=(4, 0))
-        self.tab_inv = ttk.Frame(self.nb)
-        self.tab_wt = ttk.Frame(self.nb)
-        self.tab_chart = ttk.Frame(self.nb)
-        self.nb.add(self.tab_inv, text="  Well Inventory  ")
-        self.nb.add(self.tab_wt, text="  Well Tests  ")
-        self.nb.add(self.tab_chart, text="  Prod & Inj  ")
+        self.nb.pack(fill="both", expand=True, padx=10, pady=(4,0))
+        self.f1 = ttk.Frame(self.nb)
+        self.f2 = ttk.Frame(self.nb)
+        self.f3 = ttk.Frame(self.nb)
+        self.nb.add(self.f1, text="  Well Inventory  ")
+        self.nb.add(self.f2, text="  Well Tests  ")
+        self.nb.add(self.f3, text="  Well Test Chart  ")
 
-    # ── Tab 1: Inventory ─────────────────────────────────────────────────────
-    def _build_tab_inventory(self):
-        top = ttk.Frame(self.tab_inv, padding=(8, 6))
-        top.pack(fill="x")
-        self.inv_label = ttk.Label(top, text="No data loaded.", style="Sub.TLabel")
-        self.inv_label.pack(side="left")
+    # ── Tab 1 ────────────────────────────────────────────────────────────────
+    def _tab1_inventory(self):
+        top = ttk.Frame(self.f1, padding=(8,6)); top.pack(fill="x")
+        self.inv_lbl = ttk.Label(top, text="No data.", style="Sub.TLabel")
+        self.inv_lbl.pack(side="left")
         ttk.Button(top, text="Export CSV",
-                   command=lambda: export_tree(self.inv_tree, "well_inventory")
-                   ).pack(side="right")
+                   command=lambda: export_tree(self.t1,"inventory")).pack(side="right")
+        frm = ttk.Frame(self.f1)
+        frm.pack(fill="both", expand=True, padx=8, pady=(0,8))
+        self.t1 = self._make_tree(frm)
 
-        frm = ttk.Frame(self.tab_inv)
-        frm.pack(fill="both", expand=True, padx=8, pady=(0, 8))
-        self.inv_tree = ttk.Treeview(frm, selectmode="extended")
-        vsb = ttk.Scrollbar(frm, orient="vertical", command=self.inv_tree.yview)
-        hsb = ttk.Scrollbar(frm, orient="horizontal", command=self.inv_tree.xview)
-        self.inv_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
-        self.inv_tree.grid(row=0, column=0, sticky="nsew")
-        vsb.grid(row=0, column=1, sticky="ns")
-        hsb.grid(row=1, column=0, sticky="ew")
-        frm.columnconfigure(0, weight=1)
-        frm.rowconfigure(0, weight=1)
-        self.inv_tree.tag_configure("even", background="#f0f4f8")
-        self.inv_tree.tag_configure("odd", background="white")
-
-    # ── Tab 2: Well Tests ────────────────────────────────────────────────────
-    def _build_tab_welltests(self):
-        top = ttk.Frame(self.tab_wt, padding=(8, 6))
-        top.pack(fill="x")
-        self.wt_label = ttk.Label(top, text="No data loaded.", style="Sub.TLabel")
-        self.wt_label.pack(side="left")
+    # ── Tab 2 ────────────────────────────────────────────────────────────────
+    def _tab2_welltests(self):
+        top = ttk.Frame(self.f2, padding=(8,6)); top.pack(fill="x")
+        self.wt_lbl = ttk.Label(top, text="No data.", style="Sub.TLabel")
+        self.wt_lbl.pack(side="left")
         ttk.Button(top, text="Export CSV",
-                   command=lambda: export_tree(self.wt_tree, "well_tests")
-                   ).pack(side="right")
+                   command=lambda: export_tree(self.t2,"well_tests")).pack(side="right")
+        frm = ttk.Frame(self.f2)
+        frm.pack(fill="both", expand=True, padx=8, pady=(0,8))
+        self.t2 = self._make_tree(frm)
 
-        frm = ttk.Frame(self.tab_wt)
-        frm.pack(fill="both", expand=True, padx=8, pady=(0, 8))
-        self.wt_tree = ttk.Treeview(frm, selectmode="extended")
-        vsb = ttk.Scrollbar(frm, orient="vertical", command=self.wt_tree.yview)
-        hsb = ttk.Scrollbar(frm, orient="horizontal", command=self.wt_tree.xview)
-        self.wt_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
-        self.wt_tree.grid(row=0, column=0, sticky="nsew")
-        vsb.grid(row=0, column=1, sticky="ns")
-        hsb.grid(row=1, column=0, sticky="ew")
-        frm.columnconfigure(0, weight=1)
-        frm.rowconfigure(0, weight=1)
-        self.wt_tree.tag_configure("even", background="#f0f4f8")
-        self.wt_tree.tag_configure("odd", background="white")
+    # ── Tab 3 — Well Test Chart ──────────────────────────────────────────────
+    def _tab3_chart(self):
+        outer = ttk.Frame(self.f3)
+        outer.pack(fill="both", expand=True, padx=8, pady=8)
+        outer.columnconfigure(1, weight=1)
+        outer.rowconfigure(0, weight=1)
 
-    # ── Tab 3: Prod & Inj Chart ─────────────────────────────────────────────
-    def _build_tab_prodchart(self):
-        # Top control bar
-        ctrl = ttk.Frame(self.tab_chart, padding=(8, 6))
-        ctrl.pack(fill="x")
+        # ── LEFT PANEL ───────────────────────────────────────────────────────
+        left = tk.Frame(outer, bg=self.PANEL, bd=0,
+                        highlightbackground=self.BORDER, highlightthickness=1)
+        left.grid(row=0, column=0, sticky="ns", padx=(0,8))
 
-        ttk.Label(ctrl, text="Select well(s):").pack(side="left")
+        # -- Field filter section --
+        fld_section = tk.Frame(left, bg=self.PANEL)
+        fld_section.pack(fill="x", padx=12, pady=(10,0))
+        tk.Label(fld_section, text="FIELD", font=("Segoe UI",9,"bold"),
+                 fg=self.ACCENT, bg=self.PANEL).pack(anchor="w")
+        self.fld_var = tk.StringVar(value="All")
+        self.fld_cb = ttk.Combobox(fld_section, textvariable=self.fld_var,
+                                    width=28, state="readonly")
+        self.fld_cb.pack(fill="x", pady=(4,0))
+        self.fld_cb.bind("<<ComboboxSelected>>", self._on_field_filter)
 
-        # Listbox for well selection (multi-select)
-        lb_frame = ttk.Frame(ctrl)
-        lb_frame.pack(side="left", padx=(6, 0))
-        self.well_listbox = tk.Listbox(lb_frame, selectmode="extended",
-                                       width=35, height=5, exportselection=False,
-                                       font=("Consolas", 9))
-        lb_sb = ttk.Scrollbar(lb_frame, orient="vertical",
-                              command=self.well_listbox.yview)
-        self.well_listbox.configure(yscrollcommand=lb_sb.set)
-        self.well_listbox.pack(side="left", fill="y")
-        lb_sb.pack(side="left", fill="y")
+        # -- Separator --
+        tk.Frame(left, bg=self.BORDER, height=1).pack(fill="x", padx=12, pady=8)
 
-        btn_frame = ttk.Frame(ctrl)
-        btn_frame.pack(side="left", padx=(10, 0))
-        self.chart_btn = ttk.Button(btn_frame, text="Plot Chart",
-                                    command=self._on_plot_chart)
-        self.chart_btn.pack(anchor="nw")
-        ttk.Button(btn_frame, text="Select All",
-                   command=self._select_all_wells).pack(anchor="nw", pady=(4, 0))
-        ttk.Button(btn_frame, text="Clear Selection",
-                   command=lambda: self.well_listbox.selection_clear(0, "end")
-                   ).pack(anchor="nw", pady=(4, 0))
+        # -- Well list header --
+        well_hdr = tk.Frame(left, bg=self.PANEL)
+        well_hdr.pack(fill="x", padx=12)
+        tk.Label(well_hdr, text="SELECT WELL", font=("Segoe UI",9,"bold"),
+                 fg=self.ACCENT, bg=self.PANEL).pack(side="left")
+        self.well_count_lbl = tk.Label(well_hdr, text="", font=("Segoe UI",8),
+                                       fg="#888", bg=self.PANEL)
+        self.well_count_lbl.pack(side="right")
 
-        self.chart_status = ttk.Label(ctrl, text="", style="Sub.TLabel")
-        self.chart_status.pack(side="right")
+        # -- Well listbox (fills remaining height) --
+        lb_frame = tk.Frame(left, bg=self.PANEL)
+        lb_frame.pack(fill="both", expand=True, padx=12, pady=(4,10))
 
-        # Chart area
-        self.chart_frame = ttk.Frame(self.tab_chart)
-        self.chart_frame.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+        self.well_lb = tk.Listbox(
+            lb_frame, selectmode="browse", width=30,
+            exportselection=False, font=("Consolas",9),
+            bg="white", fg="#333", selectbackground="#d4e6f1",
+            selectforeground="#1a5276", bd=1, relief="solid",
+            highlightthickness=0, activestyle="none")
+        lb_sb = ttk.Scrollbar(lb_frame, orient="vertical", command=self.well_lb.yview)
+        self.well_lb.configure(yscrollcommand=lb_sb.set)
+        self.well_lb.pack(side="left", fill="both", expand=True)
+        lb_sb.pack(side="right", fill="y")
+        self.well_lb.bind("<<ListboxSelect>>", self._on_well_select)
+
+        # ── RIGHT PANEL ──────────────────────────────────────────────────────
+        right = tk.Frame(outer, bg=self.PANEL, bd=0,
+                         highlightbackground=self.BORDER, highlightthickness=1)
+        right.grid(row=0, column=1, sticky="nsew")
+
+        # Chart status
+        chart_top = tk.Frame(right, bg=self.PANEL)
+        chart_top.pack(fill="x", padx=10, pady=(8,0))
+        self.chart_lbl = tk.Label(chart_top, text="Select a well to view chart",
+                                  font=("Segoe UI",9), fg="#888", bg=self.PANEL)
+        self.chart_lbl.pack(side="left")
+
+        # Chart canvas
+        chart_area = tk.Frame(right, bg=self.PANEL)
+        chart_area.pack(fill="both", expand=True, padx=6, pady=(4,6))
 
         if HAS_MPL:
-            self.fig = Figure(figsize=(12, 7), dpi=100, facecolor="#f4f6f8")
-            self.canvas = FigureCanvasTkAgg(self.fig, master=self.chart_frame)
+            self.fig = Figure(figsize=(10,5), dpi=100, facecolor=self.PANEL)
+            self.canvas = FigureCanvasTkAgg(self.fig, master=chart_area)
             self.canvas.get_tk_widget().pack(fill="both", expand=True)
-            toolbar = NavigationToolbar2Tk(self.canvas, self.chart_frame)
-            toolbar.update()
-        else:
-            ttk.Label(self.chart_frame,
-                      text="matplotlib not installed — charting disabled.",
-                      font=("Segoe UI", 12)).pack(expand=True)
+            tb_frame = tk.Frame(chart_area, bg=self.PANEL)
+            tb_frame.pack(fill="x")
+            NavigationToolbar2Tk(self.canvas, tb_frame).update()
 
-    # ── Status bar ───────────────────────────────────────────────────────────
-    def _build_statusbar(self):
-        self.statusbar = ttk.Label(self.root, text="", style="Status.TLabel",
-                                   anchor="w")
-        self.statusbar.pack(fill="x", side="bottom")
+    # ── shared helpers ───────────────────────────────────────────────────────
+    def _make_tree(self, parent):
+        tree = ttk.Treeview(parent, selectmode="extended")
+        vsb = ttk.Scrollbar(parent, orient="vertical",  command=tree.yview)
+        hsb = ttk.Scrollbar(parent, orient="horizontal", command=tree.xview)
+        tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+        tree.grid(row=0,column=0,sticky="nsew")
+        vsb.grid(row=0,column=1,sticky="ns")
+        hsb.grid(row=1,column=0,sticky="ew")
+        parent.columnconfigure(0,weight=1); parent.rowconfigure(0,weight=1)
+        tree.tag_configure("even", background="#f0f4f8")
+        tree.tag_configure("odd",  background="white")
+        return tree
+
+    def _statusbar(self):
+        self.sb = ttk.Label(self.root, text="", style="Status.TLabel", anchor="w")
+        self.sb.pack(fill="x", side="bottom")
 
     def _set_status(self, msg):
-        self.statusbar.config(text=msg)
-        self.root.update_idletasks()
+        self.sb.config(text=msg); self.root.update_idletasks()
 
-    # ── Pull Data (all tabs at once) ─────────────────────────────────────────
+    def _err(self, msg):
+        self._set_status("Query failed.")
+        messagebox.showerror("Error", msg)
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # Pull Data
+    # ═════════════════════════════════════════════════════════════════════════
     def _on_pull(self):
         try:
-            y = int(self.year_var.get())
-            m = int(self.month_var.get())
-            d = int(self.day_var.get())
-            self.spud_date_val = datetime(y, m, d)
+            self.spud_date_val = datetime(
+                int(self.yr.get()), int(self.mo.get()), int(self.dy.get()))
         except ValueError:
-            messagebox.showerror("Invalid Date", "Please select a valid date.")
-            return
-
+            messagebox.showerror("Bad Date","Invalid date."); return
         self.pull_btn.config(state="disabled")
-        self._set_status(f"Querying wells drilled since {self.spud_date_val:%Y-%m-%d} ...")
-        threading.Thread(target=self._pull_thread, daemon=True).start()
+        self._set_status(f"Querying wells spudded since {self.spud_date_val:%Y-%m-%d} ...")
+        threading.Thread(target=self._pull_bg, daemon=True).start()
 
-    def _pull_thread(self):
+    def _pull_bg(self):
         try:
-            # ── Query 1: Well Inventory ──────────────────────────────────────
-            inv_cols, inv_rows = run_query(
-                SQL_WELL_INVENTORY, {"spud_date": self.spud_date_val})
-            self.inventory_cols = inv_cols
-            self.inventory_rows = inv_rows
+            p = {"spud_date": self.spud_date_val}
 
-            # Build well name list (unique, producers + injectors)
-            self.well_names = sorted(set(r[0] for r in inv_rows if r[0]))
+            # Inventory
+            ic, ir = run_query(SQL_WELL_INVENTORY, p)
+            self.inv_data = ir
+            disp_cols = ic[:11]; disp_rows = [r[:11] for r in ir]
+            self.root.after(0, self._show_inv, disp_cols, disp_rows)
 
-            # Display columns (hide internal IDs)
-            display_cols = inv_cols[:9]  # exclude CMPL_FAC_ID, CMPL_DMN_KEY
-            display_rows = [r[:9] for r in inv_rows]
+            # Well Tests
+            self.root.after(0, self._set_status, "Querying latest well tests ...")
+            lc, lr = run_query(SQL_WELL_TESTS_LATEST, p)
+            self.root.after(0, self._set_status, "Querying peak oil tests ...")
+            pc, pr = run_query(SQL_WELL_TESTS_PEAK, p)
+            mc, mr = self._merge_tests(lc, lr, pc, pr)
+            self.root.after(0, self._show_wt, mc, mr)
 
-            self.root.after(0, self._show_inventory, display_cols, display_rows)
-
-            # ── Query 2: Latest Well Tests ───────────────────────────────────
-            self.root.after(0, self._set_status, "Querying latest well tests...")
-            latest_cols, latest_rows = run_query(
-                SQL_WELL_TESTS_LATEST, {"spud_date": self.spud_date_val})
-
-            # ── Query 3: Peak Oil Tests ──────────────────────────────────────
-            self.root.after(0, self._set_status, "Querying peak oil tests...")
-            peak_cols, peak_rows = run_query(
-                SQL_WELL_TESTS_PEAK, {"spud_date": self.spud_date_val})
-
-            # Merge latest + peak into one table
-            merged_cols, merged_rows = self._merge_tests(latest_cols, latest_rows,
-                                                          peak_cols, peak_rows)
-            self.root.after(0, self._show_welltests, merged_cols, merged_rows)
-
-            # Done
-            n = len(inv_rows)
+            # Chart wells — only those WITH data
             self.root.after(0, self._set_status,
-                            f"Loaded {n} completion(s) drilled since "
-                            f"{self.spud_date_val:%Y-%m-%d}.")
-            self.root.after(0, self._populate_well_listbox)
+                            "Finding producers with allocated tests ...")
+            _, prod_rows = run_query(SQL_PRODUCERS_WITH_TESTS, p)
+            self.root.after(0, self._set_status,
+                            "Finding injectors with injection data ...")
+            _, inj_rows = run_query(SQL_INJECTORS_WITH_DATA, p)
+
+            cw = []
+            for r in prod_rows:
+                cw.append((r[0], r[1] or "", r[2] or "", r[3] or "", r[4]))
+            for r in inj_rows:
+                cw.append((r[0], r[1] or "", r[2] or "", r[3] or "", r[4]))
+            cw.sort(key=lambda t: (t[1], t[0]))
+            self.chart_wells = cw
+
+            n = len(ir)
+            self.root.after(0, self._set_status,
+                            f"Loaded {n} well(s).  Chart: "
+                            f"{len(prod_rows)} producers + {len(inj_rows)} injectors with data.")
+            self.root.after(0, self._populate_chart_controls)
 
         except Exception as e:
-            self.root.after(0, self._query_error, str(e))
+            self.root.after(0, self._err, str(e))
         finally:
             self.root.after(0, lambda: self.pull_btn.config(state="normal"))
 
-    def _merge_tests(self, lat_cols, lat_rows, peak_cols, peak_rows):
-        """Merge latest-test and peak-test data by WELL_NME."""
-        # Build dict of peak data keyed by WELL_NME
-        peak_idx_name = peak_cols.index("WELL_NME")
-        peak_idx_date = peak_cols.index("PEAK_TEST_DATE")
-        peak_idx_oil = peak_cols.index("PEAK_OIL_BOPD")
-        peak_map = {}
-        for r in peak_rows:
-            peak_map[r[peak_idx_name]] = (r[peak_idx_date], r[peak_idx_oil])
+    def _merge_tests(self, lc, lr, pc, pr):
+        pm = {}
+        ni = pc.index("WELL_NME"); ndi = pc.index("PEAK_TEST_DATE")
+        noi = pc.index("PEAK_OIL_BOPD")
+        for r in pr: pm[r[ni]] = (r[ndi], r[noi])
+        mc = list(lc) + ["PEAK_TEST_DATE","PEAK_OIL_BOPD"]
+        mr = [list(r) + list(pm.get(r[0],(None,None))) for r in lr]
+        mr.sort(key=lambda x: x[-1] if x[-1] is not None else -1, reverse=True)
+        return mc, mr
 
-        merged_cols = list(lat_cols) + ["PEAK_TEST_DATE", "PEAK_OIL_BOPD"]
-        merged_rows = []
-        for r in lat_rows:
-            name = r[0]
-            peak = peak_map.get(name, (None, None))
-            merged_rows.append(list(r) + list(peak))
-        return merged_cols, merged_rows
+    # ── display ──────────────────────────────────────────────────────────────
+    def _show_inv(self, cols, rows):
+        w = {"WELL_NME":170,"WELL_API_NBR":110,"FLD_NME":100,
+             "PRIM_PURP_TYPE_CDE":70,"PRIM_MATL_DESC":80,"ENGR_STRG_NME":170,
+             "CMPL_STATE_TYPE_DESC":120,"CMPL_STATE_EFTV_DTTM":110,
+             "SPUD_DATE":100,"INIT_PROD_DTE":100,"INIT_INJ_DTE":100}
+        populate_tree(self.t1, cols, rows, w)
+        self.inv_lbl.config(text=f"{len(rows)} well(s)  (P&A excluded, one per API)")
 
-    # ── Display callbacks (main thread) ──────────────────────────────────────
-    def _show_inventory(self, cols, rows):
-        widths = {"WELL_NME": 170, "WELL_API_NBR": 110, "FLD_NME": 100,
-                  "PRIM_PURP_TYPE_CDE": 70, "ENGR_STRG_NME": 170,
-                  "CMPL_STATE_TYPE_DESC": 110, "CMPL_STATE_EFTV_DTTM": 110,
-                  "SPUD_DATE": 100, "INIT_PROD_DTE": 100}
-        populate_tree(self.inv_tree, cols, rows, widths)
-        self.inv_label.config(text=f"{len(rows)} completion(s) loaded")
+    def _show_wt(self, cols, rows):
+        w = {"WELL_NME":170,"WELL_API_NBR":110,"FLD_NME":100,
+             "ENGR_STRG_NME":160,"TEST_DATE":100,"OIL_BOPD":80,"WTR_BWPD":80,
+             "GAS_MCFD":80,"WC_PCT":70,"PEAK_TEST_DATE":110,"PEAK_OIL_BOPD":100}
+        populate_tree(self.t2, cols, rows, w)
+        self.wt_lbl.config(text=f"{len(rows)} producer(s)  "
+                                f"(sorted by Peak Oil, tests after spud date only)")
 
-    def _show_welltests(self, cols, rows):
-        widths = {"WELL_NME": 170, "WELL_API_NBR": 110, "FLD_NME": 100,
-                  "ENGR_STRG_NME": 160, "TEST_DATE": 100,
-                  "OIL_BOPD": 80, "WTR_BWPD": 80, "GAS_MCFD": 80,
-                  "WC_PCT": 70, "PEAK_TEST_DATE": 110, "PEAK_OIL_BOPD": 100}
-        populate_tree(self.wt_tree, cols, rows, widths)
-        self.wt_label.config(
-            text=f"{len(rows)} producer(s) with well test data")
+    # ── chart controls ───────────────────────────────────────────────────────
+    def _populate_chart_controls(self):
+        fields = sorted(set(f for _,f,_,_,_ in self.chart_wells if f))
+        self.fld_cb["values"] = ["All"] + fields
+        self.fld_var.set("All")
+        self._refresh_well_list()
 
-    def _populate_well_listbox(self):
-        self.well_listbox.delete(0, "end")
-        for name in self.well_names:
-            self.well_listbox.insert("end", name)
+    def _on_field_filter(self, _=None):
+        self._refresh_well_list()
 
-    def _select_all_wells(self):
-        self.well_listbox.selection_set(0, "end")
-
-    def _query_error(self, msg):
-        self._set_status("Query failed.")
-        messagebox.showerror("Query Error", f"Error:\n\n{msg}")
-
-    # ── Tab 3: Chart ─────────────────────────────────────────────────────────
-    def _on_plot_chart(self):
-        if not HAS_MPL:
-            messagebox.showinfo("Unavailable", "matplotlib is not installed.")
-            return
-        sel = self.well_listbox.curselection()
-        if not sel:
-            messagebox.showwarning("No Selection",
-                                   "Select one or more wells from the list.")
-            return
-
-        selected_names = [self.well_listbox.get(i) for i in sel]
-        self.chart_btn.config(state="disabled")
-        self.chart_status.config(text=f"Loading {len(selected_names)} well(s)...")
-        threading.Thread(target=self._chart_thread,
-                         args=(selected_names,), daemon=True).start()
-
-    def _chart_thread(self, well_names):
-        try:
-            placeholders = ", ".join([f":{i+1}" for i in range(len(well_names))])
-            sql = SQL_MONTHLY_PROD_INJ.format(placeholders=placeholders)
-            bind = {str(i + 1): n for i, n in enumerate(well_names)}
-            cols, rows = run_query(sql, bind)
-            self.root.after(0, self._draw_chart, cols, rows, well_names)
-        except Exception as e:
-            self.root.after(0, self._query_error, str(e))
-        finally:
-            self.root.after(0, lambda: self.chart_btn.config(state="normal"))
-
-    def _draw_chart(self, cols, rows, well_names):
-        if not rows:
-            self.chart_status.config(text="No monthly data found for selected wells.")
-            return
-
-        self.fig.clear()
-
-        # Parse data into dict: well_name -> {month: {oil, wtr, gas, wi, si}}
-        well_data = {}
-        for r in rows:
-            name = r[0]
-            month = r[2]
-            if name not in well_data:
-                well_data[name] = {"months": [], "oil": [], "wtr": [],
-                                   "gas": [], "wi": [], "si": []}
-            d = well_data[name]
-            d["months"].append(month)
-            d["oil"].append(r[3] or 0)
-            d["wtr"].append(r[4] or 0)
-            d["gas"].append(r[5] or 0)
-            d["wi"].append(r[6] or 0)
-            d["si"].append(r[7] or 0)
-
-        n_wells = len(well_data)
-        single = n_wells == 1
-
-        if single:
-            # Single well — 5 subplots (one per stream)
-            axes = self.fig.subplots(5, 1, sharex=True)
-            name = list(well_data.keys())[0]
-            d = well_data[name]
-            months = d["months"]
-
-            configs = [
-                ("oil", "Oil (BOPD)", "#2ecc71"),
-                ("wtr", "Water Prod (BWPD)", "#3498db"),
-                ("gas", "Gas (MCFD)", "#e74c3c"),
-                ("wi", "Water Inj (BWIPD)", "#9b59b6"),
-                ("si", "Steam Inj (BSPD)", "#e67e22"),
-            ]
-            for ax, (key, label, color) in zip(axes, configs):
-                vals = d[key]
-                ax.fill_between(months, vals, alpha=0.3, color=color)
-                ax.plot(months, vals, color=color, linewidth=1.2)
-                ax.set_ylabel(label, fontsize=8)
-                ax.tick_params(labelsize=7)
-                ax.grid(True, alpha=0.3)
-            axes[0].set_title(f"{name}  —  Monthly Allocated Rates",
-                              fontsize=11, fontweight="bold")
-            axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
-            axes[-1].xaxis.set_major_locator(mdates.MonthLocator(interval=3))
-            self.fig.autofmt_xdate(rotation=45)
+    def _refresh_well_list(self):
+        fld = self.fld_var.get()
+        self.well_lb.delete(0, "end")
+        count = 0
+        for name, f, purp, matl, fid in self.chart_wells:
+            if fld != "All" and f != fld:
+                continue
+            tag = "PROD" if purp == "PROD" else f"INJ-{matl}" if purp == "INJ" else purp
+            self.well_lb.insert("end", f"{name}  [{tag}]")
+            count += 1
+        self.well_count_lbl.config(text=f"{count} well(s)")
+        if count > 0:
+            self.well_lb.selection_set(0)
+            self._on_well_select()
         else:
-            # Multiple wells — 5 subplots, one line per well per stream
-            axes = self.fig.subplots(5, 1, sharex=True)
-            configs = [
-                ("oil", "Oil (BOPD)"),
-                ("wtr", "Water Prod (BWPD)"),
-                ("gas", "Gas (MCFD)"),
-                ("wi", "Water Inj (BWIPD)"),
-                ("si", "Steam Inj (BSPD)"),
-            ]
-            cmap = matplotlib.colormaps.get_cmap("tab10")
-            for ax, (key, label) in zip(axes, configs):
-                for idx, (name, d) in enumerate(well_data.items()):
-                    color = cmap(idx % 10)
-                    ax.plot(d["months"], d[key], color=color,
-                            linewidth=1.1, label=name if key == "oil" else None)
-                ax.set_ylabel(label, fontsize=8)
-                ax.tick_params(labelsize=7)
-                ax.grid(True, alpha=0.3)
+            if HAS_MPL:
+                self.fig.clear(); self.canvas.draw()
+            self.chart_lbl.config(text="No wells with data for selected field.")
 
-            # Legend only on first subplot
-            axes[0].legend(fontsize=7, ncol=min(n_wells, 4),
-                           loc="upper left", framealpha=0.8)
-            axes[0].set_title(
-                f"{n_wells} Wells  —  Monthly Allocated Rates",
-                fontsize=11, fontweight="bold")
-            axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
-            axes[-1].xaxis.set_major_locator(mdates.MonthLocator(interval=3))
-            self.fig.autofmt_xdate(rotation=45)
+    def _get_selected_info(self):
+        sel = self.well_lb.curselection()
+        if not sel: return None
+        text = self.well_lb.get(sel[0])
+        name = text.split("  [")[0]
+        fld = self.fld_var.get()
+        for n, f, p, m, fid in self.chart_wells:
+            if n == name and (fld == "All" or f == fld):
+                return (n, f, p, m, fid)
+        return None
 
-        self.fig.tight_layout()
-        self.canvas.draw()
-        self.chart_status.config(
-            text=f"Plotted {n_wells} well(s), {len(rows)} data points.")
+    def _on_well_select(self, _=None):
+        info = self._get_selected_info()
+        if not info or not HAS_MPL: return
+        name, fld, purp, matl, fid = info
+        self.chart_lbl.config(text=f"Loading {name} ...", fg="#888")
+        threading.Thread(target=self._chart_bg,
+                         args=(name,fld,purp,matl,fid), daemon=True).start()
+
+    # ═════════════════════════════════════════════════════════════════════════
+    # Chart
+    # ═════════════════════════════════════════════════════════════════════════
+    def _chart_bg(self, name, fld, purp, matl, fid):
+        try:
+            if purp == "PROD":
+                c, r = run_query(SQL_PROD_WELL_TESTS,
+                                 {"cmpl_fac_id":fid, "spud_date":self.spud_date_val})
+                self.root.after(0, self._draw_prod, c, r, name, fld)
+            elif purp == "INJ":
+                c, r = run_query(SQL_INJ_DAILY,
+                                 {"cmpl_fac_id":fid, "start_date":self.spud_date_val})
+                self.root.after(0, self._draw_inj, c, r, name, fld, matl)
+        except Exception as e:
+            self.root.after(0, self._err, str(e))
+
+    def _draw_prod(self, cols, rows, name, fld):
+        self.fig.clear()
+        if not rows:
+            self.chart_lbl.config(text=f"{name}: no data.", fg="#c0392b")
+            self.canvas.draw(); return
+
+        dates, oil, wtr, gas = [], [], [], []
+        for r in rows:
+            dates.append(r[0]); oil.append(r[1] or 0)
+            wtr.append(r[2] or 0); gas.append(r[3] or 0)
+
+        ax1 = self.fig.add_subplot(111)
+        lines = []
+        if any(v>0 for v in oil):
+            l, = ax1.plot(dates, oil, "o-", color="#27ae60", ms=5, lw=1.5, label="Oil (BOPD)")
+            lines.append(l)
+        if any(v>0 for v in wtr):
+            l, = ax1.plot(dates, wtr, "s-", color="#2980b9", ms=4, lw=1.2, label="Water (BWPD)")
+            lines.append(l)
+        ax1.set_ylabel("Liquid Rate (bbl/d)", fontsize=9)
+        ax1.tick_params(labelsize=8); ax1.grid(True, alpha=0.25)
+
+        if any(v>0 for v in gas):
+            ax2 = ax1.twinx()
+            l, = ax2.plot(dates, gas, "x--", color="#e74c3c", ms=4, lw=1.2, label="Gas (MCFD)")
+            lines.append(l)
+            ax2.set_ylabel("Gas (MCFD)", fontsize=9, color="#e74c3c")
+            ax2.tick_params(labelsize=8, labelcolor="#e74c3c")
+
+        ax1.legend(lines, [l.get_label() for l in lines],
+                   fontsize=8, loc="upper left", framealpha=0.85)
+        t = f"{name}  —  Allocated Well Tests"
+        if fld: t += f"  ({fld})"
+        ax1.set_title(t, fontsize=11, fontweight="bold", pad=10)
+        self._fmt_x(ax1, dates)
+        self.fig.tight_layout(); self.canvas.draw()
+        self.chart_lbl.config(text=f"{name} — {len(rows)} well tests", fg=self.ACCENT)
+
+    def _draw_inj(self, cols, rows, name, fld, matl):
+        self.fig.clear()
+        if not rows:
+            self.chart_lbl.config(text=f"{name}: no injection data.", fg="#c0392b")
+            self.canvas.draw(); return
+
+        dates, stm, wtr = [], [], []
+        for r in rows:
+            dates.append(r[0]); stm.append(r[1] or 0); wtr.append(r[2] or 0)
+
+        ax = self.fig.add_subplot(111)
+        if matl == "Steam":
+            ax.plot(dates, stm, color="#e67e22", lw=0.9, alpha=0.85, label="Steam Inj (bbl/d)")
+            ax.fill_between(dates, stm, alpha=0.15, color="#e67e22")
+            ax.set_ylabel("Steam Injection (bbl/d)", fontsize=9, color="#e67e22")
+        elif matl == "Water":
+            ax.plot(dates, wtr, color="#2980b9", lw=0.9, alpha=0.85, label="Water Inj (bbl/d)")
+            ax.fill_between(dates, wtr, alpha=0.15, color="#2980b9")
+            ax.set_ylabel("Water Injection (bbl/d)", fontsize=9, color="#2980b9")
+        else:
+            if any(v>0 for v in stm):
+                ax.plot(dates, stm, color="#e67e22", lw=0.9, label="Steam (bbl/d)")
+            if any(v>0 for v in wtr):
+                ax.plot(dates, wtr, color="#2980b9", lw=0.9, label="Water (bbl/d)")
+            ax.set_ylabel("Injection (bbl/d)", fontsize=9)
+
+        ax.tick_params(labelsize=8); ax.grid(True, alpha=0.25)
+        ax.legend(fontsize=8, loc="upper left", framealpha=0.85)
+        t = f"{name}  —  Daily Measured Injection"
+        if fld: t += f"  ({fld})"
+        ax.set_title(t, fontsize=11, fontweight="bold", pad=10)
+        self._fmt_x(ax, dates)
+        self.fig.tight_layout(); self.canvas.draw()
+        self.chart_lbl.config(text=f"{name} — {len(rows):,} daily points", fg=self.ACCENT)
+
+    def _fmt_x(self, ax, dates):
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
+        span = (max(dates)-min(dates)).days if len(dates)>1 else 30
+        if   span > 720: ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+        elif span > 360: ax.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
+        elif span > 120: ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        self.fig.autofmt_xdate(rotation=45)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
     root = tk.Tk()
-    app = RecentWellsApp(root)
+    App(root)
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
