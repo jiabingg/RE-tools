@@ -401,23 +401,112 @@ class EngineeringStringPage(Page):
             return
 
         sql_query = f"""
-        with T as
-        (
-        select cd.cmpl_nme, cd.cmpl_fac_id, wd.well_api_nbr, engr_strg_nme, max(cf.eftv_Dttm) as last_inj_dte
-        from cmpl_dmn cd
-        join cmpl_mnly_fact cf on cd.cmpl_fac_id = cf.cmpl_fac_id
-        join well_dmn wd on cd.well_fac_id = wd.well_fac_id -- Join well_dmn here to filter by well_api_nbr
-        where cd.actv_indc = 'Y'
-        and wd.actv_indc = 'Y' -- Ensure the well is active as well
-        and wd.well_api_nbr in ({formatted_well_apis}) -- Filter by WELL_API_NBR
-        and cmpl_state_type_cde in ('OPNL', 'TA')
-        group by cd.cmpl_nme, cd.cmpl_fac_id, wd.well_api_nbr, engr_strg_nme
-        )
-
-        select t.well_api_nbr, t.cmpl_nme, t.engr_strg_nme, opg.top_perf, opg.btm_perf
-        from T
-        join CURR_TOP_BTM_ACTL_WLBR_OPG opg
-        on T.cmpl_fac_id = opg.cmpl_fac_id
+WITH T AS (
+    SELECT cd.cmpl_nme, cd.cmpl_fac_id, cd.well_fac_id,
+           wd.well_api_nbr, cd.engr_strg_nme
+    FROM dwrptg.cmpl_dmn cd
+    JOIN dwrptg.well_dmn wd ON cd.well_fac_id = wd.well_fac_id
+    WHERE cd.actv_indc = 'Y'
+      AND wd.actv_indc = 'Y'
+      AND wd.well_api_nbr IN ({formatted_well_apis})
+      AND cd.cmpl_state_type_cde IN ('OPNL', 'TA')
+),
+perfs AS (
+    SELECT t.well_api_nbr, t.cmpl_nme, t.cmpl_fac_id,
+           t.well_fac_id, t.engr_strg_nme,
+           MIN(opg.top_perf) AS top_perf,
+           MIN(opg.btm_perf) AS btm_perf
+    FROM T
+    JOIN dwrptg.CURR_TOP_BTM_ACTL_WLBR_OPG opg
+        ON T.cmpl_fac_id = opg.cmpl_fac_id
+    GROUP BY t.well_api_nbr, t.cmpl_nme, t.cmpl_fac_id,
+             t.well_fac_id, t.engr_strg_nme
+),
+surveys AS (
+    SELECT wd.well_fac_id,
+           d.md_qty AS svy_md,
+           d.tvd_qty AS svy_tvd
+    FROM dwrptg.dsvy_pt_dmn d
+    JOIN dwrptg.wlbr_dmn wd ON d.wlbr_fac_id = wd.wlbr_fac_id
+    WHERE wd.well_fac_id IN (SELECT well_fac_id FROM T)
+      AND d.tvd_qty IS NOT NULL
+      AND d.md_qty IS NOT NULL
+      AND d.tvd_qty <= d.md_qty   -- Exclude bad survey points
+),
+top_above AS (
+    SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
+           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id
+                              ORDER BY s.svy_md DESC) AS rn
+    FROM perfs p
+    JOIN surveys s ON s.well_fac_id = p.well_fac_id
+    WHERE s.svy_md <= p.top_perf
+),
+top_below AS (
+    SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
+           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id
+                              ORDER BY s.svy_md ASC) AS rn
+    FROM perfs p
+    JOIN surveys s ON s.well_fac_id = p.well_fac_id
+    WHERE s.svy_md > p.top_perf
+),
+btm_above AS (
+    SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
+           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id
+                              ORDER BY s.svy_md DESC) AS rn
+    FROM perfs p
+    JOIN surveys s ON s.well_fac_id = p.well_fac_id
+    WHERE s.svy_md <= p.btm_perf
+),
+btm_below AS (
+    SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
+           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id
+                              ORDER BY s.svy_md ASC) AS rn
+    FROM perfs p
+    JOIN surveys s ON s.well_fac_id = p.well_fac_id
+    WHERE s.svy_md > p.btm_perf
+)
+SELECT p.well_api_nbr,
+       p.cmpl_nme,
+       p.engr_strg_nme,
+       p.top_perf,
+       -- Interpolated TVD, capped to never exceed MD
+       LEAST(
+           p.top_perf,
+           ROUND(
+               CASE
+                   WHEN ta.svy_md IS NOT NULL AND tb.svy_md IS NOT NULL
+                        AND tb.svy_md != ta.svy_md
+                   THEN ta.svy_tvd +
+                        (p.top_perf - ta.svy_md) *
+                        (tb.svy_tvd - ta.svy_tvd) /
+                        (tb.svy_md - ta.svy_md)
+                   WHEN ta.svy_md IS NOT NULL
+                   THEN ta.svy_tvd
+                   ELSE p.top_perf  -- Default to MD if no survey
+               END, 1)
+       ) AS top_perf_tvd,
+       p.btm_perf,
+       LEAST(
+           p.btm_perf,
+           ROUND(
+               CASE
+                   WHEN ba.svy_md IS NOT NULL AND bb.svy_md IS NOT NULL
+                        AND bb.svy_md != ba.svy_md
+                   THEN ba.svy_tvd +
+                        (p.btm_perf - ba.svy_md) *
+                        (bb.svy_tvd - ba.svy_tvd) /
+                        (bb.svy_md - ba.svy_md)
+                   WHEN ba.svy_md IS NOT NULL
+                   THEN ba.svy_tvd
+                   ELSE p.btm_perf  -- Default to MD if no survey
+               END, 1)
+       ) AS btm_perf_tvd
+FROM perfs p
+LEFT JOIN top_above ta ON p.cmpl_fac_id = ta.cmpl_fac_id AND ta.rn = 1
+LEFT JOIN top_below tb ON p.cmpl_fac_id = tb.cmpl_fac_id AND tb.rn = 1
+LEFT JOIN btm_above ba ON p.cmpl_fac_id = ba.cmpl_fac_id AND ba.rn = 1
+LEFT JOIN btm_below bb ON p.cmpl_fac_id = bb.cmpl_fac_id AND bb.rn = 1
+ORDER BY p.cmpl_nme
         """
 
         try:
