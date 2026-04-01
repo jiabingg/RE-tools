@@ -409,16 +409,16 @@ WITH T AS (
     WHERE cd.actv_indc = 'Y'
       AND wd.actv_indc = 'Y'
       AND wd.well_api_nbr IN ({formatted_well_apis})
-      AND cd.cmpl_state_type_cde IN ('OPNL', 'TA')
+      AND cd.cmpl_state_type_cde IN ('OPNL', 'TA', 'ABND')
 ),
 perfs AS (
     SELECT t.well_api_nbr, t.cmpl_nme, t.cmpl_fac_id,
            t.well_fac_id, t.engr_strg_nme,
-           MIN(opg.top_perf) AS top_perf,
-           MIN(opg.btm_perf) AS btm_perf
+           MIN(opg.top_md_qty) AS top_perf,
+           MAX(opg.btm_md_qty) AS btm_perf
     FROM T
-    JOIN dwrptg.CURR_TOP_BTM_ACTL_WLBR_OPG opg
-        ON T.cmpl_fac_id = opg.cmpl_fac_id
+    JOIN dwrptg.wlbr_dmn wd ON t.well_fac_id = wd.well_fac_id
+    JOIN dwrptg.actl_wlbr_opg_ntvl_dmn opg ON wd.wlbr_fac_id = opg.wlbr_fac_id
     GROUP BY t.well_api_nbr, t.cmpl_nme, t.cmpl_fac_id,
              t.well_fac_id, t.engr_strg_nme
 ),
@@ -431,7 +431,7 @@ surveys AS (
     WHERE wd.well_fac_id IN (SELECT well_fac_id FROM T)
       AND d.tvd_qty IS NOT NULL
       AND d.md_qty IS NOT NULL
-      AND d.tvd_qty <= d.md_qty   -- Exclude bad survey points
+      AND d.tvd_qty <= d.md_qty
 ),
 top_above AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
@@ -469,7 +469,6 @@ SELECT p.well_api_nbr,
        p.cmpl_nme,
        p.engr_strg_nme,
        p.top_perf,
-       -- Interpolated TVD, capped to never exceed MD
        LEAST(
            p.top_perf,
            ROUND(
@@ -482,7 +481,7 @@ SELECT p.well_api_nbr,
                         (tb.svy_md - ta.svy_md)
                    WHEN ta.svy_md IS NOT NULL
                    THEN ta.svy_tvd
-                   ELSE p.top_perf  -- Default to MD if no survey
+                   ELSE p.top_perf
                END, 1)
        ) AS top_perf_tvd,
        p.btm_perf,
@@ -498,7 +497,7 @@ SELECT p.well_api_nbr,
                         (bb.svy_md - ba.svy_md)
                    WHEN ba.svy_md IS NOT NULL
                    THEN ba.svy_tvd
-                   ELSE p.btm_perf  -- Default to MD if no survey
+                   ELSE p.btm_perf
                END, 1)
        ) AS btm_perf_tvd
 FROM perfs p
