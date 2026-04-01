@@ -117,6 +117,42 @@ WHERE wpd.UIC_PROJ_CDE IN ({in_list})
   AND cmf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -120)
 ORDER BY cd.cmpl_nme, TRUNC(cmf.eftv_dttm, 'MM')"""
 
+def sql_wells_by_api(api_list):
+    """Well details by API numbers — for manual override."""
+    in_list = ", ".join(f"'{a}'" for a in api_list)
+    return f"""
+SELECT DISTINCT cd.cmpl_nme AS WELL_NME, cd.well_api_nbr AS WELL_API_NBR,
+       cd.opnl_fld AS FLD_NME, cd.prim_purp_type_cde AS PRIM_PURP_TYPE_CDE,
+       cd.engr_strg_nme AS ENGR_STRG_NME, cd.actv_indc AS ACTV_INDC,
+       cd.in_svc_indc AS IN_SVC_INDC, 'MANUAL' AS UIC_PROJ_CDE, fl.XCRD, fl.YCRD
+FROM dwrptg.cmpl_dmn cd
+LEFT JOIN dwrptg.fac_lctn_dmn fl ON cd.well_fac_id = fl.fac_id
+WHERE cd.well_api_nbr IN ({in_list})
+  AND cd.actv_indc = 'Y'
+ORDER BY cd.prim_purp_type_cde, cd.cmpl_nme"""
+
+def sql_production_by_well_api(api_list):
+    """Per-well monthly data by API numbers — for manual override."""
+    in_list = ", ".join(f"'{a}'" for a in api_list)
+    return f"""
+SELECT cd.cmpl_nme AS WELL_NME, cd.well_api_nbr AS WELL_API_NBR,
+       TRUNC(cmf.eftv_dttm, 'MM') AS MONTH_DT,
+       cmf.aloc_oil_prod_vol_qty AS OIL_VOL, cmf.aloc_wtr_prod_vol_qty AS WATER_VOL,
+       cmf.aloc_gas_prod_vol_qty AS GAS_VOL, cmf.aloc_gros_prod_vol_qty AS GROSS_VOL,
+       cmf.aloc_stm_inj_vol_qty AS STEAM_INJ_VOL, cmf.aloc_wtr_inj_vol_qty AS WATER_INJ_VOL,
+       cmf.aloc_gas_inj_vol_qty AS GAS_INJ_VOL,
+       cmf.aloc_oil_prod_dly_rte_qty AS OIL_RATE, cmf.aloc_wtr_prod_dly_rte_qty AS WATER_RATE,
+       cmf.aloc_gas_prod_dly_rte_qty AS GAS_RATE, cmf.aloc_gros_prod_dly_rte_qty AS GROSS_RATE,
+       cmf.aloc_stm_inj_dly_rte_qty AS STEAM_INJ_RATE,
+       cmf.aloc_wtr_inj_dly_rte_qty AS WATER_INJ_RATE,
+       cmf.aloc_gas_inj_dly_rte_qty AS GAS_INJ_RATE
+FROM dwrptg.cmpl_dmn cd
+JOIN dwrptg.cmpl_mnly_fact cmf ON cd.cmpl_dmn_key = cmf.cmpl_dmn_key
+WHERE cd.well_api_nbr IN ({in_list})
+  AND cd.actv_indc = 'Y'
+  AND cmf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -120)
+ORDER BY cd.cmpl_nme, TRUNC(cmf.eftv_dttm, 'MM')"""
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Treeview helpers
@@ -218,6 +254,29 @@ class App:
         self.sel_lbl=ttk.Label(lf,text="Selected: 0",font=("Segoe UI",9)); self.sel_lbl.pack(fill="x",pady=(5,0))
         self.load_btn=ttk.Button(lf,text="  ▶  Load Project Data  ",style="Accent.TButton",command=self._on_load)
         self.load_btn.pack(fill="x",pady=(5,0))
+
+        # ─── Manual API Override ─────────────────────────────────────────
+        sep = ttk.Separator(lf, orient="horizontal")
+        sep.pack(fill="x", pady=(10, 5))
+
+        api_lf = ttk.LabelFrame(lf, text=" Manual API Override ", padding=4)
+        api_lf.pack(fill="x", pady=(0, 0))
+
+        ttk.Label(api_lf, text="Paste APIs (one per line or comma-separated):",
+                  font=("Segoe UI", 8), foreground="#666").pack(anchor="w")
+
+        api_txt_frame = ttk.Frame(api_lf)
+        api_txt_frame.pack(fill="x", pady=(2, 4))
+        self.api_text = tk.Text(api_txt_frame, height=5, width=28, font=("Consolas", 8),
+                                wrap="word", bd=1, relief="solid")
+        api_sb = ttk.Scrollbar(api_txt_frame, orient="vertical", command=self.api_text.yview)
+        self.api_text.configure(yscrollcommand=api_sb.set)
+        self.api_text.pack(side="left", fill="x", expand=True)
+        api_sb.pack(side="right", fill="y")
+
+        self.api_load_btn = ttk.Button(api_lf, text="  ▶  Load by API List  ",
+                                        command=self._on_load_by_api)
+        self.api_load_btn.pack(fill="x")
         # RIGHT — notebook
         right=ttk.Frame(pw); pw.add(right,weight=4)
         self.cards_frame=ttk.Frame(right); self.cards_frame.pack(fill="x",pady=(0,5))
@@ -291,6 +350,63 @@ class App:
             self.root.after(0,lambda: self._set_status("Query failed."))
         finally:
             self.root.after(0,lambda: self.load_btn.config(state="normal"))
+
+    # ── Load by manual API list ──────────────────────────────────────────────
+    def _on_load_by_api(self):
+        raw = self.api_text.get("1.0", "end").strip()
+        if not raw:
+            messagebox.showwarning("No APIs", "Paste at least one API number into the text box.")
+            return
+        # Parse: split by newlines, commas, spaces, tabs
+        import re
+        tokens = re.split(r'[,\s\n\r\t]+', raw)
+        apis = [t.strip() for t in tokens if t.strip()]
+        if not apis:
+            messagebox.showwarning("No APIs", "Could not parse any API numbers from the input.")
+            return
+        # Pad to 10 digits if user entered short APIs (e.g. 401901303 → 0401901303)
+        cleaned = []
+        for a in apis:
+            a = a.replace("-", "").replace(".", "")
+            if a.isdigit():
+                if len(a) == 9:
+                    a = "0" + a
+                cleaned.append(a)
+            else:
+                cleaned.append(a)  # keep as-is, let Oracle handle it
+        self.selected_codes = ["MANUAL"]
+        self.api_load_btn.config(state="disabled")
+        self.load_btn.config(state="disabled")
+        self._set_status(f"Loading data for {len(cleaned)} manually entered API(s) ...")
+        threading.Thread(target=self._load_by_api_bg, args=(cleaned,), daemon=True).start()
+
+    def _load_by_api_bg(self, apis):
+        try:
+            self.root.after(0, lambda: self._set_status(
+                f"Querying well details for {len(apis)} API(s) ..."))
+            wc, wr = run_query(sql_wells_by_api(apis))
+            self.well_cols = wc; self.well_rows = wr
+
+            self.root.after(0, lambda: self._set_status(
+                f"Querying per-well production & injection for {len(apis)} API(s) ..."))
+            pc, pr = run_query(sql_production_by_well_api(apis))
+            self.prod_well_cols = pc; self.prod_well_rows = pr
+
+            # Build well list for chart selectors
+            seen = set(); wl = []
+            for r in pr:
+                key = (r[0], r[1])
+                if key not in seen: seen.add(key); wl.append(key)
+            wl.sort()
+            self.well_list_for_charts = wl
+
+            self.root.after(0, self._display_results)
+        except Exception as e:
+            self.root.after(0, lambda: messagebox.showerror("Query Error", str(e)))
+            self.root.after(0, lambda: self._set_status("Query failed."))
+        finally:
+            self.root.after(0, lambda: self.api_load_btn.config(state="normal"))
+            self.root.after(0, lambda: self.load_btn.config(state="normal"))
 
     def _display_results(self):
         self._update_cards(); self._build_well_table()
