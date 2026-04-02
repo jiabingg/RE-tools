@@ -9,23 +9,21 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 
 # --- CONNECTION FIX: Enable Thick Mode ---
-# This resolves the "DPY-3015: password verifier type 0x939 is not supported" error
 try:
     oracledb.init_oracle_client()
 except Exception as e:
     print(f"Warning: Could not initialize Oracle thick client. {e}")
 # -----------------------------------------
 
+
 # Oracle Connection Manager
 class OracleConnectionManager:
     def __init__(self):
-        # Define connection configurations.
-        # Uses os.getenv to allow environment variables to override defaults for security.
         self._connections = {
             "odw": {
                 "user": os.getenv("DB_USER_ODW", "rptguser"),
                 "password": os.getenv("DB_PASSWORD_ODW", "allusers"),
-                "dsn": "odw"  # lower-case for oracledb compatibility
+                "dsn": "odw"
             },
             "sandbox": {
                 "user": os.getenv("DB_USER_SANDBOX", "engsb"),
@@ -40,10 +38,6 @@ class OracleConnectionManager:
         }
 
     def get_connection(self, name):
-        """
-        Returns a live Oracle connection for the given configuration name.
-        Raises ConnectionError if connection fails.
-        """
         if name not in self._connections:
             raise ValueError(f"Unknown DB connection name: {name}")
         config = self._connections[name]
@@ -58,7 +52,6 @@ class OracleConnectionManager:
             raise ConnectionError(f"Failed to connect to Oracle DB '{name}': {error_obj.message}") from e
 
     def available_connections(self):
-        """Returns a list of available connection names."""
         return list(self._connections.keys())
 
 
@@ -73,83 +66,59 @@ def format_well_api_list(raw_api_list):
             continue
         if api not in cleaned:
             cleaned.append(api)
-
     if not cleaned:
         return None
-
-    # Prevent SQL injection by escaping single quotes
-    escaped = [f"'{x.replace("'", "''")}'" for x in cleaned]
+    escaped = [f"'{x.replace(chr(39), chr(39)+chr(39))}'" for x in cleaned]
     return ", ".join(escaped)
 
 
-# Abstract Base Class for Application Pages
-class Page(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
+# --------------------------------------------------------------------------
+# Mixin with common Treeview display / clear / copy methods
+# --------------------------------------------------------------------------
+class TreeviewMixin:
+    """Provides display_results, clear_results, copy_to_clipboard for any
+    frame that has a `self.result_tree` Treeview and `self.current_data` attr."""
 
-    def show_page_frame(self):
-        """Brings this specific page frame to the front."""
-        self.tkraise()
-
-    # --- Common Display, Clear, Copy Methods for all pages with Treeviews ---
-    def display_results(self, df, apply_global_sort=True): # Added apply_global_sort parameter
-        """Displays DataFrame results in the Treeview widget with common sorting."""
-        # Clear existing Treeview data
+    def display_results(self, df, apply_global_sort=True):
         for i in self.result_tree.get_children():
             self.result_tree.delete(i)
 
         if df.empty:
             messagebox.showinfo("No Results", "No data found for the query.")
-            self.result_tree["columns"] = [] # Clear columns if no data
+            self.result_tree["columns"] = []
             return
 
-        # --- GLOBAL SORTING LOGIC (now conditional) ---
         if apply_global_sort:
             sort_columns = ['PRIM_PURP_TYPE_CDE', 'WELL_API_NBR']
             available_sort_columns = [col for col in sort_columns if col in df.columns]
-
-            if len(available_sort_columns) > 0:
+            if available_sort_columns:
                 try:
-                    # Convert WELL_API_NBR to string type to avoid numerical sorting issues if mixed types
                     if 'WELL_API_NBR' in df.columns:
                         df['WELL_API_NBR'] = df['WELL_API_NBR'].astype(str)
                     df.sort_values(by=available_sort_columns, inplace=True)
                 except Exception as e:
-                    messagebox.showwarning("Sorting Warning", f"Error during sorting: {e}. Displaying unsorted data.")
-            else:
-                pass # Suppress warning for pages that don't need these columns (like Daily Injection)
-        # --- END GLOBAL SORTING LOGIC ---
+                    messagebox.showwarning("Sorting Warning",
+                                           f"Error during sorting: {e}. Displaying unsorted data.")
 
-
-        # Dynamically set columns based on DataFrame columns
         columns = list(df.columns)
         self.result_tree["columns"] = columns
         self.result_tree["displaycolumns"] = columns
 
         try:
-            # Create a font object to measure text width for column auto-sizing
-            # Correctly gets the font from the ttk.Style for the Treeview element
             treeview_font_name = ttk.Style().lookup("Treeview", "font")
-            self.tree_font = tkinter.font.Font(font=treeview_font_name)
+            tree_font = tkinter.font.Font(font=treeview_font_name)
         except Exception:
-            # Fallback to a default font if lookup fails
-            self.tree_font = tkinter.font.Font(family="TkDefaultFont", size=10)
-            print("Warning: Could not determine Treeview font from style, using TkDefaultFont.")
+            tree_font = tkinter.font.Font(family="TkDefaultFont", size=10)
 
         for col in columns:
             self.result_tree.heading(col, text=col, anchor="w")
-            # Set initial column width based on header text width
-            # Use stretch=False to allow dynamic resizing based on content
-            self.result_tree.column(col, width=self.tree_font.measure(col) + 20, stretch=False)
+            self.result_tree.column(col, width=tree_font.measure(col) + 20, stretch=False)
 
-        for index, row in df.iterrows():
+        for _, row in df.iterrows():
             display_values = []
             for item in row:
                 if isinstance(item, pd.Timestamp):
-                    # --- UPDATED DATE FORMAT ---
                     display_values.append(item.strftime('%Y-%m-%d') if not pd.isna(item) else '')
-                    # --- END UPDATED DATE FORMAT ---
                 elif pd.isna(item):
                     display_values.append('')
                 else:
@@ -157,20 +126,18 @@ class Page(tk.Frame):
             self.result_tree.insert("", "end", values=display_values)
 
             for i, item in enumerate(display_values):
-                col_width = self.tree_font.measure(str(item)) + 10
+                col_width = tree_font.measure(str(item)) + 10
                 current_col_id = columns[i]
                 if self.result_tree.column(current_col_id, width=None) < col_width:
                     self.result_tree.column(current_col_id, width=col_width)
 
     def clear_results(self):
-        """Clears all data and columns from the Treeview."""
         for i in self.result_tree.get_children():
             self.result_tree.delete(i)
         self.result_tree["columns"] = []
         self.current_data = None
 
     def copy_to_clipboard(self):
-        """Copies the current Treeview data (from DataFrame) to clipboard in Excel format."""
         if self.current_data is not None and not self.current_data.empty:
             try:
                 self.current_data.to_clipboard(excel=True, index=False, header=True)
@@ -179,109 +146,103 @@ class Page(tk.Frame):
                 messagebox.showerror("Copy Error", f"Failed to copy to clipboard: {e}")
         else:
             messagebox.showwarning("No Data", "No results to copy to clipboard.")
-    # --- End Common Methods ---
 
-# Page 1: Well API Input
-class WellAPIInputPage(Page):
-    def __init__(self, parent, controller):
-        super().__init__(parent, controller)
-        self.create_widgets()
 
-    def create_widgets(self):
-        label = tb.Label(self, text="Enter Well APIs (one per line, results on next page will be filtered by these):", font=("Helvetica", 14))
+# --------------------------------------------------------------------------
+# Helper: build a standard treeview + scrollbars inside a parent frame
+# --------------------------------------------------------------------------
+def build_treeview(parent):
+    """Returns (tree_frame, result_tree) with horizontal & vertical scrollbars."""
+    tree_frame = tb.Frame(parent)
+    tree_scroll_y = tb.Scrollbar(tree_frame, orient="vertical")
+    tree_scroll_y.pack(side="right", fill="y")
+    tree_scroll_x = tb.Scrollbar(tree_frame, orient="horizontal")
+    tree_scroll_x.pack(side="bottom", fill="x")
+
+    result_tree = ttk.Treeview(tree_frame, show="headings",
+                                yscrollcommand=tree_scroll_y.set,
+                                xscrollcommand=tree_scroll_x.set)
+    result_tree.pack(fill="both", expand=True)
+    tree_scroll_y.config(command=result_tree.yview)
+    tree_scroll_x.config(command=result_tree.xview)
+    return tree_frame, result_tree
+
+
+# =========================================================================
+#  TAB 1 – Well API Input
+# =========================================================================
+class WellAPITab(tb.Frame):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
+        self._build()
+
+    def _build(self):
+        label = tb.Label(self,
+                         text="Enter Well APIs (one per line — all other tabs will use these):",
+                         font=("Helvetica", 14))
         label.pack(pady=10)
 
-        # --- TEXTBOX HEIGHT CHANGE ---
-        self.well_api_text = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=50, height=25, font=("Courier New", 10))
+        self.well_api_text = scrolledtext.ScrolledText(self, wrap=tk.WORD,
+                                                        width=50, height=25,
+                                                        font=("Courier New", 10))
         self.well_api_text.pack(pady=10)
-        # --- END TEXTBOX HEIGHT CHANGE ---
 
-        default_apis = [
-            "0401920171",
-            "0401922081",
-            "0401922236"
-        ]
+        default_apis = ["0401920171", "0401922081", "0401922236"]
         self.well_api_text.insert(tk.END, "\n".join(default_apis))
 
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
-        next_button = tb.Button(self, text="Next", command=self.go_to_next_page, bootstyle="primary")
-        next_button.pack(pady=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
+        tb.Button(self, text="Set Well APIs", command=self._set_apis,
+                  bootstyle="primary").pack(pady=10)
 
-    def go_to_next_page(self):
-        raw_apis = self.well_api_text.get("1.0", tk.END).strip().split('\n')
-        well_apis = [api.strip() for api in raw_apis if api.strip()]
-        well_apis = list(dict.fromkeys(well_apis))  # remove duplicates while keeping order
-        self.controller.shared_data["well_apis"] = well_apis
-
-        if not well_apis:
+    def _set_apis(self):
+        raw = self.well_api_text.get("1.0", tk.END).strip().split('\n')
+        apis = list(dict.fromkeys(a.strip() for a in raw if a.strip()))
+        if not apis:
             messagebox.showwarning("Input Error", "Please enter at least one Well API number.")
             return
+        self.app.shared_data["well_apis"] = apis
+        messagebox.showinfo("APIs Set", f"{len(apis)} unique Well API(s) saved. You can now pull data on any tab.")
 
-        # Navigate to the new WellBasicDataPage (now Page 2)
-        self.controller.show_page(WellBasicDataPage)
+    def get_apis(self):
+        """Read current text box content (called by other tabs before querying)."""
+        raw = self.well_api_text.get("1.0", tk.END).strip().split('\n')
+        apis = list(dict.fromkeys(a.strip() for a in raw if a.strip()))
+        self.app.shared_data["well_apis"] = apis
+        return apis
 
-# Page 2: Well Basic Data Display
-class WellBasicDataPage(Page):
-    def __init__(self, parent, controller):
-        super().__init__(parent, controller)
-        self.create_widgets()
+
+# =========================================================================
+#  TAB 2 – Well Basic Data
+# =========================================================================
+class WellBasicDataTab(tb.Frame, TreeviewMixin):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
         self.conn_manager = OracleConnectionManager()
-        self.current_data = None # Store DataFrame for clipboard copy
+        self.current_data = None
+        self._build()
 
-    def create_widgets(self):
-        header_label = tb.Label(self, text="Well Basic Data", font=("Helvetica", 16, "bold"))
-        header_label.pack(pady=10)
+    def _build(self):
+        tb.Label(self, text="Well Basic Data", font=("Helvetica", 16, "bold")).pack(pady=10)
+        tb.Button(self, text="Pull Basic Well Data", command=self.pull_basic_data,
+                  bootstyle="info").pack(pady=10)
 
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
-        pull_data_btn = tb.Button(self, text="Pull Basic Well Data", command=self.pull_basic_data, bootstyle="info")
-        pull_data_btn.pack(pady=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
-
-        self.tree_frame = tb.Frame(self)
+        self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
-        self.tree_scroll_y = tb.Scrollbar(self.tree_frame, orient="vertical")
-        self.tree_scroll_y.pack(side="right", fill="y")
-        self.tree_scroll_x = tb.Scrollbar(self.tree_frame, orient="horizontal")
-        self.tree_scroll_x.pack(side="bottom", fill="x")
-
-        self.result_tree = ttk.Treeview(self.tree_frame, show="headings",
-                                        yscrollcommand=self.tree_scroll_y.set,
-                                        xscrollcommand=self.tree_scroll_x.set)
-        self.result_tree.pack(fill="both", expand=True)
-        self.tree_scroll_y.config(command=self.result_tree.yview)
-        self.tree_scroll_x.config(command=self.result_tree.xview)
-
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
-        copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
-        copy_button.pack(pady=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
-
-        nav_frame = tb.Frame(self)
-        nav_frame.pack(pady=10)
-
-        # --- BUTTON FONT SIZE CHANGE (via ttk.Style config in MainApplication) ---
-        back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(WellAPIInputPage), bootstyle="warning")
-        back_button.grid(row=0, column=0, padx=10)
-
-        next_button = tb.Button(nav_frame, text="Next (Top Perf)", command=lambda: self.controller.show_page(EngineeringStringPage), bootstyle="primary")
-        next_button.grid(row=0, column=1, padx=10)
-        # --- END BUTTON FONT SIZE CHANGE ---
+        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
+                  bootstyle="secondary").pack(pady=10)
 
     def pull_basic_data(self):
-        """Pulls basic well data, filtered by Well APIs from Page 1."""
-        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
-        if not well_apis_to_query:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back.")
+        apis = self.app.api_tab.get_apis()
+        if not apis:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
             self.clear_results()
             return
 
-        formatted_well_apis = format_well_api_list(well_apis_to_query)
-        if not formatted_well_apis:
-            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
-            self.clear_results()
-            return
+        formatted = format_well_api_list(apis)
+        if not formatted:
+            self.clear_results(); return
 
         sql_query = f"""
 SELECT
@@ -296,109 +257,70 @@ SELECT
     cd.init_prod_dte               AS initial_prod_date
 FROM dwrptg.cmpl_dmn cd
 JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
-WHERE cd.actv_indc = 'Y' AND cd.well_api_nbr IN ({formatted_well_apis})
+WHERE cd.actv_indc = 'Y' AND cd.well_api_nbr IN ({formatted})
 ORDER BY cd.well_api_nbr, wd.wlbr_api_suff_nbr, cd.cmpl_nme
 """
+        self._execute(sql_query, date_cols=['INITIAL_PROD_DATE'])
 
+    def _execute(self, sql, date_cols=None):
         try:
             conn = self.conn_manager.get_connection('odw')
             cursor = conn.cursor()
-            cursor.execute(sql_query)
-
+            cursor.execute(sql)
             if cursor.description:
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
-
-                # Convert date columns to datetime objects for proper comparison/display
-                date_cols = ['INITIAL_PROD_DATE']
-                for col in date_cols:
+                for col in (date_cols or []):
                     if col in df.columns:
                         df[col] = pd.to_datetime(df[col], errors='coerce')
-
-                self.display_results(df) # Call common display method which includes sorting
+                self.display_results(df)
                 self.current_data = df
             else:
                 conn.commit()
-                messagebox.showinfo("Query Executed", "SQL query executed successfully. No results to display (e.g., DML statement).")
+                messagebox.showinfo("Query Executed", "No results to display.")
                 self.clear_results()
-                self.current_data = None
-
-            cursor.close()
-            conn.close()
-
+            cursor.close(); conn.close()
         except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e))
-            self.clear_results()
+            messagebox.showerror("Connection Error", str(e)); self.clear_results()
         except oracledb.Error as e:
             error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}") # Consistent error message
-            self.clear_results()
+            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results()
         except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-            self.clear_results()
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results()
 
-# Page 3: Top Perf Data
-class EngineeringStringPage(Page):
-    def __init__(self, parent, controller):
-        super().__init__(parent, controller)
-        self.available_fields = [ # Kept for consistency of attribute, but not used in UI or query filtering
-            "San Ardo", "Belridge", "Wilmington", "Coalinga", "Huntington Beach",
-            "Elk Hills", "Lost Hills", "Arco Misc.", "Ventura", "Santa Maria",
-            "Beta", "Midway Sunset", "Brea - Yorba Linda"
-        ]
-        self.create_widgets()
+
+# =========================================================================
+#  TAB 3 – Top Perf Data
+# =========================================================================
+class TopPerfTab(tb.Frame, TreeviewMixin):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
+        self._build()
 
-    def create_widgets(self):
-        # The execute button and treeview will now be closer to the top
-        execute_button = tb.Button(self, text="Run Top Perf Query", command=self.execute_field_query, bootstyle="info")
-        execute_button.pack(pady=10)
+    def _build(self):
+        tb.Label(self, text="Top Perf Query", font=("Helvetica", 16, "bold")).pack(pady=10)
+        tb.Button(self, text="Run Top Perf Query", command=self.execute_query,
+                  bootstyle="info").pack(pady=10)
 
-        self.tree_frame = tb.Frame(self)
+        self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
-        self.tree_scroll_y = tb.Scrollbar(self.tree_frame, orient="vertical")
-        self.tree_scroll_y.pack(side="right", fill="y")
-        self.tree_scroll_x = tb.Scrollbar(self.tree_frame, orient="horizontal")
-        self.tree_scroll_x.pack(side="bottom", fill="x")
+        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
+                  bootstyle="secondary").pack(pady=10)
 
-        self.result_tree = ttk.Treeview(self.tree_frame, show="headings",
-                                        yscrollcommand=self.tree_scroll_y.set,
-                                        xscrollcommand=self.tree_scroll_x.set)
-        self.result_tree.pack(fill="both", expand=True)
-        self.tree_scroll_y.config(command=self.result_tree.yview)
-        self.tree_scroll_x.config(command=self.result_tree.xview)
+    def execute_query(self):
+        apis = self.app.api_tab.get_apis()
+        if not apis:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
+            self.clear_results(); return
 
-        copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
-        copy_button.pack(pady=10)
-
-        nav_frame = tb.Frame(self)
-        nav_frame.pack(pady=10)
-
-        back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(WellBasicDataPage), bootstyle="warning")
-        back_button.grid(row=0, column=0, padx=10)
-
-        next_button = tb.Button(nav_frame, text="Next (Summary Data)", command=self.go_to_summary_page, bootstyle="primary")
-        next_button.grid(row=0, column=1, padx=10)
-
-    def go_to_summary_page(self):
-        self.controller.shared_data["selected_fields"] = [] # Pass empty list, as no fields are selected here anymore
-        self.controller.show_page(PerformanceSummaryPage)
-
-    def execute_field_query(self):
-        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
-        if not well_apis_to_query:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
-            self.clear_results()
-            return
-
-        formatted_well_apis = format_well_api_list(well_apis_to_query)
-        if not formatted_well_apis:
-            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
-            self.clear_results()
-            return
+        formatted = format_well_api_list(apis)
+        if not formatted:
+            self.clear_results(); return
 
         sql_query = f"""
 WITH T AS (
@@ -408,7 +330,7 @@ WITH T AS (
     JOIN dwrptg.well_dmn wd ON cd.well_fac_id = wd.well_fac_id
     WHERE cd.actv_indc = 'Y'
       AND wd.actv_indc = 'Y'
-      AND wd.well_api_nbr IN ({formatted_well_apis})
+      AND wd.well_api_nbr IN ({formatted})
       AND cd.cmpl_state_type_cde IN ('OPNL', 'TA', 'ABND')
 ),
 perfs AS (
@@ -435,32 +357,28 @@ surveys AS (
 ),
 top_above AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
-           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id
-                              ORDER BY s.svy_md DESC) AS rn
+           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id ORDER BY s.svy_md DESC) AS rn
     FROM perfs p
     JOIN surveys s ON s.well_fac_id = p.well_fac_id
     WHERE s.svy_md <= p.top_perf
 ),
 top_below AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
-           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id
-                              ORDER BY s.svy_md ASC) AS rn
+           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id ORDER BY s.svy_md ASC) AS rn
     FROM perfs p
     JOIN surveys s ON s.well_fac_id = p.well_fac_id
     WHERE s.svy_md > p.top_perf
 ),
 btm_above AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
-           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id
-                              ORDER BY s.svy_md DESC) AS rn
+           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id ORDER BY s.svy_md DESC) AS rn
     FROM perfs p
     JOIN surveys s ON s.well_fac_id = p.well_fac_id
     WHERE s.svy_md <= p.btm_perf
 ),
 btm_below AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
-           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id
-                              ORDER BY s.svy_md ASC) AS rn
+           ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id ORDER BY s.svy_md ASC) AS rn
     FROM perfs p
     JOIN surveys s ON s.well_fac_id = p.well_fac_id
     WHERE s.svy_md > p.btm_perf
@@ -506,170 +424,123 @@ LEFT JOIN top_below tb ON p.cmpl_fac_id = tb.cmpl_fac_id AND tb.rn = 1
 LEFT JOIN btm_above ba ON p.cmpl_fac_id = ba.cmpl_fac_id AND ba.rn = 1
 LEFT JOIN btm_below bb ON p.cmpl_fac_id = bb.cmpl_fac_id AND bb.rn = 1
 ORDER BY p.cmpl_nme
-        """
+"""
+        self._execute(sql_query)
 
+    def _execute(self, sql):
         try:
             conn = self.conn_manager.get_connection('odw')
             cursor = conn.cursor()
-            cursor.execute(sql_query)
-
+            cursor.execute(sql)
             if cursor.description:
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
-
-                self.display_results(df) # Call common display method which includes sorting
+                self.display_results(df)
                 self.current_data = df
             else:
                 conn.commit()
-                messagebox.showinfo("Query Executed", "SQL query executed successfully. No results to display (e.g., DML statement).")
+                messagebox.showinfo("Query Executed", "No results to display.")
                 self.clear_results()
-                self.current_data = None
-
-            cursor.close()
-            conn.close()
-
+            cursor.close(); conn.close()
         except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e))
-            self.clear_results()
+            messagebox.showerror("Connection Error", str(e)); self.clear_results()
         except oracledb.Error as e:
             error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}") # Consistent error message
-            self.clear_results()
+            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results()
         except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-            self.clear_results()
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results()
 
-# Page 4: Performance Summary
-class PerformanceSummaryPage(Page):
-    def __init__(self, parent, controller):
-        super().__init__(parent, controller)
-        self.calculation_labels = {} # Initialized BEFORE create_widgets
-        self.create_widgets()
+
+# =========================================================================
+#  TAB 4 – Performance Summary
+# =========================================================================
+class PerformanceSummaryTab(tb.Frame, TreeviewMixin):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
+        self.calculation_labels = {}
+        self._build()
 
+    def _build(self):
+        tb.Label(self, text="Performance Summary by Field",
+                 font=("Helvetica", 16, "bold")).pack(pady=10)
 
-    def create_widgets(self):
-        header_label = tb.Label(self, text="Performance Summary by Field", font=("Helvetica", 16, "bold"))
-        header_label.pack(pady=10)
+        # Top row: date entry + pull button
+        top_row = tb.Frame(self)
+        top_row.pack(pady=5, padx=20, fill="x")
 
-        query_calc_frame = tb.Frame(self)
-        query_calc_frame.pack(pady=10, padx=20, fill="x", expand=False)
-        query_calc_frame.columnconfigure(0, weight=1) # Left column for date label/entry
-        query_calc_frame.columnconfigure(1, weight=1) # Right column for button
-
-        # Frame for Date Entry and Button on the same row
-        top_row_frame = tb.Frame(query_calc_frame)
-        top_row_frame.grid(row=0, column=0, columnspan=2, pady=5, sticky="ew")
-        top_row_frame.columnconfigure(0, weight=1) # For date entry frame
-        top_row_frame.columnconfigure(1, weight=1) # For button
-
-
-        # Last Project Update Date input
-        date_input_frame = tb.Frame(top_row_frame)
-        date_input_frame.grid(row=0, column=0, padx=5, sticky="w")
-        tb.Label(date_input_frame, text="Last Project Update Date:").pack(side="left", padx=5)
-        self.project_update_date_entry = tb.DateEntry(date_input_frame, dateformat="%Y-%m-%d")
+        date_frame = tb.Frame(top_row)
+        date_frame.pack(side="left")
+        tb.Label(date_frame, text="Last Project Update Date:").pack(side="left", padx=5)
+        self.project_update_date_entry = tb.DateEntry(date_frame, dateformat="%Y-%m-%d")
         self.project_update_date_entry.pack(side="left", padx=5)
-        # Set default date to 2 years ago from today
         two_years_ago = date.today() - timedelta(days=730)
-        self.project_update_date_entry.entry.delete(0, tk.END) # Clear any default ttkbootstrap might put
+        self.project_update_date_entry.entry.delete(0, tk.END)
         self.project_update_date_entry.entry.insert(0, two_years_ago.strftime("%Y-%m-%d"))
 
-        # --- MOVE BUTTON POSITION ---
-        # Position the button in the second column of top_row_frame
-        pull_data_btn = tb.Button(top_row_frame, text="Pull Performance Summary Data", command=self.pull_summary_data, bootstyle="info")
-        pull_data_btn.grid(row=0, column=1, padx=5, sticky="e")
-        # --- END MOVE BUTTON POSITION ---
+        tb.Button(top_row, text="Pull Performance Summary Data",
+                  command=self.pull_summary_data, bootstyle="info").pack(side="right")
 
+        # Calculations label frame
+        calc_lf = ttk.LabelFrame(self, text="Calculations", style="info.TLabelframe")
+        calc_lf.pack(pady=10, padx=20, fill="x")
+        calc_lf.columnconfigure(1, weight=1)
 
-        calc_label_frame = ttk.LabelFrame(query_calc_frame, text="Calculations", style="info.TLabelframe")
-        # Adjusted row to 1 as row 0 is now occupied by top_row_frame
-        calc_label_frame.grid(row=1, column=0, columnspan=2, pady=10, padx=5, sticky="nsew")
-        calc_label_frame.columnconfigure(1, weight=1)
+        calc_items = [
+            ("Total INJ wells (Active/TA):", "total_inj"),
+            ("Total PROD wells:", "total_prod"),
+            ("Active Injectors (Last 2 yrs):", "active_injectors"),
+            ("Idle Injectors (Last 2 yrs):", "idle_injectors"),
+            ("Injectors Drilled Since Last Update:", "injectors_drilled"),
+            ("Active Producers (Last 2 yrs):", "active_producers"),
+            ("Idle Producers (Last 2 yrs):", "idle_producers"),
+            ("Producers Drilled Since Last Update:", "producers_drilled"),
+            ("Producers Abandoned Since Last Update:", "producers_abandoned"),
+        ]
+        for row_idx, (text, key) in enumerate(calc_items):
+            tb.Label(calc_lf, text=text, anchor="w").grid(row=row_idx, column=0, sticky="ew", padx=5, pady=2)
+            lbl = tb.Label(calc_lf, text="N/A", bootstyle="success", font=("TkDefaultFont", 10, "bold"))
+            lbl.grid(row=row_idx, column=1, sticky="ew", padx=5, pady=2)
+            self.calculation_labels[key] = lbl
 
-        calc_row = 0
-        def add_calc_row(text_label, key):
-            nonlocal calc_row
-            tb.Label(calc_label_frame, text=text_label, anchor="w").grid(row=calc_row, column=0, sticky="ew", padx=5, pady=2)
-            # Labels will be green from 'success' bootstyle, and bold font
-            self.calculation_labels[key] = tb.Label(calc_label_frame, text="N/A", bootstyle="success", font=("TkDefaultFont", 10, "bold"))
-            self.calculation_labels[key].grid(row=calc_row, column=1, sticky="ew", padx=5, pady=2)
-            calc_row += 1
-
-        add_calc_row("Total INJ wells (Active/TA):", "total_inj") # Updated description
-        add_calc_row("Total PROD wells:", "total_prod")
-        add_calc_row("Active Injectors (Last 2 yrs):", "active_injectors")
-        add_calc_row("Idle Injectors (Last 2 yrs):", "idle_injectors")
-        add_calc_row("Injectors Drilled Since Last Update:", "injectors_drilled")
-        add_calc_row("Active Producers (Last 2 yrs):", "active_producers")
-        add_calc_row("Idle Producers (Last 2 yrs):", "idle_producers")
-        add_calc_row("Producers Drilled Since Last Update:", "producers_drilled")
-        add_calc_row("Producers Abandoned Since Last Update:", "producers_abandoned")
-
-
-        self.tree_frame = tb.Frame(self)
+        self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
-        self.tree_scroll_y = tb.Scrollbar(self.tree_frame, orient="vertical")
-        self.tree_scroll_y.pack(side="right", fill="y")
-        self.tree_scroll_x = tb.Scrollbar(self.tree_frame, orient="horizontal")
-        self.tree_scroll_x.pack(side="bottom", fill="x")
-
-        self.result_tree = ttk.Treeview(self.tree_frame, show="headings",
-                                        yscrollcommand=self.tree_scroll_y.set,
-                                        xscrollcommand=self.tree_scroll_x.set)
-        self.result_tree.pack(fill="both", expand=True)
-        self.tree_scroll_y.config(command=self.result_tree.yview)
-        self.tree_scroll_x.config(command=self.result_tree.xview)
-
-        copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
-        copy_button.pack(pady=10)
-
-        nav_frame = tb.Frame(self)
-        nav_frame.pack(pady=10)
-
-        back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(EngineeringStringPage), bootstyle="warning")
-        back_button.grid(row=0, column=0, padx=10)
-        
-        next_button = tb.Button(nav_frame, text="Next (Avg Tubing Pressure)", command=lambda: self.controller.show_page(TubingPressurePage), bootstyle="primary")
-        next_button.grid(row=0, column=1, padx=10)
-
+        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
+                  bootstyle="secondary").pack(pady=10)
 
     def pull_summary_data(self):
-        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
-        if not well_apis_to_query:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
-            self.clear_calculations()
-            return
+        apis = self.app.api_tab.get_apis()
+        if not apis:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
+            self.clear_calculations(); return
 
-        formatted_well_apis = format_well_api_list(well_apis_to_query)
-        if not formatted_well_apis:
-            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
-            self.clear_calculations()
-            return
+        formatted = format_well_api_list(apis)
+        if not formatted:
+            self.clear_calculations(); return
 
         sql_query = f"""
         WITH T1 AS (
             SELECT cmpl_fac_id, eftv_dttm AS last_inj_dte FROM
             (
-                SELECT cmpl_fac_id, eftv_dttm,aloc_stm_inj_dly_rte_qty, aloc_wtr_inj_dly_rte_qty,
+                SELECT cmpl_fac_id, eftv_dttm, aloc_stm_inj_dly_rte_qty, aloc_wtr_inj_dly_rte_qty,
                        DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
                 FROM cmpl_mnly_fact
-                WHERE aloc_wtr_inj_dly_rte_qty >0 or aloc_stm_inj_dly_rte_qty > 0
+                WHERE aloc_wtr_inj_dly_rte_qty > 0 OR aloc_stm_inj_dly_rte_qty > 0
             ) WHERE rnk = 1
         ),
         T2 AS (
             SELECT cmpl_fac_id, eftv_dttm AS last_prod_dte FROM
             (
-                SELECT cmpl_fac_id, eftv_dttm,aloc_gros_prod_dly_rte_qty ,
+                SELECT cmpl_fac_id, eftv_dttm, aloc_gros_prod_dly_rte_qty,
                        DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
                 FROM cmpl_mnly_fact
-                WHERE aloc_gros_prod_dly_rte_qty >0
+                WHERE aloc_gros_prod_dly_rte_qty > 0
             ) WHERE rnk = 1
         )
-
         SELECT wd.well_nme, wd.well_api_nbr, wd.fld_nme,
                cd.init_prod_dte, cd.init_inj_dte, cd.prim_purp_type_cde,
                cd.ENGR_STRG_NME,
@@ -684,312 +555,209 @@ class PerformanceSummaryPage(Page):
         WHERE
             cd.actv_indc = 'Y'
             AND wd.actv_indc = 'Y'
-            AND wd.well_api_nbr IN ({formatted_well_apis}) 
-            AND cd.prim_purp_type_cde IN ('PROD', 'INJ') 
+            AND wd.well_api_nbr IN ({formatted})
+            AND cd.prim_purp_type_cde IN ('PROD', 'INJ')
         """
 
         try:
             conn = self.conn_manager.get_connection('odw')
             cursor = conn.cursor()
             cursor.execute(sql_query)
-
             if cursor.description:
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
-
-                date_cols = ['LAST_INJ_DTE', 'LAST_PROD_DTE', 'INIT_INJ_DTE', 'INIT_PROD_DTE', 'CMPL_STATE_EFTV_DTTM']
+                date_cols = ['LAST_INJ_DTE', 'LAST_PROD_DTE', 'INIT_INJ_DTE',
+                             'INIT_PROD_DTE', 'CMPL_STATE_EFTV_DTTM']
                 for col in date_cols:
                     if col in df.columns:
                         df[col] = pd.to_datetime(df[col], errors='coerce')
-
-                self.display_results(df) 
-                self.current_data = df 
-
+                self.display_results(df)
+                self.current_data = df
                 self.perform_calculations(df)
-
             else:
                 conn.commit()
-                messagebox.showinfo("Query Executed", "SQL query executed successfully. No results to display.")
-                self.clear_results()
-                self.clear_calculations()
-                self.current_data = None
-
-            cursor.close()
-            conn.close()
-
+                messagebox.showinfo("Query Executed", "No results to display.")
+                self.clear_results(); self.clear_calculations()
+            cursor.close(); conn.close()
         except ConnectionError as e:
             messagebox.showerror("Connection Error", str(e))
-            self.clear_results()
-            self.clear_calculations()
+            self.clear_results(); self.clear_calculations()
         except oracledb.Error as e:
             error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}") 
-            self.clear_results()
-            self.clear_calculations()
+            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
+            self.clear_results(); self.clear_calculations()
         except Exception as e:
             messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-            self.clear_results()
-            self.clear_calculations()
+            self.clear_results(); self.clear_calculations()
 
     def perform_calculations(self, df):
-        today = date.today()
         try:
             project_update_date_str = self.project_update_date_entry.entry.get()
             project_update_date = datetime.strptime(project_update_date_str, "%Y-%m-%d").date()
         except ValueError:
-            messagebox.showerror("Date Error", "Invalid 'Last Project Update Date' format. Please use %Y-%m-%d.")
-            self.clear_calculations()
-            return
+            messagebox.showerror("Date Error", "Invalid date format. Please use YYYY-MM-DD.")
+            self.clear_calculations(); return
 
-        today_ts = pd.Timestamp(today)
+        today = date.today()
         project_update_date_ts = pd.Timestamp(project_update_date)
         two_years_ago_ts = pd.Timestamp(today - timedelta(days=730))
 
         inj_df = df[df['PRIM_PURP_TYPE_CDE'] == 'INJ']
         prod_df = df[df['PRIM_PURP_TYPE_CDE'] == 'PROD']
 
-        def update_label(key, value):
+        def _set(key, val):
             if key in self.calculation_labels:
-                self.calculation_labels[key].config(text=str(value))
+                self.calculation_labels[key].config(text=str(val))
 
-        total_inj = len(inj_df[inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned'])
-        update_label("total_inj", total_inj)
-
-        total_prod = len(prod_df)
-        update_label("total_prod", total_prod)
-
-        active_inj = inj_df[inj_df['LAST_INJ_DTE'] >= two_years_ago_ts]
-        update_label("active_injectors", len(active_inj))
-
-        idle_inj = inj_df[(inj_df['LAST_INJ_DTE'] < two_years_ago_ts) &
-                          (inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]
-        update_label("idle_injectors", len(idle_inj))
-
-        inj_drilled = inj_df[(inj_df['INIT_INJ_DTE'] > project_update_date_ts) &
-                             (inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]
-        update_label("injectors_drilled", len(inj_drilled))
-
-        active_prod = prod_df[prod_df['LAST_PROD_DTE'] >= two_years_ago_ts]
-        update_label("active_producers", len(active_prod))
-
-        idle_prod = prod_df[(prod_df['LAST_PROD_DTE'] < two_years_ago_ts) &
-                            (prod_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]
-        update_label("idle_producers", len(idle_prod))
-
-        prod_drilled = prod_df[prod_df['INIT_PROD_DTE'] > project_update_date_ts]
-        update_label("producers_drilled", len(prod_drilled))
-
-        prod_abandoned = prod_df[(prod_df['CMPL_STATE_TYPE_DESC'] == 'Permanently Abandoned') &
-                                 (prod_df['CMPL_STATE_EFTV_DTTM'] > project_update_date_ts)]
-        update_label("producers_abandoned", len(prod_abandoned))
+        _set("total_inj", len(inj_df[inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned']))
+        _set("total_prod", len(prod_df))
+        _set("active_injectors", len(inj_df[inj_df['LAST_INJ_DTE'] >= two_years_ago_ts]))
+        _set("idle_injectors", len(inj_df[(inj_df['LAST_INJ_DTE'] < two_years_ago_ts) &
+                                           (inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]))
+        _set("injectors_drilled", len(inj_df[(inj_df['INIT_INJ_DTE'] > project_update_date_ts) &
+                                              (inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]))
+        _set("active_producers", len(prod_df[prod_df['LAST_PROD_DTE'] >= two_years_ago_ts]))
+        _set("idle_producers", len(prod_df[(prod_df['LAST_PROD_DTE'] < two_years_ago_ts) &
+                                            (prod_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]))
+        _set("producers_drilled", len(prod_df[prod_df['INIT_PROD_DTE'] > project_update_date_ts]))
+        _set("producers_abandoned", len(prod_df[(prod_df['CMPL_STATE_TYPE_DESC'] == 'Permanently Abandoned') &
+                                                 (prod_df['CMPL_STATE_EFTV_DTTM'] > project_update_date_ts)]))
 
     def clear_calculations(self):
-        for key in self.calculation_labels:
-            self.calculation_labels[key].config(text="N/A")
+        for lbl in self.calculation_labels.values():
+            lbl.config(text="N/A")
 
 
-# Page 5: Avg Tubing Pressure & Inj Vol Data
-class TubingPressurePage(Page):
-    def __init__(self, parent, controller):
-        super().__init__(parent, controller)
-        self.create_widgets()
+# =========================================================================
+#  TAB 5 – Avg Tubing Pressure & Inj Vol
+# =========================================================================
+class TubingPressureTab(tb.Frame, TreeviewMixin):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
-        self.avg_pressure_label = None
+        self._build()
 
-    def create_widgets(self):
-        header_label = tb.Label(self, text="Avg Injection Volume and Wlhd Tubing Pressure", font=("Helvetica", 16, "bold"))
-        header_label.pack(pady=10)
+    def _build(self):
+        tb.Label(self, text="Avg Injection Volume and Wlhd Tubing Pressure",
+                 font=("Helvetica", 16, "bold")).pack(pady=10)
 
-        control_frame = tb.Frame(self)
-        control_frame.pack(pady=10, padx=20, fill="x", expand=False)
-        control_frame.columnconfigure(0, weight=1)
-        control_frame.columnconfigure(1, weight=1)
+        control = tb.Frame(self)
+        control.pack(pady=10, padx=20, fill="x")
 
-        pull_data_btn = tb.Button(control_frame, text="Pull Averages Data", command=self.pull_tubing_pressure_data, bootstyle="info")
-        pull_data_btn.grid(row=0, column=0, padx=5, sticky="w")
+        tb.Button(control, text="Pull Averages Data", command=self.pull_data,
+                  bootstyle="info").pack(side="left")
 
-        avg_pressure_frame = tb.Frame(control_frame)
-        avg_pressure_frame.grid(row=0, column=1, padx=5, sticky="e")
-        tb.Label(avg_pressure_frame, text="Overall Avg Tubing Pressure:").pack(side="left", padx=5)
-        self.avg_pressure_label = tb.Label(avg_pressure_frame, text="N/A", bootstyle="success", font=("TkDefaultFont", 10, "bold"))
+        avg_frame = tb.Frame(control)
+        avg_frame.pack(side="right")
+        tb.Label(avg_frame, text="Overall Avg Tubing Pressure:").pack(side="left", padx=5)
+        self.avg_pressure_label = tb.Label(avg_frame, text="N/A", bootstyle="success",
+                                            font=("TkDefaultFont", 10, "bold"))
         self.avg_pressure_label.pack(side="left", padx=5)
 
-        self.tree_frame = tb.Frame(self)
+        self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
-        self.tree_scroll_y = tb.Scrollbar(self.tree_frame, orient="vertical")
-        self.tree_scroll_y.pack(side="right", fill="y")
-        self.tree_scroll_x = tb.Scrollbar(self.tree_frame, orient="horizontal")
-        self.tree_scroll_x.pack(side="bottom", fill="x")
+        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
+                  bootstyle="secondary").pack(pady=10)
 
-        self.result_tree = ttk.Treeview(self.tree_frame, show="headings",
-                                        yscrollcommand=self.tree_scroll_y.set,
-                                        xscrollcommand=self.tree_scroll_x.set)
-        self.result_tree.pack(fill="both", expand=True)
-        self.tree_scroll_y.config(command=self.result_tree.yview)
-        self.tree_scroll_x.config(command=self.result_tree.xview)
+    def pull_data(self):
+        apis = self.app.api_tab.get_apis()
+        if not apis:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
+            self.clear_results(); self._clear_avg(); return
 
-        copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
-        copy_button.pack(pady=10)
-
-        nav_frame = tb.Frame(self)
-        nav_frame.pack(pady=10)
-
-        back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(PerformanceSummaryPage), bootstyle="warning")
-        back_button.grid(row=0, column=0, padx=10)
-        
-        next_button = tb.Button(nav_frame, text="Next (Daily Prod/Inj)", command=lambda: self.controller.show_page(ProductionInjectionPage), bootstyle="primary")
-        next_button.grid(row=0, column=1, padx=10)
-
-    def pull_tubing_pressure_data(self):
-        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
-        if not well_apis_to_query:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
-            self.clear_results()
-            self.clear_average_pressure()
-            return
-
-        formatted_well_apis = format_well_api_list(well_apis_to_query)
-        if not formatted_well_apis:
-            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
-            self.clear_results()
-            self.clear_average_pressure()
-            return
+        formatted = format_well_api_list(apis)
+        if not formatted:
+            self.clear_results(); self._clear_avg(); return
 
         sql_query = f"""
-        select wd.well_nme, wd.well_api_nbr,cd.cmpl_nme, cd.cmpl_fac_id, 
-        avg(case when cf.aloc_stm_inj_vol_qty > 0 then cf.aloc_stm_inj_vol_qty end) as avg_stm_inj_vol,
-        round(avg(case when cf.aloc_wtr_inj_vol_qty > 0 then cf.aloc_wtr_inj_vol_qty end),2) as avg_wtr_inj_vol,
-        round(avg(case when cf.wlhd_tbg_prsr_qty> 0 then cf.wlhd_tbg_prsr_qty end ),2) as avg_wlhd_tbg_prsr
-        from 
-        well_dmn wd
-        join
-        cmpl_dmn cd 
-        on wd.well_fac_id = cd.well_fac_id
-        join cmpl_dly_fact cf
-        on cd.cmpl_fac_id = cf.cmpl_fac_id
-        where wd.actv_indc = 'Y' and cd.actv_indc = 'Y' and cf.eftv_Dttm >= trunc(sysdate)-60
-        and wd.well_api_nbr in ({formatted_well_apis})
-        group by wd.well_nme, wd.well_api_nbr,cd.cmpl_nme, cd.cmpl_fac_id
+        SELECT wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id,
+            AVG(CASE WHEN cf.aloc_stm_inj_vol_qty > 0 THEN cf.aloc_stm_inj_vol_qty END) AS avg_stm_inj_vol,
+            ROUND(AVG(CASE WHEN cf.aloc_wtr_inj_vol_qty > 0 THEN cf.aloc_wtr_inj_vol_qty END), 2) AS avg_wtr_inj_vol,
+            ROUND(AVG(CASE WHEN cf.wlhd_tbg_prsr_qty > 0 THEN cf.wlhd_tbg_prsr_qty END), 2) AS avg_wlhd_tbg_prsr
+        FROM well_dmn wd
+        JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+        JOIN cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+        WHERE wd.actv_indc = 'Y' AND cd.actv_indc = 'Y'
+            AND cf.eftv_dttm >= TRUNC(SYSDATE) - 60
+            AND wd.well_api_nbr IN ({formatted})
+        GROUP BY wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id
         """
 
         try:
             conn = self.conn_manager.get_connection('odw')
             cursor = conn.cursor()
             cursor.execute(sql_query)
-
             if cursor.description:
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
-
-                self.display_results(df) 
-                self.current_data = df 
-                self.calculate_average_pressure(df)
+                self.display_results(df)
+                self.current_data = df
+                self._calc_avg(df)
             else:
                 conn.commit()
-                messagebox.showinfo("Query Executed", "SQL query executed successfully. No results to display.")
-                self.clear_results()
-                self.clear_average_pressure()
-                self.current_data = None
-
-            cursor.close()
-            conn.close()
-
+                messagebox.showinfo("Query Executed", "No results to display.")
+                self.clear_results(); self._clear_avg()
+            cursor.close(); conn.close()
         except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e))
-            self.clear_results()
-            self.clear_average_pressure()
+            messagebox.showerror("Connection Error", str(e)); self.clear_results(); self._clear_avg()
         except oracledb.Error as e:
             error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
-            self.clear_results()
-            self.clear_average_pressure()
+            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results(); self._clear_avg()
         except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-            self.clear_results()
-            self.clear_average_pressure()
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results(); self._clear_avg()
 
-    def calculate_average_pressure(self, df):
-        if self.avg_pressure_label is None:
-            return
-
-        pressure_column = next((col for col in df.columns if col.upper() == 'AVG_WLHD_TBG_PRSR'), None)
-        if pressure_column is None:
-            self.avg_pressure_label.config(text="Column not found")
-            if not df.empty:
-                messagebox.showwarning("Calculation Warning", "AVG_WLHD_TBG_PRSR column not found for average calculation.")
-            return
-
-        pressures = pd.to_numeric(df[pressure_column], errors='coerce').dropna()
-        if not pressures.empty:
-            avg_pressure = pressures.mean()
-            self.avg_pressure_label.config(text=f"{avg_pressure:.1f}")
+    def _calc_avg(self, df):
+        col = next((c for c in df.columns if c.upper() == 'AVG_WLHD_TBG_PRSR'), None)
+        if col is None:
+            self.avg_pressure_label.config(text="Column not found"); return
+        vals = pd.to_numeric(df[col], errors='coerce').dropna()
+        if not vals.empty:
+            self.avg_pressure_label.config(text=f"{vals.mean():.1f}")
         else:
-            self.avg_pressure_label.config(text="No valid pressure data")
+            self.avg_pressure_label.config(text="No valid data")
 
-    def clear_average_pressure(self):
-        if self.avg_pressure_label: 
-            self.avg_pressure_label.config(text="N/A")
+    def _clear_avg(self):
+        self.avg_pressure_label.config(text="N/A")
 
-# Page 6: Production and Injection Data
-class ProductionInjectionPage(Page):
-    def __init__(self, parent, controller):
-        super().__init__(parent, controller)
-        self.create_widgets()
+
+# =========================================================================
+#  TAB 6 – Production and Injection (Monthly)
+# =========================================================================
+class ProductionInjectionTab(tb.Frame, TreeviewMixin):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
+        self._build()
 
-    def create_widgets(self):
-        header_label = tb.Label(self, text="Production and Injection Data", font=("Helvetica", 16, "bold"))
-        header_label.pack(pady=10)
+    def _build(self):
+        tb.Label(self, text="Production and Injection Data",
+                 font=("Helvetica", 16, "bold")).pack(pady=10)
+        tb.Button(self, text="Pull Production/Injection Data", command=self.pull_data,
+                  bootstyle="info").pack(pady=10)
 
-        pull_data_btn = tb.Button(self, text="Pull Production/Injection Data", command=self.pull_data, bootstyle="info")
-        pull_data_btn.pack(pady=10)
-
-        self.tree_frame = tb.Frame(self)
+        self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
-        self.tree_scroll_y = tb.Scrollbar(self.tree_frame, orient="vertical")
-        self.tree_scroll_y.pack(side="right", fill="y")
-        self.tree_scroll_x = tb.Scrollbar(self.tree_frame, orient="horizontal")
-        self.tree_scroll_x.pack(side="bottom", fill="x")
-
-        self.result_tree = ttk.Treeview(self.tree_frame, show="headings",
-                                        yscrollcommand=self.tree_scroll_y.set,
-                                        xscrollcommand=self.tree_scroll_x.set)
-        self.result_tree.pack(fill="both", expand=True)
-        self.tree_scroll_y.config(command=self.result_tree.yview)
-        self.tree_scroll_x.config(command=self.result_tree.xview)
-
-        copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
-        copy_button.pack(pady=10)
-
-        nav_frame = tb.Frame(self)
-        nav_frame.pack(pady=10)
-
-        back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(TubingPressurePage), bootstyle="warning")
-        back_button.grid(row=0, column=0, padx=10)
-        
-        next_button = tb.Button(nav_frame, text="Next (Daily Inj/Pressure)", command=lambda: self.controller.show_page(DailyInjectionPressurePage), bootstyle="primary")
-        next_button.grid(row=0, column=1, padx=10)
+        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
+                  bootstyle="secondary").pack(pady=10)
 
     def pull_data(self):
-        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
-        if not well_apis_to_query:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
-            self.clear_results()
-            return
+        apis = self.app.api_tab.get_apis()
+        if not apis:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
+            self.clear_results(); return
 
-        formatted_well_apis = format_well_api_list(well_apis_to_query)
-        if not formatted_well_apis:
-            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
-            self.clear_results()
-            return
+        formatted = format_well_api_list(apis)
+        if not formatted:
+            self.clear_results(); return
 
-        # Updated query with GAS INJ Per Day and corrected WATER INJ mapping
         sql_query = f"""
         SELECT
             wd.well_nme AS "WELL NAME",
@@ -1001,189 +769,158 @@ class ProductionInjectionPage(Page):
             cf.aloc_stm_inj_dly_rte_qty AS "STEAM INJ Per Day",
             cf.aloc_wtr_inj_dly_rte_qty AS "WATER INJ Per Day",
             cf.aloc_gas_inj_dly_rte_qty AS "GAS INJ Per Day"
-        FROM
-            well_dmn wd
-            JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-            JOIN cmpl_mnly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
-        WHERE
-            cd.actv_indc = 'Y'
-            AND wd.actv_indc = 'Y'
-            AND wd.well_api_nbr IN ({formatted_well_apis})
+        FROM well_dmn wd
+        JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+        JOIN cmpl_mnly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+        WHERE cd.actv_indc = 'Y' AND wd.actv_indc = 'Y'
+            AND wd.well_api_nbr IN ({formatted})
             AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -62)
             AND cf.eftv_dttm <= TRUNC(SYSDATE)
-        ORDER BY
-            wd.well_api_nbr,
-            cf.eftv_dttm
+        ORDER BY wd.well_api_nbr, cf.eftv_dttm
         """
 
         try:
             conn = self.conn_manager.get_connection('odw')
             cursor = conn.cursor()
             cursor.execute(sql_query)
-
             if cursor.description:
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
-
                 if 'DATE' in df.columns:
                     df['DATE'] = pd.to_datetime(df['DATE'], errors='coerce')
-
-                self.display_results(df, apply_global_sort=False) 
-                self.current_data = df 
+                self.display_results(df, apply_global_sort=False)
+                self.current_data = df
             else:
                 conn.commit()
-                messagebox.showinfo("Query Executed", "SQL query executed successfully. No results to display.")
+                messagebox.showinfo("Query Executed", "No results to display.")
                 self.clear_results()
-                self.current_data = None
-
-            cursor.close()
-            conn.close()
-
+            cursor.close(); conn.close()
         except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e))
-            self.clear_results()
+            messagebox.showerror("Connection Error", str(e)); self.clear_results()
         except oracledb.Error as e:
             error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
-            self.clear_results()
+            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results()
         except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-            self.clear_results()
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results()
 
-# NEW Page 7: Daily Injection and Tubing Pressure (Full Data)
-class DailyInjectionPressurePage(Page):
-    def __init__(self, parent, controller):
-        super().__init__(parent, controller)
-        self.create_widgets()
+
+# =========================================================================
+#  TAB 7 – Daily Injection and Tubing Pressure
+# =========================================================================
+class DailyInjectionPressureTab(tb.Frame, TreeviewMixin):
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
+        self._build()
 
-    def create_widgets(self):
-        header_label = tb.Label(self, text="Daily Injection and Tubing Pressure (Full Data)", font=("Helvetica", 16, "bold"))
-        header_label.pack(pady=10)
+    def _build(self):
+        tb.Label(self, text="Daily Injection and Tubing Pressure (Full Data)",
+                 font=("Helvetica", 16, "bold")).pack(pady=10)
+        tb.Button(self, text="Pull Daily Data", command=self.pull_data,
+                  bootstyle="info").pack(pady=10)
 
-        pull_data_btn = tb.Button(self, text="Pull Daily Data", command=self.pull_data, bootstyle="info")
-        pull_data_btn.pack(pady=10)
-
-        self.tree_frame = tb.Frame(self)
+        self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
-        self.tree_scroll_y = tb.Scrollbar(self.tree_frame, orient="vertical")
-        self.tree_scroll_y.pack(side="right", fill="y")
-        self.tree_scroll_x = tb.Scrollbar(self.tree_frame, orient="horizontal")
-        self.tree_scroll_x.pack(side="bottom", fill="x")
-
-        self.result_tree = ttk.Treeview(self.tree_frame, show="headings",
-                                        yscrollcommand=self.tree_scroll_y.set,
-                                        xscrollcommand=self.tree_scroll_x.set)
-        self.result_tree.pack(fill="both", expand=True)
-        self.tree_scroll_y.config(command=self.result_tree.yview)
-        self.tree_scroll_x.config(command=self.result_tree.xview)
-
-        copy_button = tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard, bootstyle="secondary")
-        copy_button.pack(pady=10)
-
-        nav_frame = tb.Frame(self)
-        nav_frame.pack(pady=10)
-
-        back_button = tb.Button(nav_frame, text="Back", command=lambda: self.controller.show_page(ProductionInjectionPage), bootstyle="warning")
-        back_button.pack()
+        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
+                  bootstyle="secondary").pack(pady=10)
 
     def pull_data(self):
-        well_apis_to_query = self.controller.shared_data.get("well_apis", [])
-        if not well_apis_to_query:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the first page. Please go back to Page 1.")
-            self.clear_results()
-            return
+        apis = self.app.api_tab.get_apis()
+        if not apis:
+            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
+            self.clear_results(); return
 
-        formatted_well_apis = format_well_api_list(well_apis_to_query)
-        if not formatted_well_apis:
-            messagebox.showwarning("Input Error", "No valid Well APIs provided.")
-            self.clear_results()
-            return
+        formatted = format_well_api_list(apis)
+        if not formatted:
+            self.clear_results(); return
 
         sql_query = f"""
-        select wd.well_nme, wd.well_api_nbr,cd.cmpl_nme, cd.cmpl_fac_id, cf.eftv_dttm, 
-        cf.aloc_stm_inj_vol_qty,
-        cf.aloc_wtr_inj_vol_qty,
-        cf.wlhd_tbg_prsr_qty
-        from
-        well_dmn wd
-        join
-        cmpl_dmn cd
-        on wd.well_fac_id = cd.well_fac_id
-        join cmpl_dly_fact cf
-        on cd.cmpl_fac_id = cf.cmpl_fac_id
-        where wd.actv_indc = 'Y' and cd.actv_indc = 'Y' and cf.eftv_Dttm >= trunc(sysdate)-60 
-        and wd.well_api_nbr in ({formatted_well_apis})
-        order by cf.eftv_dttm
+        SELECT wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id,
+            cf.eftv_dttm,
+            cf.aloc_stm_inj_vol_qty,
+            cf.aloc_wtr_inj_vol_qty,
+            cf.wlhd_tbg_prsr_qty
+        FROM well_dmn wd
+        JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+        JOIN cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+        WHERE wd.actv_indc = 'Y' AND cd.actv_indc = 'Y'
+            AND cf.eftv_dttm >= TRUNC(SYSDATE) - 60
+            AND wd.well_api_nbr IN ({formatted})
+        ORDER BY cf.eftv_dttm
         """
 
         try:
             conn = self.conn_manager.get_connection('odw')
             cursor = conn.cursor()
             cursor.execute(sql_query)
-
             if cursor.description:
                 rows = cursor.fetchall()
                 columns = [col[0] for col in cursor.description]
                 df = pd.DataFrame(rows, columns=columns)
-
                 if 'EFTV_DTTM' in df.columns:
                     df['EFTV_DTTM'] = pd.to_datetime(df['EFTV_DTTM'], errors='coerce')
-
-                self.display_results(df, apply_global_sort=False) 
-                self.current_data = df 
+                self.display_results(df, apply_global_sort=False)
+                self.current_data = df
             else:
                 conn.commit()
-                messagebox.showinfo("Query Executed", "SQL query executed successfully. No results to display.")
+                messagebox.showinfo("Query Executed", "No results to display.")
                 self.clear_results()
-                self.current_data = None
-
-            cursor.close()
-            conn.close()
-
+            cursor.close(); conn.close()
         except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e))
-            self.clear_results()
+            messagebox.showerror("Connection Error", str(e)); self.clear_results()
         except oracledb.Error as e:
             error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
-            self.clear_results()
+            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results()
         except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-            self.clear_results()
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results()
 
-# Main Application Class
+
+# =========================================================================
+#  MAIN APPLICATION  –  single window with ttk.Notebook
+# =========================================================================
 class MainApplication(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
         self.title("Periodic Project Review")
-        self.geometry("1600x1200") 
+        self.geometry("1600x1200")
 
         s = ttk.Style()
         s.configure("TButton", font=("Helvetica", 12, "bold"))
+        # Make notebook tab text larger and bolder
+        s.configure("TNotebook.Tab", font=("Helvetica", 11, "bold"), padding=[12, 6])
 
-        self.container = tb.Frame(self)
-        self.container.pack(side="top", fill="both", expand=True)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
+        self.shared_data = {}
 
-        self.frames = {}
-        for F in (WellAPIInputPage, WellBasicDataPage, EngineeringStringPage, PerformanceSummaryPage, TubingPressurePage, ProductionInjectionPage, DailyInjectionPressurePage):
-            page_name = F.__name__
-            frame = F(parent=self.container, controller=self)
-            self.frames[page_name] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
+        # Create Notebook (tab container)
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
-        self.shared_data = {} 
+        # Build each tab — order matches original page flow
+        self.api_tab = WellAPITab(self.notebook, self)
+        self.notebook.add(self.api_tab, text="  Well APIs  ")
 
-        self.show_page(WellAPIInputPage)
+        self.basic_tab = WellBasicDataTab(self.notebook, self)
+        self.notebook.add(self.basic_tab, text="  Basic Data  ")
 
-    def show_page(self, page_class):
-        frame = self.frames[page_class.__name__]
-        frame.show_page_frame() 
+        self.perf_tab = TopPerfTab(self.notebook, self)
+        self.notebook.add(self.perf_tab, text="  Top Perf  ")
+
+        self.summary_tab = PerformanceSummaryTab(self.notebook, self)
+        self.notebook.add(self.summary_tab, text="  Summary  ")
+
+        self.tubing_tab = TubingPressureTab(self.notebook, self)
+        self.notebook.add(self.tubing_tab, text="  Avg Tubing Pres  ")
+
+        self.prod_inj_tab = ProductionInjectionTab(self.notebook, self)
+        self.notebook.add(self.prod_inj_tab, text="  Monthly Prod/Inj  ")
+
+        self.daily_tab = DailyInjectionPressureTab(self.notebook, self)
+        self.notebook.add(self.daily_tab, text="  Daily Inj/Pres  ")
+
 
 if __name__ == "__main__":
     app = MainApplication()
