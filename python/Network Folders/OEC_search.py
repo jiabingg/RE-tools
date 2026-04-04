@@ -599,6 +599,22 @@ class PDFScannerApp:
         self._is_scanning = False
 
         self._build_ui()
+        self._load_previous_roots()
+
+    def _load_previous_roots(self):
+        """Load completed root folders from scan_progress.json into the folder list."""
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            progress_path = os.path.join(script_dir, "data", PROGRESS_FILENAME)
+            if not os.path.exists(progress_path):
+                return
+            with open(progress_path, "r", encoding="utf-8") as f:
+                saved = json.load(f)
+            roots = saved.get("root_folders_completed", [])
+            if roots:
+                self.folder_text.insert("1.0", "\n".join(roots))
+        except (json.JSONDecodeError, IOError, KeyError):
+            pass
 
     # ── UI Construction ──────────────────────────────────────────────────
 
