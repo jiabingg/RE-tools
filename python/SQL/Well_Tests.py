@@ -8,6 +8,26 @@ import ttkbootstrap as tb
 import pandas as pd
 from datetime import datetime
 
+
+def ensure_oracle_thick_mode():
+    """Initialize python-oracledb thick mode when available."""
+    if not oracledb.is_thin_mode():
+        return
+
+    lib_dir = os.getenv("ORACLE_CLIENT_LIB_DIR")
+    try:
+        if lib_dir:
+            oracledb.init_oracle_client(lib_dir=lib_dir)
+        else:
+            oracledb.init_oracle_client()
+    except Exception as exc:
+        raise ConnectionError(
+            "Oracle thick mode could not be initialized. "
+            "Install Oracle Instant Client and set ORACLE_CLIENT_LIB_DIR, "
+            "or ensure ORACLE_HOME/PATH points to the client installation. "
+            f"Original error: {exc}"
+        ) from exc
+
 APP_TITLE = "Last 3 Well Tests by API Numbers"
 APP_WIDTH = 2400
 APP_HEIGHT = 1480
@@ -28,7 +48,8 @@ class OracleConnectionManager:
 
     def connect(self):
         cfg = self._connections[self._active]
-        return oracledb.connect(cfg["user"], cfg["password"], cfg["dsn"])
+        ensure_oracle_thick_mode()
+        return oracledb.connect(user=cfg["user"], password=cfg["password"], dsn=cfg["dsn"])
 
 # ---------------------------
 # Query Builder

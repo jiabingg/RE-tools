@@ -4,9 +4,32 @@ import tkinter as tk
 from tkinter import messagebox, scrolledtext
 from tkinter import ttk
 import tkinter.font
-import ttkbootstrap as tb
 import pandas as pd
 from datetime import datetime
+
+
+def ensure_oracle_thick_mode():
+    """Initialize python-oracledb thick mode when available.
+
+    Some Oracle password verifier types are only supported in thick mode.
+    This helper tries to switch from thin mode to thick mode before connect.
+    """
+    if not oracledb.is_thin_mode():
+        return
+
+    oracle_client_lib_dir = os.getenv("ORACLE_CLIENT_LIB_DIR")
+    try:
+        if oracle_client_lib_dir:
+            oracledb.init_oracle_client(lib_dir=oracle_client_lib_dir)
+        else:
+            oracledb.init_oracle_client()
+    except Exception as exc:
+        raise ConnectionError(
+            "Oracle thick mode could not be initialized. "
+            "Install Oracle Instant Client and set ORACLE_CLIENT_LIB_DIR, "
+            "or ensure ORACLE_HOME/PATH points to the client installation. "
+            f"Original error: {exc}"
+        ) from exc
 
 """
 Small UI app to query WELLBORE info for a list of WELL API numbers.
@@ -45,6 +68,7 @@ class OracleConnectionManager:
         if name not in self._connections:
             raise ValueError(f"Unknown DB connection name: {name}")
         config = self._connections[name]
+        ensure_oracle_thick_mode()
         try:
             return oracledb.connect(
                 user=config["user"], password=config["password"], dsn=config["dsn"]
@@ -62,9 +86,9 @@ class OracleConnectionManager:
 # ---------------------------
 # UI App
 # ---------------------------
-class WellCompletionApp(tb.Window):
+class WellCompletionApp(tk.Tk):
     def __init__(self):
-        super().__init__(themename="flatly")
+        super().__init__()
         self.title("Wellbore Lookup by Well API")
         self.geometry("1200x800")
 
@@ -75,14 +99,14 @@ class WellCompletionApp(tb.Window):
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
 
-        container = tb.Frame(self)
+        container = tk.Frame(self)
         container.pack(fill="both", expand=True, padx=12, pady=12)
 
         # Input panel
-        input_frame = tb.LabelFrame(container, text="Input", bootstyle="info")
+        input_frame = tk.LabelFrame(container, text="Input")
         input_frame.pack(fill="x", pady=8)
 
-        lbl = tb.Label(
+        lbl = tk.Label(
             input_frame,
             text="Enter WELL API numbers (one per line):",
             font=("Helvetica", 12),
@@ -95,27 +119,26 @@ class WellCompletionApp(tb.Window):
         self.api_text.pack(fill="x", padx=8, pady=6)
 
         # Buttons row
-        btn_row = tb.Frame(input_frame)
+        btn_row = tk.Frame(input_frame)
         btn_row.pack(fill="x", padx=8, pady=6)
 
-        run_btn = tb.Button(btn_row, text="Run Query", bootstyle="primary", command=self.run_query)
+        run_btn = ttk.Button(btn_row, text="Run Query", command=self.run_query)
         run_btn.pack(side="left")
 
-        copy_btn = tb.Button(
+        copy_btn = ttk.Button(
             btn_row,
             text="Copy Results to Clipboard",
-            bootstyle="secondary",
             command=self.copy_to_clipboard,
         )
         copy_btn.pack(side="left", padx=8)
 
         # Results table
-        table_frame = tb.Frame(container)
+        table_frame = tk.Frame(container)
         table_frame.pack(fill="both", expand=True)
 
-        self.tree_scroll_y = tb.Scrollbar(table_frame, orient="vertical")
+        self.tree_scroll_y = ttk.Scrollbar(table_frame, orient="vertical")
         self.tree_scroll_y.pack(side="right", fill="y")
-        self.tree_scroll_x = tb.Scrollbar(table_frame, orient="horizontal")
+        self.tree_scroll_x = ttk.Scrollbar(table_frame, orient="horizontal")
         self.tree_scroll_x.pack(side="bottom", fill="x")
 
         self.tree = ttk.Treeview(

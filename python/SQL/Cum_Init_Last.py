@@ -4,17 +4,46 @@ import tkinter as tk
 from tkinter import messagebox, scrolledtext
 from tkinter import ttk
 import tkinter.font
-import ttkbootstrap as tb
 import pandas as pd
-from datetime import datetime
+
+
+def ensure_oracle_thick_mode():
+    """Initialize oracledb thick mode when available.
+
+    This is required for Oracle password verifier types that are not
+    supported by thin mode, such as the DPY-3015 error shown in the app.
+    """
+    if not oracledb.is_thin_mode():
+        return
+
+    lib_dir = os.getenv("ORACLE_CLIENT_LIB_DIR")
+    try:
+        if lib_dir:
+            oracledb.init_oracle_client(lib_dir=lib_dir)
+        else:
+            oracledb.init_oracle_client()
+    except Exception as exc:
+        raise ConnectionError(
+            "Oracle thick mode could not be initialized. "
+            "Install Oracle Instant Client and set ORACLE_CLIENT_LIB_DIR, "
+            "or ensure ORACLE_HOME/PATH points to the client installation. "
+            f"Original error: {exc}"
+        ) from exc
 
 """
-Small UI app to query WELL + COMPLETION info for a list of WELL API numbers.
+UI tool: Well Status + Cumulative Snapshot
 
-- Enter one API per line
-- Click "Run Query"
-- Results appear in a table
-- "Copy Results to Clipboard" copies the table (Excel format)
+- Enter WELL API numbers (one per line)
+- Runs a query that returns:
+  * well name, API, field
+  * primary purpose, reservoir, init prod/inj dates
+  * Last injection & production dates (from CTEs)
+  * Current-month cumulative volumes (oil/water/gas prod, steam/water injected)
+  * Bottom-hole X/Y (from cmpl_non_ver_dmn)
+- Displays in a table with auto-sized columns
+- Button to copy results to clipboard (Excel format)
+
+Uses the same OracleConnectionManager style/credentials as your other tools.
 """
 
 # ---------------------------
@@ -22,7 +51,6 @@ Small UI app to query WELL + COMPLETION info for a list of WELL API numbers.
 # ---------------------------
 class OracleConnectionManager:
     def __init__(self):
-        # Environment variables can override these defaults
         self._connections = {
             "odw": {
                 "user": os.getenv("DB_USER_ODW", "rptguser"),
@@ -44,16 +72,13 @@ class OracleConnectionManager:
     def get_connection(self, name):
         if name not in self._connections:
             raise ValueError(f"Unknown DB connection name: {name}")
-        config = self._connections[name]
+        cfg = self._connections[name]
+        ensure_oracle_thick_mode()
         try:
-            return oracledb.connect(
-                user=config["user"], password=config["password"], dsn=config["dsn"]
-            )
+            return oracledb.connect(user=cfg["user"], password=cfg["password"], dsn=cfg["dsn"])
         except oracledb.Error as e:
-            error_obj, = e.args
-            raise ConnectionError(
-                f"Failed to connect to Oracle DB '{name}': {error_obj.message}"
-            ) from e
+            (err,) = e.args
+            raise ConnectionError(f"Failed to connect to Oracle DB '{name}': {err.message}") from e
 
     def available_connections(self):
         return list(self._connections.keys())
@@ -62,73 +87,51 @@ class OracleConnectionManager:
 # ---------------------------
 # UI App
 # ---------------------------
-class WellCompletionApp(tb.Window):
+class WellStatusSummaryApp(tk.Tk):
     def __init__(self):
-        super().__init__(themename="flatly")
-        self.title("Well & Completion State Lookup")
-        self.geometry("1200x800")
+        super().__init__()
+        self.title("Well Status + Cumulative Snapshot")
+        self.geometry("1400x900")
 
-        # style
         s = ttk.Style()
         s.configure("TButton", font=("Helvetica", 12, "bold"))
 
         self.conn_manager = OracleConnectionManager()
         self.current_data = None
 
-        container = tb.Frame(self)
+        container = tk.Frame(self)
         container.pack(fill="both", expand=True, padx=12, pady=12)
 
-        # Input panel
-        input_frame = tb.LabelFrame(container, text="Input", bootstyle="info")
+        # Input area
+        input_frame = tk.LabelFrame(container, text="Input")
         input_frame.pack(fill="x", pady=8)
 
-        lbl = tb.Label(
-            input_frame,
-            text="Enter WELL API numbers (one per line):",
-            font=("Helvetica", 12),
-        )
-        lbl.pack(anchor="w", padx=8, pady=6)
+        tk.Label(input_frame, text="Enter WELL API numbers (one per line):", font=("Helvetica", 12)).pack(anchor="w", padx=8, pady=6)
 
-        self.api_text = scrolledtext.ScrolledText(
-            input_frame, wrap=tk.WORD, width=40, height=8, font=("Courier New", 10)
-        )
+        self.api_text = scrolledtext.ScrolledText(input_frame, wrap=tk.WORD, width=50, height=10, font=("Courier New", 10))
         self.api_text.pack(fill="x", padx=8, pady=6)
 
-        # Buttons row
-        btn_row = tb.Frame(input_frame)
+        btn_row = tk.Frame(input_frame)
         btn_row.pack(fill="x", padx=8, pady=6)
 
-        run_btn = tb.Button(btn_row, text="Run Query", bootstyle="primary", command=self.run_query)
-        run_btn.pack(side="left")
-
-        copy_btn = tb.Button(
-            btn_row,
-            text="Copy Results to Clipboard",
-            bootstyle="secondary",
-            command=self.copy_to_clipboard,
-        )
-        copy_btn.pack(side="left", padx=8)
+        ttk.Button(btn_row, text="Run Query", command=self.run_query).pack(side="left")
+        ttk.Button(btn_row, text="Copy Results to Clipboard", command=self.copy_to_clipboard).pack(side="left", padx=8)
 
         # Results table
-        table_frame = tb.Frame(container)
+        table_frame = tk.Frame(container)
         table_frame.pack(fill="both", expand=True)
 
-        self.tree_scroll_y = tb.Scrollbar(table_frame, orient="vertical")
+        self.tree_scroll_y = ttk.Scrollbar(table_frame, orient="vertical")
         self.tree_scroll_y.pack(side="right", fill="y")
-        self.tree_scroll_x = tb.Scrollbar(table_frame, orient="horizontal")
+        self.tree_scroll_x = ttk.Scrollbar(table_frame, orient="horizontal")
         self.tree_scroll_x.pack(side="bottom", fill="x")
 
-        self.tree = ttk.Treeview(
-            table_frame,
-            show="headings",
-            yscrollcommand=self.tree_scroll_y.set,
-            xscrollcommand=self.tree_scroll_x.set,
-        )
+        self.tree = ttk.Treeview(table_frame, show="headings", yscrollcommand=self.tree_scroll_y.set, xscrollcommand=self.tree_scroll_x.set)
         self.tree.pack(fill="both", expand=True)
         self.tree_scroll_y.config(command=self.tree.yview)
         self.tree_scroll_x.config(command=self.tree.xview)
 
-        # compute font for auto-width
+        # Font for measuring column widths
         try:
             treeview_font_name = ttk.Style().lookup("Treeview", "font")
             self.tree_font = tkinter.font.Font(font=treeview_font_name)
@@ -144,50 +147,60 @@ class WellCompletionApp(tb.Window):
             messagebox.showwarning("Input Error", "Please enter at least one WELL API number.")
             self.clear_table()
             return
-
-        # --- SAFE (bind) version of your query with dynamic IN list ---
-        # It is functionally equivalent to the text you provided.
-        bind_names = [f"api{i}" for i in range(len(apis))]
-        placeholders = ", ".join([f":{b}" for b in bind_names])
-        params = {b: v for b, v in zip(bind_names, apis)}
+        in_list = ", ".join([f"'{a}'" for a in apis])
 
         sql = f"""
+            -- Last Injection Date
+            WITH T1 AS (
+                SELECT cmpl_fac_id, eftv_dttm AS last_inj_dte FROM (
+                    SELECT cmpl_fac_id, eftv_dttm, aloc_stm_inj_dly_rte_qty,
+                           DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
+                    FROM cmpl_mnly_fact
+                    WHERE aloc_stm_inj_dly_rte_qty > 0
+                ) WHERE rnk = 1
+            ),
+            -- Last Production Date
+            T2 AS (
+                SELECT cmpl_fac_id, eftv_dttm AS last_prod_dte FROM (
+                    SELECT cmpl_fac_id, eftv_dttm, aloc_gros_prod_dly_rte_qty,
+                           DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
+                    FROM cmpl_mnly_fact
+                    WHERE aloc_gros_prod_dly_rte_qty > 0
+                ) WHERE rnk = 1
+            )
             SELECT
                 wd.well_nme,
                 wd.well_api_nbr,
                 wd.fld_nme,
                 cd.prim_purp_type_cde,
-                cd.engr_strg_nme,
-                cd.cmpl_state_type_desc,
-                cd.cmpl_state_eftv_dttm
+                cd.ENGR_STRG_NME,
+                cd.init_prod_dte,
+                cd.init_inj_dte,
+                T1.last_inj_dte,
+                T2.last_prod_dte,
+                ccf.aloc_cum_oil_prod_vol_qty,
+                ccf.aloc_cum_wtr_prod_vol_qty,
+                ccf.aloc_cum_gas_prod_vol_qty,
+                ccf.aloc_cum_stm_inj_vol_qty,
+                ccf.aloc_cum_wtr_inj_vol_qty,
+                cnd.btm_xcrd_qty,
+                cnd.btm_ycrd_qty
             FROM well_dmn wd
-            JOIN cmpl_dmn cd
-                ON wd.well_fac_id = cd.well_fac_id
+            JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+            LEFT JOIN cmpl_non_ver_dmn cnd ON cd.cmpl_fac_id = cnd.cmpl_fac_id
+            LEFT JOIN curr_cmpl_opnl_stat os ON cd.cmpl_fac_id = os.cmpl_fac_id
+            JOIN cmpl_mnly_cum_fact ccf ON (cd.cmpl_fac_id = ccf.cmpl_fac_id AND ccf.eftv_dttm = TRUNC(SYSDATE, 'MM'))
+            LEFT JOIN T1 ON cd.cmpl_fac_id = T1.cmpl_fac_id
+            LEFT JOIN T2 ON cd.cmpl_fac_id = T2.cmpl_fac_id
             WHERE cd.actv_indc = 'Y'
               AND wd.actv_indc = 'Y'
-              AND cd.cmpl_state_type_cde NOT IN ('PRPO','FUTR')
-              AND wd.well_api_nbr IN ({placeholders})
-              AND cd.cmpl_seq_nbr IS NOT NULL
+              AND wd.well_api_nbr IN ({in_list})
         """
-
-        # --- If you want the literal string interpolation version you pasted, use this instead ---
-        # formatted_well_apis = ", ".join([f"'{a}'" for a in apis])
-        # sql = f"""
-        #     select wd.well_nme,wd.well_api_nbr,wd.fld_nme,
-        #     cd.prim_purp_type_cde,
-        #     cd.ENGR_STRG_NME, cd.CMPL_STATE_TYPE_DESC, cd.CMPL_STATE_EFTV_DTTM
-        #     from well_dmn wd
-        #     join cmpl_dmn cd
-        #     on wd.well_fac_id = cd.well_fac_id
-        #     where cd.actv_indc= 'Y' and wd.actv_indc = 'Y' and cd.cmpl_state_type_cde not in ('PRPO','FUTR')
-        #     and wd.well_api_nbr in ({formatted_well_apis})
-        #     and cd.CMPL_SEQ_NBR is not null
-        # """
 
         try:
             conn = self.conn_manager.get_connection("odw")
             cur = conn.cursor()
-            cur.execute(sql, params)  # pass params for bind placeholders
+            cur.execute(sql)
 
             rows = cur.fetchall() if cur.description else []
             cols = [c[0] for c in cur.description] if cur.description else []
@@ -201,19 +214,15 @@ class WellCompletionApp(tb.Window):
 
             df = pd.DataFrame(rows, columns=cols)
 
-            # Normalize date column & friendly order
-            for col in ["CMPL_STATE_EFTV_DTTM", "cmpl_state_eftv_dttm"]:
+            # Normalize date columns
+            for col in [
+                "INIT_PROD_DTE",
+                "INIT_INJ_DTE",
+                "LAST_INJ_DTE",
+                "LAST_PROD_DTE",
+            ]:
                 if col in df.columns:
                     df[col] = pd.to_datetime(df[col], errors="coerce")
-
-            # Optional: sort results (API then effective date desc)
-            if "WELL_API_NBR" in df.columns:
-                sort_cols = ["WELL_API_NBR"]
-                if "CMPL_STATE_EFTV_DTTM" in df.columns:
-                    sort_cols.append("CMPL_STATE_EFTV_DTTM")
-                    df = df.sort_values(sort_cols, ascending=[True, False])
-                else:
-                    df = df.sort_values(sort_cols)
 
             self.current_data = df
             self.display_dataframe(df)
@@ -222,23 +231,21 @@ class WellCompletionApp(tb.Window):
             messagebox.showerror("Connection Error", str(e))
             self.clear_table()
         except oracledb.Error as e:
-            error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
+            (err,) = e.args
+            messagebox.showerror("Database Error", f"Oracle Error: {err.message}")
             self.clear_table()
         except Exception as e:
             messagebox.showerror("Error", f"Unexpected error: {e}")
             self.clear_table()
 
     def display_dataframe(self, df: pd.DataFrame):
-        # Clear existing
+        # clear
         for i in self.tree.get_children():
             self.tree.delete(i)
         self.tree["columns"] = []
-
         if df.empty:
             return
 
-        # Column order & widths
         cols = list(df.columns)
         self.tree["columns"] = cols
         self.tree["displaycolumns"] = cols
@@ -247,7 +254,6 @@ class WellCompletionApp(tb.Window):
             self.tree.heading(col, text=col, anchor="w")
             self.tree.column(col, width=self.tree_font.measure(col) + 24, stretch=False)
 
-        # Insert rows with light formatting
         for _, row in df.iterrows():
             vals = []
             for item in row:
@@ -259,7 +265,6 @@ class WellCompletionApp(tb.Window):
                     vals.append(item)
             self.tree.insert("", "end", values=vals)
 
-            # Auto-grow columns based on content
             for i, item in enumerate(vals):
                 width = self.tree_font.measure(str(item)) + 12
                 col_id = cols[i]
@@ -284,5 +289,5 @@ class WellCompletionApp(tb.Window):
 
 
 if __name__ == "__main__":
-    app = WellCompletionApp()
+    app = WellStatusSummaryApp()
     app.mainloop()

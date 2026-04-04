@@ -14,7 +14,7 @@ class Launcher(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
         self.title("Project Utilities Launcher")
-        self.geometry("1100x950")
+        self.geometry("1100x665")
 
         s = ttk.Style()
         s.configure("TButton", font=("Helvetica", 12, "bold"))
@@ -31,6 +31,11 @@ class Launcher(tb.Window):
         for label, folder, bootstyle in sections:
             frame = tb.LabelFrame(self, text=label)
             frame.pack(fill="x", padx=12, pady=8)
+            if label in ["ODW", "EKPSPP"]:
+                frame.configure(height=1120)
+            else:
+                frame.configure(height=560)
+            frame.pack_propagate(False)
             folder_path = os.path.join(self.base_dir, folder)
             if os.path.isdir(folder_path):
                 scripts = sorted([f for f in os.listdir(folder_path) if f.endswith('.py')])
