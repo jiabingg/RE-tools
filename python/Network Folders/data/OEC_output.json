@@ -1,0 +1,88 @@
+{
+  "created": "2026-04-03T16:31:24.251806",
+  "last_updated": "2026-04-03T22:21:25.981777",
+  "entries": [
+    {
+      "filename": "Attachment 11 Injectate Analysis.pdf",
+      "folder": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\New folder",
+      "filepath": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\New folder\\Attachment 11 Injectate Analysis.pdf",
+      "found_at": "2026-04-03T16:31:24.356088",
+      "match_status": "content_confirmed",
+      "content_keywords_found": [
+        "Oilfield Environmental & Compliance"
+      ],
+      "root_folder": ""
+    },
+    {
+      "filename": "IP(8)_North Coles Levee - Water Analysis.pdf",
+      "folder": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\New folder",
+      "filepath": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\New folder\\IP(8)_North Coles Levee - Water Analysis.pdf",
+      "found_at": "2026-04-03T16:31:24.375071",
+      "match_status": "content_confirmed",
+      "content_keywords_found": [
+        "UIC Water Testing",
+        "Oilfield Environmental & Compliance"
+      ],
+      "root_folder": ""
+    },
+    {
+      "filename": "Appendix W-IP-4 Water Analysis Reports of 22 Wells and Non-USDW Aquifer Demonstration.pdf",
+      "folder": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\New folder",
+      "filepath": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\New folder\\Appendix W-IP-4 Water Analysis Reports of 22 Wells and Non-USDW Aquifer Demonstration.pdf",
+      "root_folder": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples",
+      "match_status": "filename_match_only",
+      "content_keywords_found": [],
+      "found_at": "2026-04-03T22:16:58.347938"
+    },
+    {
+      "filename": "Attachment 6 Water Analysis.pdf",
+      "folder": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\WD\\UIC_45406003 McKittrickFinalDocsCornerstone\\Attachments and Figures",
+      "filepath": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\WD\\UIC_45406003 McKittrickFinalDocsCornerstone\\Attachments and Figures\\Attachment 6 Water Analysis.pdf",
+      "root_folder": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples",
+      "match_status": "content_confirmed",
+      "content_keywords_found": [
+        "Oilfield Environmental & Compliance"
+      ],
+      "found_at": "2026-04-03T22:16:58.712858"
+    },
+    {
+      "filename": "Attachment 11 Injectate Analysis.pdf",
+      "folder": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\WD\\UIC_46400104 Submittal Package 10-03-2025",
+      "filepath": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples\\WD\\UIC_46400104 Submittal Package 10-03-2025\\Attachment 11 Injectate Analysis.pdf",
+      "root_folder": "C:\\Users\\jiab\\OneDrive - California Resources Corporation\\1_UIC\\Examples",
+      "match_status": "content_confirmed",
+      "content_keywords_found": [
+        "Oilfield Environmental & Compliance"
+      ],
+      "found_at": "2026-04-03T22:16:58.745580"
+    },
+    {
+      "filename": "Appendix W-IP-4 Water Analysis Reports of 22 Wells and Non-USDW Aquifer Demonstration.pdf",
+      "folder": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews\\Ventura\\2024 Group 1\\9. Appendix",
+      "filepath": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews\\Ventura\\2024 Group 1\\9. Appendix\\Appendix W-IP-4 Water Analysis Reports of 22 Wells and Non-USDW Aquifer Demonstration.pdf",
+      "root_folder": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews",
+      "match_status": "filename_match_only",
+      "content_keywords_found": [],
+      "found_at": "2026-04-03T22:20:57.715071"
+    },
+    {
+      "filename": "Appendix W-IP-4 Water Analysis Reports of 22 Wells and Non-USDW Aquifer Demonstration.pdf",
+      "folder": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews\\Ventura\\2025 Group 2\\9. Appendix",
+      "filepath": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews\\Ventura\\2025 Group 2\\9. Appendix\\Appendix W-IP-4 Water Analysis Reports of 22 Wells and Non-USDW Aquifer Demonstration.pdf",
+      "root_folder": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews",
+      "match_status": "filename_match_only",
+      "content_keywords_found": [],
+      "found_at": "2026-04-03T22:21:05.865959"
+    },
+    {
+      "filename": "Appendix W-IP-4 Water Analysis Reports of 22 Wells and Non-USDW Aquifer Demonstration.pdf",
+      "folder": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews\\Ventura\\2025 Group 3\\8. Appendix",
+      "filepath": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews\\Ventura\\2025 Group 3\\8. Appendix\\Appendix W-IP-4 Water Analysis Reports of 22 Wells and Non-USDW Aquifer Demonstration.pdf",
+      "root_folder": "U:\\BKCALL02-Central\\EHS - DOGGR\\UIC\\Project by Project Reviews",
+      "match_status": "filename_match_only",
+      "content_keywords_found": [],
+      "found_at": "2026-04-03T22:21:14.154312"
+    }
+  ],
+  "total_entries": 8
+}
