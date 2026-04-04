@@ -281,6 +281,49 @@ ORDER BY MV.PID, MV.PROD_INJ_DATE"""
     return results, sql
 
 
+def fetch_tab5(cur, api14_list, api14_name_map, log):
+    """Tab 5: Daily Injection & Pressure — 60 days from HMR.DAILY_INJECTION_DATA.
+    Columns: API14, well name, date, calculated rate, accumulated volume,
+    wellhead pressure, injection pressure, upstream/downstream pressure,
+    pressure ratio, choke size, hours, 7-day averages, comp type/status."""
+    t = time.time()
+    w = _chunked_in("D.API_NO14", api14_list)
+    sql = f"""SELECT D.API_NO14 AS API_14, D.AUTOMATION_NAME AS WELL_NAME,
+    TO_CHAR(D.INJ_DATE, 'YYYY-MM-DD') AS INJ_DATE,
+    ROUND(D.CALCULATED_RATE, 2) AS CALC_RATE,
+    ROUND(D.ACCUM_VOL, 2) AS ACCUM_VOL,
+    ROUND(D.WELL_HEAD_PSI, 1) AS WH_PRESS,
+    ROUND(D.WELL_INJ_PRESS, 1) AS INJ_PRESS,
+    ROUND(D.UPSTREAM_PRESS, 1) AS UP_PRESS,
+    ROUND(D.DOWNSTREAM_PRESS, 1) AS DN_PRESS,
+    ROUND(D.PRESSURE_RATIO, 4) AS PRESS_RATIO,
+    D.CHOKE_SIZE,
+    ROUND(D.HOURS, 1) AS HOURS,
+    D.CURR_COMP_TYPE AS COMP_TYPE,
+    D.CURR_COMP_STATUS AS STATUS,
+    ROUND(D.INJ_RATE_7D_AVG, 2) AS RATE_7D_AVG,
+    ROUND(D.UPSTREAM_PRESS_7D_AVG, 1) AS UP_PRESS_7D,
+    ROUND(D.DOWNSTREAM_PRESS_7D_AVG, 1) AS DN_PRESS_7D
+FROM HMR.DAILY_INJECTION_DATA D
+WHERE {w}
+  AND D.INJ_DATE >= SYSDATE - 60
+ORDER BY D.API_NO14, D.INJ_DATE"""
+    cur.execute(sql)
+    rows = cur.fetchall()
+    cols = [d[0] for d in cur.description]
+    log(f"Tab5: {len(rows)} daily rows ({time.time()-t:.1f}s)")
+
+    results = []
+    for row in rows:
+        d = dict(zip(cols, row))
+        a14 = str(d.get("API_14", ""))
+        d["API_10"] = a14[:10]
+        if not d.get("WELL_NAME"):
+            d["WELL_NAME"] = api14_name_map.get(a14, "")
+        results.append(d)
+    return results, sql
+
+
 # ---------------------------------------------------------------------------
 # Main Application
 # ---------------------------------------------------------------------------
@@ -305,6 +348,7 @@ class WellDataViewer(tk.Tk):
         self._build_tab2()
         self._build_tab3()
         self._build_tab4()
+        self._build_tab5()
 
         self.log("Application started.")
         self.after(200, self._detect_driver)
@@ -428,7 +472,7 @@ class WellDataViewer(tk.Tk):
         self.log(f"Validated {len(valid)} unique APIs, {dupes} dupes, {len(invalid)} invalid.")
         if not valid: self.lbl_status.config(text="No valid APIs.", foreground="red"); return
         self.lbl_status.config(text=f"✓ {len(valid)} APIs — fetching all tabs…", foreground="blue")
-        for lbl in (self.lbl_tab2_status, self.lbl_tab3_status, self.lbl_tab4_status):
+        for lbl in (self.lbl_tab2_status, self.lbl_tab3_status, self.lbl_tab4_status, self.lbl_tab5_status):
             lbl.config(text="Queued…", foreground="blue")
         self.update_idletasks()
         threading.Thread(target=self._fetch_all_tabs, daemon=True).start()
@@ -678,6 +722,39 @@ class WellDataViewer(tk.Tk):
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
 
+    # ── TAB 5 — Daily Injection & Pressure ──
+    def _build_tab5(self):
+        tab = ttk.Frame(self.notebook)
+        self.notebook.add(tab, text="  Daily Inj & Pressure  ")
+
+        cols = ("WELL_NAME","API_10","API_14","INJ_DATE",
+                "CALC_RATE","ACCUM_VOL",
+                "WH_PRESS","INJ_PRESS","UP_PRESS","DN_PRESS",
+                "PRESS_RATIO","CHOKE_SIZE","HOURS",
+                "COMP_TYPE","STATUS",
+                "RATE_7D_AVG","UP_PRESS_7D","DN_PRESS_7D")
+        hm = {"WELL_NAME":"Well Name","API_10":"API 10","API_14":"API 14",
+              "INJ_DATE":"Date","CALC_RATE":"Calc Rate (BPD)",
+              "ACCUM_VOL":"Accum Vol (BBL)",
+              "WH_PRESS":"WH Press (psi)","INJ_PRESS":"Inj Press (psi)",
+              "UP_PRESS":"Upstream (psi)","DN_PRESS":"Downstream (psi)",
+              "PRESS_RATIO":"Press Ratio","CHOKE_SIZE":"Choke",
+              "HOURS":"Hours","COMP_TYPE":"Comp Type","STATUS":"Status",
+              "RATE_7D_AVG":"Rate 7D Avg","UP_PRESS_7D":"Up Press 7D",
+              "DN_PRESS_7D":"Dn Press 7D"}
+
+        toolbar, self.tree5, self.sql5 = self._make_tree_tab(
+            tab, cols, hm, sql_label="SQL Query (HMR.DAILY_INJECTION_DATA, 60 days)")
+
+        ttk.Button(toolbar, text="Copy to Clipboard",
+                   command=lambda: copy_tree_to_clipboard(self.tree5, self)).pack(side="left", padx=4)
+
+        ttk.Label(toolbar, text="  Source: HMR.DAILY_INJECTION_DATA (60 days)",
+                  foreground="gray", font=("TkDefaultFont",8)).pack(side="left", padx=12)
+
+        self.lbl_tab5_status = ttk.Label(toolbar, text="")
+        self.lbl_tab5_status.pack(side="right", padx=8)
+
     # ── FETCH ALL ──
     def _fetch_all_tabs(self):
         t_total = time.time()
@@ -689,7 +766,7 @@ class WellDataViewer(tk.Tk):
 
             # Step 1
             t = time.time()
-            for lbl in (self.lbl_tab2_status, self.lbl_tab3_status, self.lbl_tab4_status):
+            for lbl in (self.lbl_tab2_status, self.lbl_tab3_status, self.lbl_tab4_status, self.lbl_tab5_status):
                 self.after(0, lambda l=lbl: l.config(text="Step 1: API14 lookup…", foreground="blue"))
             rows1, sql1 = step1_api14_lookup(cur, self.validated_apis)
             api14_list = list(set(str(r[0]) for r in rows1))
@@ -708,7 +785,7 @@ class WellDataViewer(tk.Tk):
             self.after(0, self.log, f"Step 1: {len(api14_list)} API14s ({time.time()-t:.1f}s)")
 
             if not api14_list:
-                for lbl in (self.lbl_tab2_status, self.lbl_tab3_status, self.lbl_tab4_status):
+                for lbl in (self.lbl_tab2_status, self.lbl_tab3_status, self.lbl_tab4_status, self.lbl_tab5_status):
                     self.after(0, lambda l=lbl: l.config(text="No completions found.", foreground="orange"))
                 self.after(0, lambda: self.lbl_status.config(text="No completions.", foreground="orange"))
                 cur.close(); conn.close(); return
@@ -760,6 +837,17 @@ class WellDataViewer(tk.Tk):
             # Auto-show chart
             self.after(100, self._show_chart)
 
+            # Tab 5
+            self.after(0, lambda: self.lbl_tab5_status.config(text="Fetching…", foreground="blue"))
+            t5_res, t5_sql = fetch_tab5(cur, api14_list, api14_name_map,
+                                         lambda m: self.after(0, self.log, m))
+            self.after(0, self._populate_generic, self.tree5, t5_res)
+            self.after(0, self._fill_sql, self.sql5, t5_sql)
+            n5 = len(t5_res)
+            self.after(0, lambda: self.lbl_tab5_status.config(
+                text=f"{n5} daily rows" if n5 else "No daily injection data (60 days)",
+                foreground="green" if n5 else "orange"))
+
             cur.close(); conn.close()
             elapsed = time.time() - t_total
             self.after(0, self.log, f"All tabs done in {elapsed:.1f}s.")
@@ -770,7 +858,7 @@ class WellDataViewer(tk.Tk):
             tb = traceback.format_exc()
             self.after(0, self.log, f"ERROR: {e}")
             self.after(0, self.log, tb)
-            for lbl in (self.lbl_tab2_status, self.lbl_tab3_status, self.lbl_tab4_status):
+            for lbl in (self.lbl_tab2_status, self.lbl_tab3_status, self.lbl_tab4_status, self.lbl_tab5_status):
                 self.after(0, lambda l=lbl: l.config(text="Error", foreground="red"))
             self.after(0, lambda: self.lbl_status.config(text="✗ Error — see log", foreground="red"))
             self.after(0, lambda: messagebox.showerror("Error", f"Failed:\n{e}"))
