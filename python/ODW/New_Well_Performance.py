@@ -1,10 +1,11 @@
 """
-Recent Drilled Wells Performance Viewer  (v4)
+Recent Drilled Wells Performance Viewer  (v5)
 ===============================================
 Tabs:
   1. Well Inventory   — one row per well (largest cmpl_fac_id), P&A excluded
   2. Well Tests       — latest + peak allocated tests (after spud date only)
   3. Well Test Chart  — producer: well-test scatter; injector: daily measured inj
+                        Left panel: 3-column sortable well selector (Name, Type, Peak Oil)
 
 Requirements:   pip install oracledb matplotlib
 Run:            python recent_wells_performance.py
@@ -37,43 +38,32 @@ except ImportError:
     HAS_MPL = False
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SQL — Tab 1: Inventory (one row per API — largest cmpl_fac_id)
+# SQL — Tab 1
 # ─────────────────────────────────────────────────────────────────────────────
 SQL_WELL_INVENTORY = """
 WITH base AS (
-    SELECT
-        cd.cmpl_nme, cd.well_api_nbr, cd.opnl_fld,
-        cd.prim_purp_type_cde, cd.prim_matl_desc, cd.engr_strg_nme,
-        cd.cmpl_state_type_desc, cd.cmpl_state_eftv_dttm,
-        wd.bore_start_dttm, cd.init_prod_dte, cd.init_inj_dte,
-        cd.cmpl_fac_id, cd.cmpl_dmn_key,
-        ROW_NUMBER() OVER (PARTITION BY cd.well_api_nbr
-                           ORDER BY cd.cmpl_fac_id DESC) AS rn
+    SELECT cd.cmpl_nme, cd.well_api_nbr, cd.opnl_fld,
+           cd.prim_purp_type_cde, cd.prim_matl_desc, cd.engr_strg_nme,
+           cd.cmpl_state_type_desc, cd.cmpl_state_eftv_dttm,
+           wd.bore_start_dttm, cd.init_prod_dte, cd.init_inj_dte,
+           cd.cmpl_fac_id, cd.cmpl_dmn_key,
+           ROW_NUMBER() OVER (PARTITION BY cd.well_api_nbr
+                              ORDER BY cd.cmpl_fac_id DESC) AS rn
     FROM dwrptg.cmpl_dmn cd
     JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
     WHERE wd.bore_start_dttm >= :spud_date
       AND cd.actv_indc = 'Y'
       AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
 )
-SELECT cmpl_nme           AS WELL_NME,
-       well_api_nbr       AS WELL_API_NBR,
-       opnl_fld           AS FLD_NME,
-       prim_purp_type_cde AS PRIM_PURP_TYPE_CDE,
-       prim_matl_desc     AS PRIM_MATL_DESC,
-       engr_strg_nme      AS ENGR_STRG_NME,
-       cmpl_state_type_desc AS CMPL_STATE_TYPE_DESC,
-       cmpl_state_eftv_dttm AS CMPL_STATE_EFTV_DTTM,
-       bore_start_dttm    AS SPUD_DATE,
-       init_prod_dte      AS INIT_PROD_DTE,
-       init_inj_dte       AS INIT_INJ_DTE,
-       cmpl_fac_id        AS CMPL_FAC_ID,
-       cmpl_dmn_key       AS CMPL_DMN_KEY
+SELECT cmpl_nme, well_api_nbr, opnl_fld, prim_purp_type_cde, prim_matl_desc,
+       engr_strg_nme, cmpl_state_type_desc, cmpl_state_eftv_dttm,
+       bore_start_dttm, init_prod_dte, init_inj_dte, cmpl_fac_id, cmpl_dmn_key
 FROM base WHERE rn = 1
 ORDER BY prim_purp_type_cde DESC, bore_start_dttm DESC
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SQL — Tab 2: Well Tests (allocated only, after spud date)
+# SQL — Tab 2
 # ─────────────────────────────────────────────────────────────────────────────
 SQL_WELL_TESTS_LATEST = """
 WITH dedup AS (
@@ -84,8 +74,7 @@ WITH dedup AS (
     FROM dwrptg.cmpl_dmn cd
     JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
     WHERE wd.bore_start_dttm >= :spud_date
-      AND cd.actv_indc = 'Y'
-      AND cd.prim_purp_type_cde = 'PROD'
+      AND cd.actv_indc = 'Y' AND cd.prim_purp_type_cde = 'PROD'
       AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
 ),
 ranked AS (
@@ -139,7 +128,7 @@ ORDER BY PEAK_OIL_BOPD DESC NULLS LAST
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SQL — Tab 3: producers with >=1 allocated test after spud date
+# SQL — Tab 3: producers with tests + peak oil
 # ─────────────────────────────────────────────────────────────────────────────
 SQL_PRODUCERS_WITH_TESTS = """
 WITH dedup AS (
@@ -152,20 +141,28 @@ WITH dedup AS (
     WHERE wd.bore_start_dttm >= :spud_date
       AND cd.actv_indc = 'Y' AND cd.prim_purp_type_cde = 'PROD'
       AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
+),
+peak AS (
+    SELECT dd.cmpl_fac_id,
+           MAX(f.bopd_qty) AS peak_oil
+    FROM dedup dd
+    JOIN dwrptg.cmpl_prod_tst_fact f ON dd.cmpl_fac_id = f.cmpl_fac_id
+    JOIN dwrptg.cmpl_prod_tst_dmn  d ON d.cmpl_prod_tst_dmn_key = f.cmpl_prod_tst_dmn_key
+    WHERE dd.drn = 1 AND d.use_for_aloc_indc = 'Y'
+      AND f.prod_msmt_strt_dttm >= :spud_date AND f.bopd_qty > 0
+    GROUP BY dd.cmpl_fac_id
 )
 SELECT DISTINCT dd.cmpl_nme, dd.opnl_fld, dd.prim_purp_type_cde,
-       dd.prim_matl_desc, dd.cmpl_fac_id
+       dd.prim_matl_desc, dd.cmpl_fac_id, NVL(pk.peak_oil, 0) AS peak_oil
 FROM dedup dd
 JOIN dwrptg.cmpl_prod_tst_fact f ON dd.cmpl_fac_id = f.cmpl_fac_id
 JOIN dwrptg.cmpl_prod_tst_dmn  d ON d.cmpl_prod_tst_dmn_key = f.cmpl_prod_tst_dmn_key
+LEFT JOIN peak pk ON dd.cmpl_fac_id = pk.cmpl_fac_id
 WHERE dd.drn = 1 AND d.use_for_aloc_indc = 'Y'
   AND f.prod_msmt_strt_dttm >= :spud_date
 ORDER BY dd.opnl_fld, dd.cmpl_nme
 """
 
-# ─────────────────────────────────────────────────────────────────────────────
-# SQL — Tab 3: injectors with >=1 daily record after spud date
-# ─────────────────────────────────────────────────────────────────────────────
 SQL_INJECTORS_WITH_DATA = """
 WITH dedup AS (
     SELECT cd.cmpl_nme, cd.well_api_nbr, cd.opnl_fld,
@@ -179,7 +176,7 @@ WITH dedup AS (
       AND NVL(cd.cmpl_state_type_desc, 'X') != 'Permanently Abandoned'
 )
 SELECT DISTINCT dd.cmpl_nme, dd.opnl_fld, dd.prim_purp_type_cde,
-       dd.prim_matl_desc, dd.cmpl_fac_id
+       dd.prim_matl_desc, dd.cmpl_fac_id, 0 AS peak_oil
 FROM dedup dd
 JOIN dwrptg.cmpl_dly_fact cdf ON dd.cmpl_fac_id = cdf.cmpl_fac_id
 WHERE dd.drn = 1 AND cdf.eftv_dttm >= :spud_date
@@ -260,19 +257,14 @@ def populate_tree(tree, columns, rows, col_widths=None):
                     tags=("even" if i%2==0 else "odd",))
 
 def _sort_key(val, reverse):
-    """Return a sort key that sorts numbers numerically and non-numbers after."""
+    """Sort numbers numerically, blanks last, text lexically."""
     if val == "":
-        # Blanks always sort last regardless of direction
         return (1, 0, "")
-    # Strip commas for numeric parsing
     stripped = val.replace(",", "")
     try:
         return (0, float(stripped), "")
     except ValueError:
         pass
-    # Try date parsing (YYYY-MM-DD)
-    if len(val) == 10 and val[4:5] == "-" and val[7:8] == "-":
-        return (0, 0, val)  # dates sort lexically fine in YYYY-MM-DD format
     return (0, 0, val)
 
 def _sort_tree(tree, col, rev):
@@ -299,6 +291,19 @@ def export_tree(tree, title="export"):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Well selector Treeview sort (separate from main table sort — no # column)
+# ─────────────────────────────────────────────────────────────────────────────
+def _sort_well_tree(tree, col, rev, callback):
+    """Sort the well-selector treeview, then fire callback for auto-select."""
+    data = [(tree.set(k, col), k) for k in tree.get_children("")]
+    data.sort(key=lambda t: _sort_key(t[0], rev), reverse=rev)
+    for i, (_, k) in enumerate(data):
+        tree.move(k, "", i)
+        tree.item(k, tags=("even" if i % 2 == 0 else "odd",))
+    tree.heading(col, command=lambda: _sort_well_tree(tree, col, not rev, callback))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Application
 # ─────────────────────────────────────────────────────────────────────────────
 class App:
@@ -314,6 +319,7 @@ class App:
         self.root.minsize(1100, 650)
 
         self.inv_data = []
+        # chart_wells: list of (name, fld, purp, matl, fac_id, peak_oil)
         self.chart_wells = []
         self.spud_date_val = None
 
@@ -411,58 +417,67 @@ class App:
                         highlightbackground=self.BORDER, highlightthickness=1)
         left.grid(row=0, column=0, sticky="ns", padx=(0,8))
 
-        # -- Field filter section --
+        # -- Field filter --
         fld_section = tk.Frame(left, bg=self.PANEL)
-        fld_section.pack(fill="x", padx=12, pady=(10,0))
+        fld_section.pack(fill="x", padx=10, pady=(8,0))
         tk.Label(fld_section, text="FIELD", font=("Segoe UI",9,"bold"),
                  fg=self.ACCENT, bg=self.PANEL).pack(anchor="w")
         self.fld_var = tk.StringVar(value="All")
         self.fld_cb = ttk.Combobox(fld_section, textvariable=self.fld_var,
-                                    width=28, state="readonly")
+                                    width=32, state="readonly")
         self.fld_cb.pack(fill="x", pady=(4,0))
         self.fld_cb.bind("<<ComboboxSelected>>", self._on_field_filter)
 
         # -- Separator --
-        tk.Frame(left, bg=self.BORDER, height=1).pack(fill="x", padx=12, pady=8)
+        tk.Frame(left, bg=self.BORDER, height=1).pack(fill="x", padx=10, pady=6)
 
-        # -- Well list header --
+        # -- Well count --
         well_hdr = tk.Frame(left, bg=self.PANEL)
-        well_hdr.pack(fill="x", padx=12)
+        well_hdr.pack(fill="x", padx=10)
         tk.Label(well_hdr, text="SELECT WELL", font=("Segoe UI",9,"bold"),
                  fg=self.ACCENT, bg=self.PANEL).pack(side="left")
         self.well_count_lbl = tk.Label(well_hdr, text="", font=("Segoe UI",8),
                                        fg="#888", bg=self.PANEL)
         self.well_count_lbl.pack(side="right")
 
-        # -- Well listbox (fills remaining height) --
-        lb_frame = tk.Frame(left, bg=self.PANEL)
-        lb_frame.pack(fill="both", expand=True, padx=12, pady=(4,10))
+        # -- Well selector Treeview (3 columns: Well, Type, Peak Oil) --
+        tree_frame = tk.Frame(left, bg=self.PANEL)
+        tree_frame.pack(fill="both", expand=True, padx=10, pady=(4,8))
 
-        self.well_lb = tk.Listbox(
-            lb_frame, selectmode="browse", width=30,
-            exportselection=False, font=("Consolas",9),
-            bg="white", fg="#333", selectbackground="#d4e6f1",
-            selectforeground="#1a5276", bd=1, relief="solid",
-            highlightthickness=0, activestyle="none")
-        lb_sb = ttk.Scrollbar(lb_frame, orient="vertical", command=self.well_lb.yview)
-        self.well_lb.configure(yscrollcommand=lb_sb.set)
-        self.well_lb.pack(side="left", fill="both", expand=True)
-        lb_sb.pack(side="right", fill="y")
-        self.well_lb.bind("<<ListboxSelect>>", self._on_well_select)
+        self.well_tree = ttk.Treeview(tree_frame, columns=("WELL","TYPE","PEAK_OIL"),
+                                       show="headings", selectmode="browse")
+        self.well_tree.heading("WELL", text="Well",
+                               command=lambda: _sort_well_tree(self.well_tree, "WELL", False, None))
+        self.well_tree.heading("TYPE", text="Type",
+                               command=lambda: _sort_well_tree(self.well_tree, "TYPE", False, None))
+        self.well_tree.heading("PEAK_OIL", text="Peak Oil",
+                               command=lambda: _sort_well_tree(self.well_tree, "PEAK_OIL", True, None))
+        self.well_tree.column("WELL", width=155, anchor="w")
+        self.well_tree.column("TYPE", width=75, anchor="w")
+        self.well_tree.column("PEAK_OIL", width=65, anchor="e")
+
+        wt_sb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.well_tree.yview)
+        self.well_tree.configure(yscrollcommand=wt_sb.set)
+        self.well_tree.pack(side="left", fill="both", expand=True)
+        wt_sb.pack(side="right", fill="y")
+
+        self.well_tree.tag_configure("even", background="#f0f4f8")
+        self.well_tree.tag_configure("odd",  background="white")
+
+        # Bind selection change to auto-plot
+        self.well_tree.bind("<<TreeviewSelect>>", self._on_well_select)
 
         # ── RIGHT PANEL ──────────────────────────────────────────────────────
         right = tk.Frame(outer, bg=self.PANEL, bd=0,
                          highlightbackground=self.BORDER, highlightthickness=1)
         right.grid(row=0, column=1, sticky="nsew")
 
-        # Chart status
         chart_top = tk.Frame(right, bg=self.PANEL)
         chart_top.pack(fill="x", padx=10, pady=(8,0))
         self.chart_lbl = tk.Label(chart_top, text="Select a well to view chart",
                                   font=("Segoe UI",9), fg="#888", bg=self.PANEL)
         self.chart_lbl.pack(side="left")
 
-        # Chart canvas
         chart_area = tk.Frame(right, bg=self.PANEL)
         chart_area.pack(fill="both", expand=True, padx=6, pady=(4,6))
 
@@ -530,19 +545,18 @@ class App:
             mc, mr = self._merge_tests(lc, lr, pc, pr)
             self.root.after(0, self._show_wt, mc, mr)
 
-            # Chart wells — only those WITH data
-            self.root.after(0, self._set_status,
-                            "Finding producers with allocated tests ...")
+            # Chart wells — producers with tests + peak oil
+            self.root.after(0, self._set_status, "Finding producers with allocated tests ...")
             _, prod_rows = run_query(SQL_PRODUCERS_WITH_TESTS, p)
-            self.root.after(0, self._set_status,
-                            "Finding injectors with injection data ...")
+            self.root.after(0, self._set_status, "Finding injectors with injection data ...")
             _, inj_rows = run_query(SQL_INJECTORS_WITH_DATA, p)
 
+            # chart_wells: (name, fld, purp, matl, fac_id, peak_oil)
             cw = []
             for r in prod_rows:
-                cw.append((r[0], r[1] or "", r[2] or "", r[3] or "", r[4]))
+                cw.append((r[0], r[1] or "", r[2] or "", r[3] or "", r[4], r[5] or 0))
             for r in inj_rows:
-                cw.append((r[0], r[1] or "", r[2] or "", r[3] or "", r[4]))
+                cw.append((r[0], r[1] or "", r[2] or "", r[3] or "", r[4], 0))
             cw.sort(key=lambda t: (t[1], t[0]))
             self.chart_wells = cw
 
@@ -586,27 +600,34 @@ class App:
 
     # ── chart controls ───────────────────────────────────────────────────────
     def _populate_chart_controls(self):
-        fields = sorted(set(f for _,f,_,_,_ in self.chart_wells if f))
+        fields = sorted(set(f for _,f,_,_,_,_ in self.chart_wells if f))
         self.fld_cb["values"] = ["All"] + fields
         self.fld_var.set("All")
-        self._refresh_well_list()
+        self._refresh_well_tree()
 
     def _on_field_filter(self, _=None):
-        self._refresh_well_list()
+        self._refresh_well_tree()
 
-    def _refresh_well_list(self):
+    def _refresh_well_tree(self):
+        """Populate the 3-column well-selector Treeview."""
         fld = self.fld_var.get()
-        self.well_lb.delete(0, "end")
+        self.well_tree.delete(*self.well_tree.get_children())
         count = 0
-        for name, f, purp, matl, fid in self.chart_wells:
+        for name, f, purp, matl, fid, peak in self.chart_wells:
             if fld != "All" and f != fld:
                 continue
-            tag = "PROD" if purp == "PROD" else f"INJ-{matl}" if purp == "INJ" else purp
-            self.well_lb.insert("end", f"{name}  [{tag}]")
+            wtype = "PROD" if purp == "PROD" else f"INJ-{matl}" if purp == "INJ" else purp
+            peak_str = fmt(peak) if peak and peak > 0 else ""
+            tag = "even" if count % 2 == 0 else "odd"
+            self.well_tree.insert("", "end", values=(name, wtype, peak_str), tags=(tag,))
             count += 1
         self.well_count_lbl.config(text=f"{count} well(s)")
-        if count > 0:
-            self.well_lb.selection_set(0)
+        # Auto-select first row
+        children = self.well_tree.get_children()
+        if children:
+            self.well_tree.selection_set(children[0])
+            self.well_tree.focus(children[0])
+            # Trigger chart
             self._on_well_select()
         else:
             if HAS_MPL:
@@ -614,23 +635,26 @@ class App:
             self.chart_lbl.config(text="No wells with data for selected field.")
 
     def _get_selected_info(self):
-        sel = self.well_lb.curselection()
-        if not sel: return None
-        text = self.well_lb.get(sel[0])
-        name = text.split("  [")[0]
+        """Get (name, fld, purp, matl, fac_id, peak) for selected well tree row."""
+        sel = self.well_tree.selection()
+        if not sel:
+            return None
+        vals = self.well_tree.item(sel[0], "values")
+        name = vals[0]
         fld = self.fld_var.get()
-        for n, f, p, m, fid in self.chart_wells:
+        for n, f, p, m, fid, pk in self.chart_wells:
             if n == name and (fld == "All" or f == fld):
-                return (n, f, p, m, fid)
+                return (n, f, p, m, fid, pk)
         return None
 
     def _on_well_select(self, _=None):
         info = self._get_selected_info()
-        if not info or not HAS_MPL: return
-        name, fld, purp, matl, fid = info
+        if not info or not HAS_MPL:
+            return
+        name, fld, purp, matl, fid, pk = info
         self.chart_lbl.config(text=f"Loading {name} ...", fg="#888")
         threading.Thread(target=self._chart_bg,
-                         args=(name,fld,purp,matl,fid), daemon=True).start()
+                         args=(name, fld, purp, matl, fid), daemon=True).start()
 
     # ═════════════════════════════════════════════════════════════════════════
     # Chart
@@ -639,11 +663,11 @@ class App:
         try:
             if purp == "PROD":
                 c, r = run_query(SQL_PROD_WELL_TESTS,
-                                 {"cmpl_fac_id":fid, "spud_date":self.spud_date_val})
+                                 {"cmpl_fac_id": fid, "spud_date": self.spud_date_val})
                 self.root.after(0, self._draw_prod, c, r, name, fld)
             elif purp == "INJ":
                 c, r = run_query(SQL_INJ_DAILY,
-                                 {"cmpl_fac_id":fid, "start_date":self.spud_date_val})
+                                 {"cmpl_fac_id": fid, "start_date": self.spud_date_val})
                 self.root.after(0, self._draw_inj, c, r, name, fld, matl)
         except Exception as e:
             self.root.after(0, self._err, str(e))
@@ -661,16 +685,16 @@ class App:
 
         ax1 = self.fig.add_subplot(111)
         lines = []
-        if any(v>0 for v in oil):
+        if any(v > 0 for v in oil):
             l, = ax1.plot(dates, oil, "o-", color="#27ae60", ms=5, lw=1.5, label="Oil (BOPD)")
             lines.append(l)
-        if any(v>0 for v in wtr):
+        if any(v > 0 for v in wtr):
             l, = ax1.plot(dates, wtr, "s-", color="#2980b9", ms=4, lw=1.2, label="Water (BWPD)")
             lines.append(l)
         ax1.set_ylabel("Liquid Rate (bbl/d)", fontsize=9)
         ax1.tick_params(labelsize=8); ax1.grid(True, alpha=0.25)
 
-        if any(v>0 for v in gas):
+        if any(v > 0 for v in gas):
             ax2 = ax1.twinx()
             l, = ax2.plot(dates, gas, "x--", color="#e74c3c", ms=4, lw=1.2, label="Gas (MCFD)")
             lines.append(l)
@@ -706,9 +730,9 @@ class App:
             ax.fill_between(dates, wtr, alpha=0.15, color="#2980b9")
             ax.set_ylabel("Water Injection (bbl/d)", fontsize=9, color="#2980b9")
         else:
-            if any(v>0 for v in stm):
+            if any(v > 0 for v in stm):
                 ax.plot(dates, stm, color="#e67e22", lw=0.9, label="Steam (bbl/d)")
-            if any(v>0 for v in wtr):
+            if any(v > 0 for v in wtr):
                 ax.plot(dates, wtr, color="#2980b9", lw=0.9, label="Water (bbl/d)")
             ax.set_ylabel("Injection (bbl/d)", fontsize=9)
 
@@ -723,7 +747,7 @@ class App:
 
     def _fmt_x(self, ax, dates):
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
-        span = (max(dates)-min(dates)).days if len(dates)>1 else 30
+        span = (max(dates) - min(dates)).days if len(dates) > 1 else 30
         if   span > 720: ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
         elif span > 360: ax.xaxis.set_major_locator(mdates.MonthLocator(interval=3))
         elif span > 120: ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))

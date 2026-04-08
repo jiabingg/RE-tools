@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalGEM Idle Well Regulation Cheatsheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#f8f6f1;
+    --surface:#ffffff;
+    --surface2:#f0ede6;
+    --border:#ddd6c8;
+    --text:#2c2416;
+    --text2:#5c5243;
+    --text3:#8a7f6e;
+    --amber:#b45309;
+    --amber-bg:#fef3c7;
+    --amber-br:#f59e0b;
+    --blue:#1d4ed8;
+    --blue-bg:#dbeafe;
+    --blue-br:#3b82f6;
+    --green:#047857;
+    --green-bg:#d1fae5;
+    --green-br:#10b981;
+    --red:#b91c1c;
+    --red-bg:#fee2e2;
+    --red-br:#ef4444;
+    --purple:#6d28d9;
+    --purple-bg:#ede9fe;
+    --purple-br:#8b5cf6;
+    --cyan:#0e7490;
+    --cyan-bg:#cffafe;
+    --cyan-br:#06b6d4;
+  }
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px}
+
+  /* Header */
+  .hdr{background:#1e3a5f;padding:44px 36px 36px;position:relative;overflow:hidden}
+  .hdr::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 60%);pointer-events:none}
+  .hdr h1{font-family:'JetBrains Mono',monospace;font-size:32px;color:#fbbf24;position:relative;letter-spacing:-.5px}
+  .hdr .sub{font-size:16px;color:#cbd5e1;margin-top:8px;position:relative}
+  .hdr .refs{font-family:'JetBrains Mono',monospace;font-size:12px;color:#94a3b8;margin-top:14px;position:relative;letter-spacing:.3px}
+
+  .ctr{max-width:1140px;margin:0 auto;padding:28px 20px}
+
+  /* Tabs */
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:28px;background:var(--surface);border-radius:14px;padding:7px;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .tab{font-family:'JetBrains Mono',monospace;font-size:13px;padding:11px 18px;border:none;background:transparent;color:var(--text2);cursor:pointer;border-radius:10px;transition:all .15s;white-space:nowrap;font-weight:500}
+  .tab:hover{color:var(--text);background:var(--surface2)}
+  .tab.active{background:#1e3a5f;color:#fbbf24;font-weight:700;box-shadow:0 2px 6px rgba(30,58,95,.25)}
+
+  .sec{display:none}.sec.active{display:block}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:22px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+  .card::before{content:'';position:absolute;top:0;left:0;width:5px;height:100%;border-radius:14px 0 0 14px}
+  .card.amber::before{background:var(--amber-br)}.card.blue::before{background:var(--blue-br)}.card.green::before{background:var(--green-br)}.card.red::before{background:var(--red-br)}.card.purple::before{background:var(--purple-br)}.card.cyan::before{background:var(--cyan-br)}
+
+  .card h2{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:10px;color:var(--text)}
+  .card h2 .ic{font-size:22px}
+  .card h3{font-size:16px;font-weight:700;margin:18px 0 10px;color:var(--amber)}
+
+  .badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;border-radius:6px;font-weight:700;letter-spacing:.3px;vertical-align:middle}
+  .badge.amber{background:var(--amber-bg);color:var(--amber)}.badge.blue{background:var(--blue-bg);color:var(--blue)}.badge.green{background:var(--green-bg);color:var(--green)}.badge.red{background:var(--red-bg);color:var(--red)}.badge.purple{background:var(--purple-bg);color:var(--purple)}.badge.cyan{background:var(--cyan-bg);color:var(--cyan)}
+
+  /* Definition boxes */
+  .db{background:var(--surface2);border-left:4px solid var(--amber-br);padding:16px 22px;border-radius:0 10px 10px 0;margin:12px 0;font-size:15px;color:var(--text)}
+  .db strong{color:var(--amber)}
+  .db.blue-l{border-left-color:var(--blue-br)}.db.blue-l strong{color:var(--blue)}
+  .db.red-l{border-left-color:var(--red-br)}.db.red-l strong{color:var(--red)}
+  .db.green-l{border-left-color:var(--green-br)}.db.green-l strong{color:var(--green)}
+  .db.purple-l{border-left-color:var(--purple-br)}.db.purple-l strong{color:var(--purple)}
+
+  /* Diagram wrapper */
+  .dw{background:var(--surface2);border-radius:12px;padding:22px;margin:18px 0;overflow-x:auto;border:1px solid var(--border)}
+  .dw svg{width:100%;height:auto;display:block}
+
+  /* Tables */
+  .tbl{width:100%;border-collapse:collapse;font-size:15px;margin:14px 0}
+  .tbl th{font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);text-align:left;padding:12px 14px;border-bottom:2px solid var(--border);background:var(--surface2)}
+  .tbl td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+  .tbl tr:hover td{background:rgba(245,158,11,.05)}
+
+  /* Flow steps */
+  .fs{display:flex;align-items:flex-start;gap:16px;background:var(--surface2);border-radius:10px;padding:16px 20px;border:1px solid var(--border);margin-bottom:12px}
+  .fn{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:800;color:var(--amber);min-width:34px;line-height:1.2}
+  .ft{font-size:15px}.ft strong{color:var(--text)}.ft .det{font-size:14px;color:var(--text2);margin-top:5px;line-height:1.6}
+
+  /* Retest cards */
+  .rg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:14px 0}
+  .rc{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center}
+  .rc .psi{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:800;color:var(--blue)}
+  .rc .lb{font-size:13px;color:var(--text2);margin-top:3px}
+  .rc .iv{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--green);margin-top:10px}
+
+  /* Checklist */
+  .cl{list-style:none;margin:10px 0}
+  .cl li{position:relative;padding:10px 0 10px 32px;font-size:15px;border-bottom:1px solid var(--border);color:var(--text)}
+  .cl li::before{content:'▸';position:absolute;left:8px;top:10px;color:var(--amber);font-size:16px;font-weight:700}
+
+  /* Notes */
+  .note{font-size:14px;color:var(--text2);margin-top:10px;padding:12px 16px;background:var(--amber-bg);border-radius:8px;border:1px solid #fcd34d;line-height:1.6}
+
+  /* Alert boxes */
+  .warn-box{background:var(--red-bg);border:1px solid #fca5a5;border-radius:10px;padding:16px 20px;margin:14px 0;font-size:15px;color:var(--red)}
+  .warn-box strong{color:#991b1b}
+  .ok-box{background:var(--green-bg);border:1px solid #6ee7b7;border-radius:10px;padding:16px 20px;margin:14px 0;font-size:15px;color:var(--green)}
+  .ok-box strong{color:#065f46}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:720px){.two{grid-template-columns:1fr}.hdr h1{font-size:24px}.hdr{padding:28px 20px 24px}.tabs{flex-direction:column}}
+
+  /* Quick ref */
+  .qr{background:var(--surface);border:2px solid var(--amber-br);border-radius:14px;padding:20px 24px;margin-bottom:24px;box-shadow:0 2px 8px rgba(245,158,11,.1)}
+  .qr h3{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--amber);margin-bottom:12px}
+  .qi{display:flex;justify-content:space-between;padding:8px 0;font-size:15px;border-bottom:1px solid var(--border);color:var(--text)}
+  .qi:last-child{border-bottom:none}
+  .qv{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>CalGEM Idle Well Regulations</h1>
+  <div class="sub">Interactive Cheatsheet — CCR Title 14 · PRC §3008, §3206, §3206.1 · AB 1866 (2024)</div>
+  <div class="refs">§1752 · §1760 · §1772 · §1772.1 · §1772.1.1 · §1772.1.2 · §1772.1.4 · §1772.2 · §1772.3 · §1772.4 · §1772.5 · §1772.6 · §1772.7</div>
+</div>
+
+<div class="ctr">
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-t="overview">Overview</button>
+    <button class="tab" data-t="defs">Definitions</button>
+    <button class="tab" data-t="testing">Testing</button>
+    <button class="tab" data-t="timeline">Timeline by Age</button>
+    <button class="tab" data-t="pressure">Pressure Test</button>
+    <button class="tab" data-t="failure">Failed Tests</button>
+    <button class="tab" data-t="plans">Plans & Waivers</button>
+    <button class="tab" data-t="15year">15-Year Analysis</button>
+    <button class="tab" data-t="fees">Fees (2025)</button>
+  </div>
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="sec active" id="s-overview">
+    <div class="qr">
+      <h3>⚡ Quick Reference</h3>
+      <div class="qi"><span>Idle well trigger</span><span class="qv">24 mo. zero volumes</span></div>
+      <div class="qi"><span>Return to active</span><span class="qv">6 mo. continuous prod/inj</span></div>
+      <div class="qi"><span>Long-term idle</span><span class="qv">≥ 8 years idle</span></div>
+      <div class="qi"><span>Fluid level test</span><span class="qv">Every 24 months</span></div>
+      <div class="qi"><span>Casing pressure test</span><span class="qv">Within 24 mo., retest 48–96 mo.</span></div>
+      <div class="qi"><span>Clean out tag</span><span class="qv">Within 8 years, retest 48 mo.</span></div>
+      <div class="qi"><span>15-year engineering analysis</span><span class="qv">By end of month 15 idle</span></div>
+      <div class="qi"><span>Post-failure remedy deadline</span><span class="qv">12 months</span></div>
+      <div class="qi"><span>Approx. idle wells statewide</span><span class="qv">~35,000</span></div>
+      <div class="qi"><span>IWMP / Waiver Plan max length</span><span class="qv">8 years</span></div>
+    </div>
+
+    <div class="card amber">
+      <h2><span class="ic">🔄</span> Master Flow — Life of an Idle Well</h2>
+      <div class="dw">
+        <svg viewBox="0 0 900 570" xmlns="http://www.w3.org/2000/svg">
+          <!-- Start pill -->
+          <rect x="310" y="8" width="280" height="50" rx="25" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+          <text x="450" y="39" text-anchor="middle" fill="#92400e" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700">24 MO. ZERO VOLUMES → IDLE</text>
+
+          <line x1="450" y1="58" x2="450" y2="92" stroke="#d1d5db" stroke-width="2"/>
+          <polygon points="444,88 450,96 456,88" fill="#d1d5db"/>
+
+          <!-- 0–24 months -->
+          <rect x="260" y="92" width="380" height="48" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+          <text x="278" y="121" fill="#1d4ed8" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">WITHIN 24 MO</text>
+          <text x="418" y="121" fill="#1e3a5f" font-family="Inter,sans-serif" font-size="14" font-weight="600">Fluid Level Test + Casing Pressure Test</text>
+
+          <line x1="450" y1="140" x2="450" y2="170" stroke="#d1d5db" stroke-width="2"/>
+          <polygon points="444,166 450,174 456,166" fill="#d1d5db"/>
+
+          <!-- Ongoing -->
+          <rect x="280" y="170" width="340" height="48" rx="10" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+          <text x="298" y="199" fill="#047857" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">ONGOING</text>
+          <text x="398" y="199" fill="#1e3a5f" font-family="Inter,sans-serif" font-size="14" font-weight="600">Repeat fluid level every 24 mo.</text>
+
+          <line x1="450" y1="218" x2="450" y2="248" stroke="#d1d5db" stroke-width="2"/>
+          <polygon points="444,244 450,252 456,244" fill="#d1d5db"/>
+
+          <!-- 8 years -->
+          <rect x="290" y="248" width="320" height="48" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
+          <text x="308" y="277" fill="#6d28d9" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">8 YEARS</text>
+          <text x="400" y="277" fill="#1e3a5f" font-family="Inter,sans-serif" font-size="14" font-weight="600">Clean Out Tag required</text>
+
+          <line x1="450" y1="296" x2="450" y2="326" stroke="#d1d5db" stroke-width="2"/>
+          <polygon points="444,322 450,330 456,322" fill="#d1d5db"/>
+
+          <!-- 15 years -->
+          <rect x="260" y="326" width="380" height="48" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+          <text x="278" y="355" fill="#b91c1c" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">15 YEARS</text>
+          <text x="378" y="355" fill="#1e3a5f" font-family="Inter,sans-serif" font-size="14" font-weight="600">Engineering Analysis — prove viability</text>
+
+          <line x1="450" y1="374" x2="450" y2="408" stroke="#d1d5db" stroke-width="2"/>
+
+          <!-- Decision diamond -->
+          <polygon points="450,408 530,445 450,482 370,445" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+          <text x="450" y="449" text-anchor="middle" fill="#92400e" font-family="Inter,sans-serif" font-size="14" font-weight="700">VIABLE?</text>
+
+          <!-- YES -->
+          <line x1="530" y1="445" x2="640" y2="445" stroke="#10b981" stroke-width="2"/>
+          <rect x="640" y="425" width="230" height="40" rx="10" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+          <text x="755" y="450" text-anchor="middle" fill="#047857" font-family="Inter,sans-serif" font-size="13" font-weight="700">Keep well → continue testing</text>
+
+          <!-- NO -->
+          <line x1="370" y1="445" x2="260" y2="445" stroke="#ef4444" stroke-width="2"/>
+          <rect x="30" y="425" width="230" height="40" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="145" y="450" text-anchor="middle" fill="#b91c1c" font-family="Inter,sans-serif" font-size="13" font-weight="700">P&A in 12 mo. or put on Plan</text>
+
+          <!-- Exit paths label -->
+          <text x="450" y="516" text-anchor="middle" fill="#5c5243" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">WAYS OUT OF IDLE STATUS</text>
+
+          <rect x="20" y="532" width="150" height="36" rx="18" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="95" y="555" text-anchor="middle" fill="#92400e" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">PLUG & ABANDON</text>
+
+          <rect x="190" y="532" width="155" height="36" rx="18" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="267" y="555" text-anchor="middle" fill="#1d4ed8" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">TESTING WAIVER</text>
+
+          <rect x="365" y="532" width="100" height="36" rx="18" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+          <text x="415" y="555" text-anchor="middle" fill="#6d28d9" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">IWMP</text>
+
+          <rect x="485" y="532" width="180" height="36" rx="18" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+          <text x="575" y="555" text-anchor="middle" fill="#047857" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">RESTART (6 mo. prod)</text>
+
+          <rect x="685" y="532" width="170" height="36" rx="18" fill="#cffafe" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="770" y="555" text-anchor="middle" fill="#0e7490" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">PARTIAL P&A §1752</text>
+
+          <!-- Legend -->
+          <rect x="8" y="8" width="156" height="104" rx="8" fill="white" stroke="#d1d5db" stroke-width="1"/>
+          <text x="18" y="26" fill="#5c5243" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700">LEGEND</text>
+          <rect x="18" y="36" width="14" height="5" rx="2" fill="#3b82f6"/><text x="38" y="42" fill="#5c5243" font-size="11" font-family="Inter">Integrity testing</text>
+          <rect x="18" y="52" width="14" height="5" rx="2" fill="#8b5cf6"/><text x="38" y="58" fill="#5c5243" font-size="11" font-family="Inter">Mechanical check</text>
+          <rect x="18" y="68" width="14" height="5" rx="2" fill="#ef4444"/><text x="38" y="74" fill="#5c5243" font-size="11" font-family="Inter">Engineering review</text>
+          <rect x="18" y="84" width="14" height="5" rx="2" fill="#10b981"/><text x="38" y="90" fill="#5c5243" font-size="11" font-family="Inter">Repeat / ongoing</text>
+
+          <!-- USDW note -->
+          <rect x="640" y="300" width="250" height="58" rx="8" fill="#cffafe" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="652" y="320" fill="#0e7490" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700">½-MILE USDW EXCEPTION</text>
+          <text x="652" y="338" fill="#1e3a5f" font-family="Inter,sans-serif" font-size="12">If wellbore >½ mi from USDW:</text>
+          <text x="652" y="354" fill="#1e3a5f" font-family="Inter,sans-serif" font-size="12">+2 extra years before testing §1772.1(e)</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DEFINITIONS ===== -->
+  <div class="sec" id="s-defs">
+    <div class="card amber">
+      <h2><span class="ic">📖</span> Key Definitions <span class="badge amber">§1760 / PRC §3008</span></h2>
+      <div class="db"><strong>Idle Well (§1760(n)):</strong> Any well with 24 consecutive months of zero production (oil, gas, water for stimulation) or injection. Must produce/inject continuously for 6 months to exit idle status. Does not include active observation wells.</div>
+      <div class="db"><strong>Long-Term Idle Well (§1760(o)):</strong> Any well idle for ≥ 8 years.</div>
+      <div class="db"><strong>Low-Priority Idle Well (§1760(p)):</strong> Does NOT penetrate USDW, no surface pressure, not open to atmosphere, not in geologic hazard area, not critical/urban/environmentally sensitive.</div>
+      <div class="db blue-l"><strong>USDW (§1760(x)):</strong> Underground Source of Drinking Water — aquifer not EPA-exempted that supplies or could supply a public water system, contains &lt;10,000 mg/L TDS.</div>
+      <div class="db"><strong>Freshwater (§1760(j)):</strong> Water with ≤ 3,000 mg/L TDS.</div>
+      <div class="db"><strong>Urban Area (§1760(y)):</strong> Cohesive area of ≥ 25 establishments/residences; perimeter 300 ft beyond outer structures.</div>
+      <div class="db purple-l"><strong>Partially Plugged (§1752):</strong> Well partially plugged with Division approval. Subject to casing pressure test every 60 months. Exempt from §1772.1 testing and §1772.1.2 engineering analysis.</div>
+      <div class="db green-l"><strong>Active Observation Well (PRC §3008(c)):</strong> Well used solely for gathering reservoir data (pressure, temperature). Must demonstrate need to Division and provide annual summary report.</div>
+    </div>
+
+    <div class="card blue">
+      <h2><span class="ic">📅</span> When Does a Well Become Idle?</h2>
+      <p style="margin-bottom:12px">Idle Start Date = first day of the month after the 24th consecutive month of zero reported volumes.</p>
+      <div class="db"><strong>Example:</strong> Last production = Jan 2009 → Idle Start Date = Feb 1, 2011</div>
+      <p style="margin-top:12px">A well exits idle when it is P&A'd per PRC §3208 or maintains 6 continuous months of production/injection. The exit date is the first day of the month after the 6th month.</p>
+      <div class="note">⚠ Converting to an observation or monitoring well does NOT eliminate an idle well. Neither does transferring to another operator.</div>
+    </div>
+
+    <div class="card green">
+      <h2><span class="ic">🏷️</span> Compliance vs. Roll-in Wells</h2>
+      <div class="two">
+        <div class="db green-l"><strong>Compliance Wells</strong><br>Idle <em>before</em> April 1, 2019. Subject to Testing Compliance Work Plan §1772.1.4. Must complete all testing by April 1, 2025.</div>
+        <div class="db blue-l"><strong>Roll-in Wells</strong><br>Became idle <em>after</em> April 1, 2019. Testing deadlines triggered from date they become idle (24 mo. for fluid level & pressure test, 8 yr for clean out tag).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TESTING ===== -->
+  <div class="sec" id="s-testing">
+    <div class="card blue">
+      <h2><span class="ic">🧪</span> Three Required Tests <span class="badge blue">§1772.1</span></h2>
+
+      <div class="fs">
+        <div class="fn">1</div>
+        <div class="ft">
+          <strong>Fluid Level Test</strong> <span class="badge green">Every 24 mo.</span>
+          <div class="det">Acoustical, mechanical, or other reliable method to determine if fluid is above the base of USDW. If above USDW (or presumed to be), after 4/1/2025 must do casing pressure test within 90 days. Not required if wellbore does not penetrate USDW. If operator hasn't demonstrated USDW location, fluid is <em>presumed</em> above USDW.</div>
+        </div>
+      </div>
+      <div class="fs">
+        <div class="fn">2</div>
+        <div class="ft">
+          <strong>Casing Pressure Test</strong> <span class="badge blue">Within 24 mo.</span>
+          <div class="det">Test from surface to 100 ft MD above uppermost perf, above deepest cemented casing shoe, or above top of landed liner — whichever is highest. Retest interval depends on test pressure (see Pressure Test tab). If the well cannot be safely tested, it is <strong>deemed failed</strong>.</div>
+        </div>
+      </div>
+      <div class="fs">
+        <div class="fn">3</div>
+        <div class="ft">
+          <strong>Clean Out Tag</strong> <span class="badge purple">Within 8 years</span>
+          <div class="det">Run open-ended tubing or gauge ring of minimum P&A diameter to current Division-approved depth. Must reach at least 25 ft below uppermost perf in lowermost non-abandoned zone. Retest every 48 months (or less frequent with Division approval). Division may require more frequent tests if field/geologic conditions warrant.</div>
+        </div>
+      </div>
+
+      <div class="note">📋 All testing requires 24-hour prior notice to district office. Test results submitted digitally within 60 days (30 days if fluid level above USDW).</div>
+    </div>
+
+    <div class="card green">
+      <h2><span class="ic">🔓</span> Exemptions from Testing</h2>
+      <ul class="cl">
+        <li>Well on approved <strong>Testing Waiver Plan</strong> (scheduled for P&A within 8 years) — §1772.2</li>
+        <li>Well on approved <strong>IWMP</strong> scheduled for P&A — §1772.3</li>
+        <li><strong>Partially plugged</strong> wells tested per §1752 (pressure test every 60 mo.) — §1752(e)</li>
+        <li>Wells penetrating <strong>gas storage reservoir</strong> tested under §1726.6 — §1772.7</li>
+        <li><strong>Inaccessible wells</strong> with Division-approved demonstration & monitoring plan — §1772.1(d)</li>
+        <li>Wells where <strong>no part of wellbore</strong> is within ½ mile of USDW get 2 extra years before becoming "idle" for testing purposes — §1772.1(e)</li>
+      </ul>
+    </div>
+
+    <div class="card cyan">
+      <h2><span class="ic">👁️</span> Active Observation Wells <span class="badge cyan">§1772.5</span></h2>
+      <p>Within 6 months of becoming an observation well (unless tested in past 5 years): casing pressure test per §1772.1.1. Retest every 60 months. Same remedies as idle wells if test fails.</p>
+      <div class="db blue-l"><strong>Pre-existing (as of 4/1/2019):</strong> Test ≥ half by 4/1/2021, test all by 4/1/2023.</div>
+    </div>
+
+    <div class="card amber">
+      <h2><span class="ic">📝</span> Idle Well Inventory & Evaluation <span class="badge amber">§1772</span></h2>
+      <p style="margin-bottom:10px">Due Jan 31 annually (initial due Jan 31, 2021). Must include for each idle well:</p>
+      <ul class="cl">
+        <li>API number & name, spud date</li>
+        <li>Surface obstacles or access impediments</li>
+        <li>Most recent MI test results (type, date, results, remediation)</li>
+        <li>Whether well penetrates freshwater or USDW</li>
+        <li>Current tubing/casing pressures (or if open to atmosphere)</li>
+        <li>Critical well / urban area / environmentally sensitive wellhead status</li>
+        <li>Known geologic hazards in area</li>
+        <li>Known downhole issues (holes, collapsed casing, stuck equipment)</li>
+        <li>Whether partially plugged per §1752</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== TIMELINE BY AGE ===== -->
+  <div class="sec" id="s-timeline">
+    <div class="card amber">
+      <h2><span class="ic">⏱️</span> What's Required Based on How Long a Well Has Been Idle</h2>
+      <div class="dw">
+        <svg viewBox="0 0 920 450" xmlns="http://www.w3.org/2000/svg">
+          <!-- Axis -->
+          <line x1="60" y1="80" x2="880" y2="80" stroke="#9ca3af" stroke-width="2"/>
+          <line x1="60" y1="72" x2="60" y2="88" stroke="#9ca3af" stroke-width="2"/>
+          <text x="60" y="65" text-anchor="middle" fill="#5c5243" font-family="JetBrains Mono,monospace" font-size="12">0</text>
+          <line x1="200" y1="72" x2="200" y2="88" stroke="#3b82f6" stroke-width="2.5"/>
+          <text x="200" y="65" text-anchor="middle" fill="#1d4ed8" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">2 yr</text>
+          <line x1="440" y1="72" x2="440" y2="88" stroke="#8b5cf6" stroke-width="2.5"/>
+          <text x="440" y="65" text-anchor="middle" fill="#6d28d9" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">8 yr</text>
+          <line x1="680" y1="72" x2="680" y2="88" stroke="#ef4444" stroke-width="2.5"/>
+          <text x="680" y="65" text-anchor="middle" fill="#b91c1c" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">15 yr</text>
+          <line x1="880" y1="72" x2="880" y2="88" stroke="#9ca3af" stroke-width="2"/>
+          <text x="880" y="65" text-anchor="middle" fill="#5c5243" font-family="JetBrains Mono,monospace" font-size="12">20+ yr</text>
+
+          <!-- Bars -->
+          <rect x="60" y="108" width="820" height="42" rx="8" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+          <text x="78" y="134" fill="#047857" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">FLUID LEVEL TEST — Every 24 months (unless not near USDW)</text>
+
+          <rect x="60" y="162" width="820" height="42" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+          <text x="78" y="188" fill="#1d4ed8" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">CASING PRESSURE TEST — First within 24 mo., retest 48–96 mo.</text>
+
+          <rect x="440" y="216" width="440" height="42" rx="8" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+          <text x="458" y="242" fill="#6d28d9" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">CLEAN OUT TAG — First at 8 yr, retest every 48 mo.</text>
+          <line x1="440" y1="88" x2="440" y2="216" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="4,4"/>
+
+          <rect x="680" y="270" width="200" height="42" rx="8" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="698" y="296" fill="#b91c1c" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">15-YR ENG. ANALYSIS</text>
+          <line x1="680" y1="88" x2="680" y2="270" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,4"/>
+
+          <!-- Fees -->
+          <text x="60" y="340" fill="#92400e" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">ANNUAL FEES (2025 — AB 1866):</text>
+
+          <rect x="60" y="352" width="140" height="32" rx="6" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+          <text x="130" y="373" text-anchor="middle" fill="#92400e" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">$1,000</text>
+          <text x="130" y="394" text-anchor="middle" fill="#8a7f6e" font-size="11">0–2.99 yr</text>
+
+          <rect x="200" y="352" width="240" height="32" rx="6" fill="#fef3c7" stroke="#fbbf24" stroke-width="1.5"/>
+          <text x="320" y="373" text-anchor="middle" fill="#92400e" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">$2,500</text>
+          <text x="320" y="394" text-anchor="middle" fill="#8a7f6e" font-size="11">3–7.99 yr</text>
+
+          <rect x="440" y="352" width="240" height="32" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="560" y="373" text-anchor="middle" fill="#92400e" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">$5,000</text>
+          <text x="560" y="394" text-anchor="middle" fill="#8a7f6e" font-size="11">8–14.99 yr</text>
+
+          <rect x="680" y="352" width="100" height="32" rx="6" fill="#fee2e2" stroke="#fca5a5" stroke-width="1.5"/>
+          <text x="730" y="373" text-anchor="middle" fill="#b91c1c" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">$12,500</text>
+          <text x="730" y="394" text-anchor="middle" fill="#8a7f6e" font-size="11">15–19.99</text>
+
+          <rect x="780" y="352" width="100" height="32" rx="6" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+          <text x="830" y="373" text-anchor="middle" fill="#991b1b" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">$22,500</text>
+          <text x="830" y="394" text-anchor="middle" fill="#8a7f6e" font-size="11">20+ yr</text>
+
+          <!-- Compliance benchmarks -->
+          <text x="60" y="428" fill="#0e7490" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">COMPLIANCE WELL MILESTONES (idle before 4/1/2019):</text>
+          <rect x="60" y="436" width="820" height="30" rx="6" fill="#cffafe" stroke="#67e8f9" stroke-width="1"/>
+          <text x="78" y="456" fill="#0e7490" font-family="Inter,sans-serif" font-size="12" font-weight="600">5% by 4/2020 → 15% by 4/2021 → 30% by 4/2022 → 50% by 4/2023 → 75% by 4/2024 → 100% by 4/2025</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card blue">
+      <h2><span class="ic">📊</span> At-a-Glance: Requirements by Idle Duration</h2>
+      <table class="tbl">
+        <tr><th>Years Idle</th><th>Required Actions</th><th>Fee (2025)</th><th>Key Deadline</th></tr>
+        <tr><td><strong>0–2</strong></td><td>Fluid level test, casing pressure test</td><td>$1,000/yr</td><td>Within 24 months of going idle</td></tr>
+        <tr><td><strong>2–8</strong></td><td>Repeat fluid level (24 mo.), repeat pressure test (48–96 mo.)</td><td>$2,500/yr<br><small style="color:var(--text3)">(3–7.99 yr)</small></td><td>Ongoing per schedule</td></tr>
+        <tr><td><strong>8–15</strong><br><small style="color:var(--text3)">(long-term)</small></td><td>All above + Clean Out Tag (every 48 mo.)</td><td>$5,000/yr</td><td>Clean out due at year 8</td></tr>
+        <tr><td style="color:var(--red)"><strong>15+</strong></td><td>All above + Engineering Analysis proving viability</td><td>$12,500/yr<br><small style="color:var(--text3)">(15–19.99)</small></td><td>Due by end of month 15 of idle</td></tr>
+        <tr><td style="color:var(--red)"><strong>20+</strong></td><td>All above (continued)</td><td style="color:var(--red);font-weight:700">$22,500/yr</td><td>Ongoing compliance</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== PRESSURE TEST ===== -->
+  <div class="sec" id="s-pressure">
+    <div class="card blue">
+      <h2><span class="ic">🔧</span> Pressure Testing Parameters <span class="badge blue">§1772.1.1</span></h2>
+      <h3>Standard Casing Pressure Test</h3>
+      <ul class="cl">
+        <li>Test with <strong>liquid</strong> unless Division approves gas</li>
+        <li>Wellbore filled with stable fluid column, free of excess gases</li>
+        <li>Minimum <strong>200 psi above surface pressure</strong></li>
+        <li>Calibrated gauge, accuracy within 1% of test pressure</li>
+        <li>Pressure recorded at least <strong>once per minute</strong></li>
+        <li><strong>Pass criteria:</strong> ≤ 3% pressure change over continuous 30 minutes</li>
+        <li><strong>Steam exception:</strong> If in area of review for cyclic/steamflood, up to 10% <em>increase</em> is a pass</li>
+        <li>Analog gauge: test pressure must be within mid-range scale</li>
+        <li>Results submitted digitally within 60 days in tabular format</li>
+      </ul>
+    </div>
+
+    <div class="card green">
+      <h2><span class="ic">🔁</span> Retest Intervals — Depends on Test Pressure</h2>
+      <div class="rg">
+        <div class="rc">
+          <div class="psi">200 psi</div>
+          <div class="lb">above surface pressure</div>
+          <div class="iv">Retest ≤ 48 mo.</div>
+        </div>
+        <div class="rc">
+          <div class="psi">500 psi</div>
+          <div class="lb">above surface pressure</div>
+          <div class="iv">Retest ≤ 72 mo.</div>
+        </div>
+        <div class="rc">
+          <div class="psi">1,000 psi</div>
+          <div class="lb">above surface pressure</div>
+          <div class="iv">Retest ≤ 96 mo.</div>
+        </div>
+        <div class="rc">
+          <div class="psi" style="font-size:20px">Alt. Method</div>
+          <div class="lb">§1772.1.1(b)(c)(d)</div>
+          <div class="iv">Retest ≤ 48 mo.</div>
+        </div>
+      </div>
+      <div class="note">💡 Higher test pressure = longer interval between retests. Testing at 1,000 psi buys you 8 years vs. 4 years at 200 psi.</div>
+    </div>
+
+    <div class="card purple">
+      <h2><span class="ic">🔬</span> Alternative Test Methods</h2>
+      <div class="db purple-l"><strong>Inert Gas Depression Test (§1772.1.1(b)):</strong> Displace fluid to 100 ft above perf/shoe/liner top using inert gas. Minimum computed pressure must be ≥ 500 psi. Pass = fluid static, pressure stabilizes ±1% over 60 minutes. Confirm fluid level at end of test.</div>
+      <div class="db blue-l"><strong>Alternate Mechanical Integrity Test (§1772.1.1(c)):</strong> E.g., magnetic flux or ultrasonic casing wall thickness inspection, ultrasonic imaging + cement evaluation log. Requires Division case-by-case approval as "at least as effective" as pressure test.</div>
+      <div class="db green-l"><strong>Passive Testing — Low-Priority Wells Only (§1772.1.1(d)):</strong> Caliper survey with Division-approved protocols for evaluating well integrity. Only for wells that meet ALL low-priority criteria.</div>
+    </div>
+  </div>
+
+  <!-- ===== FAILED TESTS ===== -->
+  <div class="sec" id="s-failure">
+    <div class="card red">
+      <h2><span class="ic">⚠️</span> What Happens When a Test Fails? <span class="badge red">§1772.1(b)</span></h2>
+      <p style="margin-bottom:14px">Within <strong>12 months</strong> of a failed casing pressure test or clean out tag (or any other non-compliance), the operator must do <strong>one</strong> of the following:</p>
+
+      <div class="fs"><div class="fn" style="color:var(--green)">A</div><div class="ft"><strong>Bring the well into compliance</strong><div class="det">Fix the issue and pass the required test</div></div></div>
+      <div class="fs"><div class="fn" style="color:var(--purple)">B</div><div class="ft"><strong>Partially plug & abandon</strong> per §1752<div class="det">Partial P&A still requires pressure testing every 60 months</div></div></div>
+      <div class="fs"><div class="fn" style="color:var(--red)">C</div><div class="ft"><strong>Fully plug & abandon</strong> per PRC §3208<div class="det">Permanently seal the well</div></div></div>
+      <div class="fs"><div class="fn" style="color:var(--blue)">D</div><div class="ft"><strong>Schedule for P&A</strong> under approved IWMP or Testing Waiver Plan<div class="det">Commits operator to P&A within 8 years</div></div></div>
+
+      <div class="warn-box"><strong>⚠ Automatic Failure:</strong> If a well <em>cannot be safely and effectively tested</em> for any reason, it is deemed to have failed the pressure test. §1772.1(a)(2)</div>
+      <div class="warn-box"><strong>⚠ Each untested well = separate violation</strong> if operator misses Testing Compliance Work Plan benchmarks. §1772.1.4(f)</div>
+    </div>
+
+    <div class="card amber">
+      <h2><span class="ic">📜</span> Enforcement Consequences</h2>
+      <div class="db red-l"><strong>Failure to pay fees (PRC §3206(c)):</strong> Conclusive evidence of well desertion → Supervisor may order P&A under §3237.</div>
+      <div class="db red-l"><strong>Failure to comply with regulations (PRC §3206.1(e)):</strong> Conclusive evidence of desertion → Supervisor may order P&A.</div>
+      <div class="db red-l"><strong>Failure to remediate or prove viability (PRC §3206.1(d)):</strong> Operator shall P&A per §3208.</div>
+      <div class="db"><strong>Late fee penalties:</strong> 10% penalty + 1.5%/month non-compounding interest. May be referred to State Controller's Office after 2 months.</div>
+      <div class="note">Since 1977, CalGEM has plugged and abandoned about 1,400 deserted wells at a cost of $29.5 million to the State.</div>
+    </div>
+  </div>
+
+  <!-- ===== PLANS & WAIVERS ===== -->
+  <div class="sec" id="s-plans">
+    <div class="card blue">
+      <h2><span class="ic">📋</span> Testing Waiver Plan <span class="badge blue">§1772.2</span></h2>
+      <div class="db blue-l"><strong>Purpose:</strong> Schedule P&A of idle wells within up to 8 years. While on an approved plan and in compliance, the operator is exempt from testing requirements (§1772.1, §1772.1.1, §1772.1.2).</div>
+      <h3>Requirements</h3>
+      <ul class="cl">
+        <li>List of wells with API, name, scheduled P&A date, known integrity deficiencies</li>
+        <li>At least <strong>10% of wells P&A'd each year</strong></li>
+        <li>All wells P&A'd within 8 years</li>
+        <li>Prioritize per §1772.4 factors with written justification</li>
+        <li>Division may adjust order of wells</li>
+      </ul>
+      <div class="warn-box"><strong>If operator fails to meet schedule:</strong> Division may cancel the entire plan. Operator must then test ALL listed wells within 90 days. No new waiver plan until fully in compliance with §1772.1.</div>
+    </div>
+
+    <div class="card purple">
+      <h2><span class="ic">📑</span> Idle Well Management Plan (IWMP) <span class="badge purple">§1772.3 / PRC §3206</span></h2>
+      <div class="db purple-l"><strong>Purpose:</strong> Filed in lieu of paying idle well fees (due May 1 each year). Commits operator to eliminating idle wells annually. Up to 8-year plan, reviewed annually by CalGEM. IWMP filed after May 1 will NOT be accepted.</div>
+
+      <h3>AB 1866 Changes (Effective Jan 1, 2025)</h3>
+      <div class="ok-box"><strong>Key change:</strong> IWMPs now cover ALL idle wells, not just long-term idle wells. Minimum annual elimination percentages increased. Operators must consider prioritization factors when scheduling wells for P&A.</div>
+
+      <h3>Required Elimination Rates (2025+)</h3>
+      <table class="tbl">
+        <tr><th>Statewide Idle Count</th><th>CY 2025–2027</th><th>CY 2028–2029</th><th>CY 2030+</th></tr>
+        <tr><td>0–250</td><td>5%</td><td>6%</td><td>8%</td></tr>
+        <tr><td>251–1,250</td><td>6%</td><td>8%</td><td>10%</td></tr>
+        <tr><td>1,251–3,000</td><td>7%</td><td>10%</td><td>15%</td></tr>
+        <tr><td>3,001+</td><td>15%</td><td>18%</td><td>20%</td></tr>
+      </table>
+
+      <div class="warn-box"><strong>IWMP failure:</strong> Plan cancelled → must pay all idle well fees immediately → cannot propose new IWMP for 2 years → can only reapply after all fees/penalties/interest paid in full. May appeal to Dept. of Conservation per PRC §3350+.</div>
+      <div class="note">📌 "Elimination" = P&A per §3208 or 6 continuous months of production/injection. NOT converting to observation well or transferring operator.</div>
+    </div>
+
+    <div class="card green">
+      <h2><span class="ic">📐</span> Testing Compliance Work Plan <span class="badge green">§1772.1.4</span></h2>
+      <div class="db green-l"><strong>Applies to:</strong> All wells idle as of April 1, 2019 ("compliance wells"). Was due June 1, 2019. Must complete all testing by April 1, 2025.</div>
+      <h3>Annual Benchmarks</h3>
+      <table class="tbl">
+        <tr><th>Date</th><th>Cumulative % Tested</th></tr>
+        <tr><td>April 1, 2020</td><td>≥ 5%</td></tr>
+        <tr><td>April 1, 2021</td><td>≥ 15%</td></tr>
+        <tr><td>April 1, 2022</td><td>≥ 30%</td></tr>
+        <tr><td>April 1, 2023</td><td>≥ 50%</td></tr>
+        <tr><td>April 1, 2024</td><td>≥ 75%</td></tr>
+        <tr><td>April 1, 2025</td><td>100%</td></tr>
+      </table>
+      <div class="note">P&A or partial P&A counts as "completion of testing" for benchmarks. Pre-4/1/2019 tests accepted if conducted per §1772.1 and §1772.1.1 parameters.</div>
+    </div>
+
+    <div class="card amber">
+      <h2><span class="ic">📊</span> Prioritization Factors <span class="badge amber">§1772.4</span></h2>
+      <p style="margin-bottom:10px">When prioritizing wells for testing or P&A on any plan, operators shall consider:</p>
+      <ul class="cl">
+        <li>Critical well, urban area, or environmentally sensitive wellhead</li>
+        <li>Known geologic hazards (subsidence, landslides, seismicity damage history)</li>
+        <li>Surface pressure in casing/tubing, or open to atmosphere</li>
+        <li>Surface obstacles preventing access</li>
+        <li>Known downhole issues (holes in casing, collapsed casing, stuck rods/packer/fish)</li>
+        <li>Fluid level above base of freshwater</li>
+        <li>Fluid level above base of USDW</li>
+        <li>Age of the idle well</li>
+        <li>Other threats to life, health, property, natural resources</li>
+        <li>Operational/economic efficiencies from sequencing</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== 15-YEAR ANALYSIS ===== -->
+  <div class="sec" id="s-15year">
+    <div class="card red">
+      <h2><span class="ic">📐</span> 15-Year Engineering Analysis <span class="badge red">§1772.1.2</span></h2>
+      <div class="db red-l"><strong>Trigger:</strong> By the end of the month in which an idle well has been idle for 15 years. Must demonstrate to Division's satisfaction it is <strong>viable to return the well to operation</strong>.</div>
+
+      <h3>Required Elements — Reservoir Viability (§1772.1.2(b))</h3>
+      <ul class="cl">
+        <li>API number and well name</li>
+        <li>Statement of potential future use</li>
+        <li>Identification of each reservoir unit & reservoir characteristics</li>
+        <li>Representative e-log below deepest producing zone — all geologic units, formations, USDWs, freshwater aquifers, oil/gas zones</li>
+        <li>Structural contour map on geologic marker near top of each reservoir unit — faults, lateral containment, productive zone extent</li>
+      </ul>
+
+      <h3>Required Elements — Mechanical Integrity (§1772.1.2(c) / §1772.1.3)</h3>
+      <ul class="cl">
+        <li>Complete casing diagram: operator, lease, API, spud date, ground elevation, reference elevation, USDW/freshwater bases</li>
+        <li>Casing sizes/grades/connections/weights, shoe/stub/liner depths</li>
+        <li>Perforations, open-hole completions, water shutoffs, cement ports, casing damage, junk/fish</li>
+        <li>Subsurface equipment (SSVs, packers, gas lift mandrels)</li>
+        <li>Hole diameters, cement plugs & fill locations (top & bottom)</li>
+        <li>Fluid type/weight between cement plugs</li>
+        <li>Formation/zone/marker depths, injection zone & confining layers</li>
+        <li>Cement yield calculations, slurry info (volume, density, yield, type, additives)</li>
+        <li>Wellbore path (MD + inclination & azimuth)</li>
+        <li>Current passing pressure test + clean out tag results</li>
+      </ul>
+
+      <h3>If Division Determines "Not Viable"</h3>
+      <div class="warn-box"><strong>Process:</strong> Division provides basis for determination → operator gets ≥ 30 days to provide additional info → if still not viable after final review → operator must P&A within 12 months or schedule under approved plan.</div>
+
+      <div class="ok-box"><strong>Multi-well efficiency:</strong> If reservoir data applies to multiple wells in same field, operator can reference it in subsequent analyses without resubmitting. §1772.1.2(e)</div>
+
+      <div class="note">For wells idle ≥ 9 years as of 4/1/2019: analysis due by LATER of (A) 60 days after scheduled testing in Compliance Work Plan, or (B) end of month when well hits 15 years idle. §1772.1.2(i)</div>
+    </div>
+  </div>
+
+  <!-- ===== FEES ===== -->
+  <div class="sec" id="s-fees">
+    <div class="card amber">
+      <h2><span class="ic">💰</span> Annual Idle Well Fees <span class="badge amber">PRC §3206 — Eff. 1/1/2025 (AB 1866)</span></h2>
+      <p style="margin-bottom:16px">AB 1866 (Sept 2024) dramatically increased idle well fees. Fees are assessed for each well idle at any point in the prior calendar year. The operator as of Dec 31 of the prior year is responsible.</p>
+
+      <table class="tbl">
+        <tr><th>Years Idle</th><th>Previous Fee</th><th style="color:var(--red)">New Fee (2025)</th><th>Increase</th></tr>
+        <tr><td>0–2.99</td><td style="color:var(--text3)">$0</td><td style="font-weight:700">$1,000</td><td><span class="badge red">NEW</span></td></tr>
+        <tr><td>3–7.99</td><td style="color:var(--text3)">$150</td><td style="font-weight:700">$2,500</td><td>~17×</td></tr>
+        <tr><td>8–14.99</td><td style="color:var(--text3)">$300</td><td style="font-weight:700">$5,000</td><td>~17×</td></tr>
+        <tr><td>15–19.99</td><td style="color:var(--text3)">$750</td><td style="font-weight:700">$12,500</td><td>~17×</td></tr>
+        <tr><td>20+</td><td style="color:var(--text3)">$1,500</td><td style="font-weight:700;color:var(--red)">$22,500</td><td>15×</td></tr>
+      </table>
+
+      <div class="warn-box"><strong>Late penalties:</strong> 10% penalty if not paid by May 1, plus 1.5%/month non-compounding interest until paid. May be referred to State Controller's Office after 2 months. Failure to pay = conclusive evidence of desertion.</div>
+      <div class="ok-box"><strong>Alternative:</strong> File an IWMP by May 1 in lieu of fees. IWMP filed after May 1 will NOT be accepted.</div>
+    </div>
+
+    <div class="card blue">
+      <h2><span class="ic">📈</span> Fee Impact — Old vs. New</h2>
+      <div class="dw">
+        <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg">
+          <text x="40" y="22" fill="#5c5243" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">ANNUAL FEE PER WELL — 2025 (colored) vs. Previous (gray)</text>
+
+          <line x1="80" y1="44" x2="80" y2="270" stroke="#d1d5db" stroke-width="1"/>
+          <text x="74" y="270" text-anchor="end" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">$0</text>
+          <text x="74" y="218" text-anchor="end" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">$5k</text>
+          <line x1="78" y1="216" x2="750" y2="216" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
+          <text x="74" y="166" text-anchor="end" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">$10k</text>
+          <line x1="78" y1="164" x2="750" y2="164" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
+          <text x="74" y="114" text-anchor="end" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">$15k</text>
+          <line x1="78" y1="112" x2="750" y2="112" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4"/>
+          <text x="74" y="58" text-anchor="end" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">$22.5k</text>
+
+          <!-- 0-2.99 -->
+          <rect x="120" y="268" width="45" height="2" rx="1" fill="#d1d5db"/>
+          <rect x="170" y="258" width="45" height="12" rx="3" fill="#f59e0b"/>
+          <text x="192" y="254" text-anchor="middle" fill="#92400e" font-size="11" font-weight="700" font-family="JetBrains Mono,monospace">$1k</text>
+          <text x="170" y="290" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">0-3yr</text>
+
+          <!-- 3-7.99 -->
+          <rect x="260" y="267" width="45" height="3" rx="1" fill="#d1d5db"/>
+          <rect x="310" y="244" width="45" height="26" rx="3" fill="#f59e0b"/>
+          <text x="332" y="240" text-anchor="middle" fill="#92400e" font-size="11" font-weight="700" font-family="JetBrains Mono,monospace">$2.5k</text>
+          <text x="310" y="290" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">3-8yr</text>
+
+          <!-- 8-14.99 -->
+          <rect x="400" y="267" width="45" height="3" rx="1" fill="#d1d5db"/>
+          <rect x="450" y="218" width="45" height="52" rx="3" fill="#3b82f6"/>
+          <text x="472" y="214" text-anchor="middle" fill="#1d4ed8" font-size="11" font-weight="700" font-family="JetBrains Mono,monospace">$5k</text>
+          <text x="450" y="290" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">8-15yr</text>
+
+          <!-- 15-19.99 -->
+          <rect x="540" y="264" width="45" height="6" rx="1" fill="#d1d5db"/>
+          <rect x="590" y="140" width="45" height="130" rx="3" fill="#ef4444"/>
+          <text x="612" y="136" text-anchor="middle" fill="#b91c1c" font-size="11" font-weight="700" font-family="JetBrains Mono,monospace">$12.5k</text>
+          <text x="590" y="290" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">15-20yr</text>
+
+          <!-- 20+ -->
+          <rect x="680" y="262" width="45" height="8" rx="1" fill="#d1d5db"/>
+          <rect x="730" y="50" width="45" height="220" rx="3" fill="#dc2626"/>
+          <text x="752" y="46" text-anchor="middle" fill="#991b1b" font-size="11" font-weight="700" font-family="JetBrains Mono,monospace">$22.5k</text>
+          <text x="730" y="290" fill="#5c5243" font-size="11" font-family="JetBrains Mono,monospace">20+yr</text>
+
+          <!-- Legend -->
+          <rect x="100" y="310" width="14" height="10" rx="3" fill="#d1d5db"/>
+          <text x="120" y="320" fill="#5c5243" font-size="12" font-family="Inter">Previous fee</text>
+          <rect x="230" y="310" width="14" height="10" rx="3" fill="#f59e0b"/>
+          <text x="250" y="320" fill="#92400e" font-size="12" font-family="Inter" font-weight="600">New fee (2025)</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card red">
+      <h2><span class="ic">💸</span> Cost Example — 100 Wells Idle 10 Years</h2>
+      <div class="two">
+        <div class="db" style="border-left-color:#d1d5db"><strong style="color:var(--text3)">Previous:</strong> 100 × $300 = <strong style="color:var(--text3)">$30,000/year</strong></div>
+        <div class="db red-l"><strong>New (2025):</strong> 100 × $5,000 = <strong>$500,000/year</strong></div>
+      </div>
+      <div class="note">This dramatic increase is designed to incentivize operators to either P&A idle wells or file IWMPs. Fees deposited into the Hazardous and Idle-Deserted Well Abatement Fund.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('tabs').addEventListener('click',e=>{
+  if(!e.target.classList.contains('tab'))return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('s-'+e.target.dataset.t).classList.add('active');
+});
+</script>
+</body>
+</html>
