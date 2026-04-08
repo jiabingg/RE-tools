@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalGEM UIC Program Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FFF9F0;
+  --cream-dark: #F5EDE0;
+  --warm-white: #FFFDF8;
+  --text-primary: #2D2A26;
+  --text-secondary: #5C5650;
+  --text-muted: #8A847C;
+  --amber: #D4850F;
+  --amber-light: #FFF3E0;
+  --amber-border: #F5C87A;
+  --blue: #2B6CB0;
+  --blue-light: #EBF4FF;
+  --blue-border: #90C0F0;
+  --green: #2D7D46;
+  --green-light: #E8F5E9;
+  --green-border: #A5D6A7;
+  --red: #C53030;
+  --red-light: #FFF5F5;
+  --red-border: #FCA5A5;
+  --purple: #6B46C1;
+  --purple-light: #F3E8FF;
+  --purple-border: #C4B5FD;
+  --teal: #0E7490;
+  --teal-light: #E0F7FA;
+  --teal-border: #80DEEA;
+  --border: #E8E0D4;
+  --shadow: 0 1px 3px rgba(45,42,38,0.06), 0 1px 2px rgba(45,42,38,0.04);
+  --shadow-md: 0 4px 12px rgba(45,42,38,0.08), 0 2px 4px rgba(45,42,38,0.04);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', -apple-system, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-primary);
+  background: var(--cream);
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, #2D2A26 0%, #3D3832 100%);
+  color: white;
+  padding: 28px 32px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.header h1 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin-bottom: 2px;
+}
+.header .subtitle {
+  font-size: 13px;
+  color: #C4B89A;
+  font-weight: 500;
+}
+.header .version-badge {
+  display: inline-block;
+  background: var(--amber);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ── Tab Navigation ── */
+.tab-nav {
+  display: flex;
+  gap: 2px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 9px 18px;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: #C4B89A;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+.tab-btn.active {
+  background: var(--cream);
+  color: var(--text-primary);
+}
+
+/* ── Main ── */
+.main { max-width: 1280px; margin: 0 auto; padding: 24px 32px 60px; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Section Cards ── */
+.card {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.card h2 {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card h2 .icon { font-size: 22px; }
+.card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 18px 0 10px;
+  color: var(--text-primary);
+}
+
+/* ── Color accent strips ── */
+.card.amber { border-left: 4px solid var(--amber); }
+.card.blue { border-left: 4px solid var(--blue); }
+.card.green { border-left: 4px solid var(--green); }
+.card.red { border-left: 4px solid var(--red); }
+.card.purple { border-left: 4px solid var(--purple); }
+.card.teal { border-left: 4px solid var(--teal); }
+
+/* ── Regulation citations ── */
+.cite {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--amber-light);
+  color: var(--amber);
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.cite.blue-cite { background: var(--blue-light); color: var(--blue); }
+.cite.green-cite { background: var(--green-light); color: var(--green); }
+.cite.red-cite { background: var(--red-light); color: var(--red); }
+.cite.purple-cite { background: var(--purple-light); color: var(--purple); }
+
+/* ── Key number callouts ── */
+.key-num {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--blue);
+  font-size: 14px;
+}
+
+/* ── Checklist tables ── */
+.checklist-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  margin: 12px 0 8px;
+}
+.checklist-table thead th {
+  background: var(--cream-dark);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+}
+.checklist-table thead th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+.checklist-table thead th:last-child { border-radius: 0 var(--radius-sm) 0 0; }
+.checklist-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.checklist-table tr:last-child td { border-bottom: none; }
+.checklist-table tr:hover td { background: var(--amber-light); }
+.checklist-table .section-code {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--amber);
+  white-space: nowrap;
+}
+.checklist-table .ref-auth {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── Info boxes ── */
+.info-box {
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+.info-box.amber-box { background: var(--amber-light); border: 1px solid var(--amber-border); }
+.info-box.blue-box { background: var(--blue-light); border: 1px solid var(--blue-border); }
+.info-box.green-box { background: var(--green-light); border: 1px solid var(--green-border); }
+.info-box.red-box { background: var(--red-light); border: 1px solid var(--red-border); }
+.info-box.purple-box { background: var(--purple-light); border: 1px solid var(--purple-border); }
+.info-box.teal-box { background: var(--teal-light); border: 1px solid var(--teal-border); }
+.info-box strong { font-weight: 700; }
+
+/* ── Timeline / Steps ── */
+.step-list { list-style: none; padding: 0; margin: 14px 0; }
+.step-list li {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.step-list li:last-child { border-bottom: none; }
+.step-num {
+  min-width: 34px;
+  height: 34px;
+  background: var(--amber);
+  color: white;
+  font-weight: 800;
+  font-size: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step-num.blue-step { background: var(--blue); }
+.step-num.green-step { background: var(--green); }
+.step-num.teal-step { background: var(--teal); }
+
+/* ── RASCI badges ── */
+.rasci { display: inline-block; font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin: 0 2px; }
+.rasci.r-ar { background: #FEE2E2; color: #991B1B; }
+.rasci.r-cs { background: #DBEAFE; color: #1E40AF; }
+.rasci.r-i { background: #FEF3C7; color: #92400E; }
+.rasci.r-is { background: #D1FAE5; color: #065F46; }
+.rasci.r-a { background: #FCE7F3; color: #9D174D; }
+.rasci.r-r { background: #FEF9C3; color: #854D0E; }
+.rasci.r-s { background: #E0E7FF; color: #3730A3; }
+
+/* ── Collapsible sections ── */
+.collapsible-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  user-select: none;
+}
+.collapsible-header h3 { margin: 0; }
+.collapsible-header .arrow {
+  transition: transform 0.2s;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.collapsible-header.open .arrow { transform: rotate(90deg); }
+.collapsible-body { display: none; padding-bottom: 8px; }
+.collapsible-body.open { display: block; }
+
+/* ── SVG containers ── */
+.svg-container { margin: 16px 0; overflow-x: auto; }
+.svg-container svg { max-width: 100%; height: auto; }
+
+/* ── Grid layouts ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ── MIT schedule mini-cards ── */
+.mit-card {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  text-align: center;
+}
+.mit-card .well-type { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.mit-card .freq {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--blue);
+}
+.mit-card .freq-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Search/Filter ── */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.search-bar input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--sans);
+  font-size: 14px;
+  background: var(--warm-white);
+  outline: none;
+}
+.search-bar input:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(212,133,15,0.12); }
+
+/* ── Print styles ── */
+@media print {
+  .header { position: static; }
+  .tab-nav { display: none; }
+  .tab-content { display: block !important; page-break-before: always; }
+  .tab-content:first-child { page-break-before: avoid; }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--cream-dark); }
+::-webkit-scrollbar-thumb { background: #C4B89A; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <div class="header-inner">
+    <h1>CalGEM UIC Program Cheatsheet <span class="version-badge">March 2026</span></h1>
+    <div class="subtitle">Underground Injection Control — Project-by-Project Review · Non-Expansion · Periodic Review</div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="showTab('overview')">Overview & Flowchart</button>
+      <button class="tab-btn" onclick="showTab('pbp')">Project-by-Project Review</button>
+      <button class="tab-btn" onclick="showTab('nonexp')">Non-Expansion AOR</button>
+      <button class="tab-btn" onclick="showTab('periodic')">Periodic Review</button>
+      <button class="tab-btn" onclick="showTab('checklist')">Full Checklist Reference</button>
+      <button class="tab-btn" onclick="showTab('mit')">MIT & MASIP</button>
+      <button class="tab-btn" onclick="showTab('rasci')">RASCI Chart</button>
+      <button class="tab-btn" onclick="showTab('glossary')">Glossary & Regs</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main">
+
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: OVERVIEW -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-overview" class="tab-content active">
+
+  <div class="card amber">
+    <h2><span class="icon">📋</span> What Is the UIC Program?</h2>
+    <p>CalGEM's Underground Injection Control (UIC) Program administers state regulations for permitting, drilling, inspecting, testing, and sealing Class II injection wells in California. CalGEM has EPA-delegated primacy for Class II wells under the Safe Drinking Water Act. The program coordinates with the State Water Resources Control Board (SWRCB) via the <strong>Revised Memorandum of Agreement (MOA)</strong>, last updated <strong>March 18, 2026</strong>.</p>
+    <div class="info-box amber-box" style="margin-top:12px">
+      <strong>Your Three Core Workflows:</strong> Project-by-Project Review (full data package for new/expansion/merge), Non-Expansion NOI review (adding wells to approved projects), and Periodic Review (every 3 years minimum per <span class="cite">§1724.6(d)</span>).
+    </div>
+  </div>
+
+  <div class="card blue">
+    <h2><span class="icon">🔄</span> UIC Project Review Flowchart — March 2026</h2>
+    <p>The flowchart below shows the review process for New, Merge, Expansion, and Project-by-Project reviews per <strong>Attachment 1</strong> of the revised MOA appendix.</p>
+    <div class="svg-container">
+      <svg viewBox="0 0 1050 620" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+        <!-- Background swim lanes -->
+        <rect x="0" y="0" width="1050" height="620" rx="10" fill="#FAFAF5" stroke="#E8E0D4"/>
+        <!-- Lane labels -->
+        <rect x="0" y="0" width="120" height="620" rx="10" fill="#F5EDE0"/>
+        <text x="60" y="65" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">Operator/</text>
+        <text x="60" y="78" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">Consultant</text>
+        <text x="60" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">CalGEM</text>
+        <text x="60" y="173" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">Technical Lead</text>
+        <text x="60" y="275" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">CalGEM</text>
+        <text x="60" y="288" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">Project Mgr</text>
+        <text x="60" y="385" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">CalGEM HQ</text>
+        <text x="60" y="475" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">Water Board</text>
+        <text x="60" y="565" text-anchor="middle" font-size="11" font-weight="700" fill="#5C5650">CalGEM CEQA</text>
+        <!-- Horizontal lane lines -->
+        <line x1="120" y1="110" x2="1050" y2="110" stroke="#E8E0D4" stroke-dasharray="4,4"/>
+        <line x1="120" y1="220" x2="1050" y2="220" stroke="#E8E0D4" stroke-dasharray="4,4"/>
+        <line x1="120" y1="340" x2="1050" y2="340" stroke="#E8E0D4" stroke-dasharray="4,4"/>
+        <line x1="120" y1="430" x2="1050" y2="430" stroke="#E8E0D4" stroke-dasharray="4,4"/>
+        <line x1="120" y1="520" x2="1050" y2="520" stroke="#E8E0D4" stroke-dasharray="4,4"/>
+
+        <!-- Phase labels at top -->
+        <text x="230" y="22" font-size="10" font-weight="700" fill="#D4850F">PHASE 1–2: PRE-APP & SUBMIT</text>
+        <text x="480" y="22" font-size="10" font-weight="700" fill="#2B6CB0">PHASE 3: REVIEW</text>
+        <text x="720" y="22" font-size="10" font-weight="700" fill="#2D7D46">PHASE 4–5: DISTRICT & HQ</text>
+        <text x="920" y="22" font-size="10" font-weight="700" fill="#6B46C1">PHASE 6–7: FINAL</text>
+
+        <!-- START -->
+        <circle cx="145" cy="65" r="14" fill="#D4850F"/>
+        <text x="145" y="69" text-anchor="middle" font-size="10" font-weight="700" fill="white">S</text>
+
+        <!-- 1.1 Email preliminary info -->
+        <rect x="170" y="42" width="115" height="44" rx="6" fill="#FFF3E0" stroke="#D4850F" stroke-width="1.5"/>
+        <text x="228" y="60" text-anchor="middle" font-size="10" font-weight="600" fill="#2D2A26">1.1 Email prelim</text>
+        <text x="228" y="73" text-anchor="middle" font-size="10" fill="#5C5650">info to CalGEM</text>
+        <line x1="159" y1="65" x2="170" y2="65" stroke="#D4850F" stroke-width="1.5" marker-end="url(#arrowAmber)"/>
+
+        <!-- 1.2 Pre-app meeting -->
+        <rect x="170" y="130" width="115" height="44" rx="6" fill="#EBF4FF" stroke="#2B6CB0" stroke-width="1.5"/>
+        <text x="228" y="148" text-anchor="middle" font-size="10" font-weight="600" fill="#2D2A26">1.2 Pre-app mtg</text>
+        <text x="228" y="161" text-anchor="middle" font-size="10" fill="#5C5650">WB, CalGEM, CEQA</text>
+        <line x1="228" y1="86" x2="228" y2="130" stroke="#8A847C" stroke-width="1" marker-end="url(#arrowGray)"/>
+
+        <!-- 2.1 Submit application -->
+        <rect x="310" y="42" width="115" height="44" rx="6" fill="#FFF3E0" stroke="#D4850F" stroke-width="1.5"/>
+        <text x="368" y="60" text-anchor="middle" font-size="10" font-weight="600" fill="#2D2A26">2.1 Submit</text>
+        <text x="368" y="73" text-anchor="middle" font-size="10" fill="#5C5650">Application</text>
+        <line x1="285" y1="65" x2="310" y2="65" stroke="#D4850F" stroke-width="1.5" marker-end="url(#arrowAmber)"/>
+
+        <!-- 2.2 Intake review diamond -->
+        <polygon points="368,120 395,152 368,184 341,152" fill="#EBF4FF" stroke="#2B6CB0" stroke-width="1.5"/>
+        <text x="368" y="148" text-anchor="middle" font-size="9" font-weight="600" fill="#2B6CB0">2.2</text>
+        <text x="368" y="159" text-anchor="middle" font-size="8" fill="#2B6CB0">Intake?</text>
+        <line x1="368" y1="86" x2="368" y2="120" stroke="#8A847C" stroke-width="1" marker-end="url(#arrowGray)"/>
+
+        <!-- 3.1 Intake done, review begins -->
+        <rect x="420" y="130" width="125" height="44" rx="6" fill="#2B6CB0" stroke="#2B6CB0" stroke-width="1.5"/>
+        <text x="483" y="148" text-anchor="middle" font-size="10" font-weight="600" fill="white">3.1 Review</text>
+        <text x="483" y="161" text-anchor="middle" font-size="10" fill="#DBEAFE">process begins</text>
+        <line x1="395" y1="152" x2="420" y2="152" stroke="#2B6CB0" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+        <!-- 3.2 Wellbore diagram deep dive -->
+        <rect x="420" y="185" width="125" height="36" rx="6" fill="#EBF4FF" stroke="#2B6CB0" stroke-width="1.5"/>
+        <text x="483" y="207" text-anchor="middle" font-size="9" font-weight="600" fill="#2B6CB0">3.2 Wellbore deep dive</text>
+        <line x1="483" y1="174" x2="483" y2="185" stroke="#8A847C" stroke-width="1"/>
+
+        <!-- 3.3 WB reviews water supply -->
+        <rect x="420" y="450" width="125" height="44" rx="6" fill="#E0F7FA" stroke="#0E7490" stroke-width="1.5"/>
+        <text x="483" y="468" text-anchor="middle" font-size="9" font-weight="600" fill="#0E7490">3.3 WB reviews</text>
+        <text x="483" y="481" text-anchor="middle" font-size="9" fill="#0E7490">water supply wells</text>
+        <line x1="483" y1="221" x2="483" y2="450" stroke="#8A847C" stroke-width="1" stroke-dasharray="4,4"/>
+
+        <!-- 3.5 WB communicates findings -->
+        <rect x="560" y="450" width="110" height="44" rx="6" fill="#E0F7FA" stroke="#0E7490" stroke-width="1.5"/>
+        <text x="615" y="468" text-anchor="middle" font-size="9" font-weight="600" fill="#0E7490">3.5 WB findings</text>
+        <text x="615" y="481" text-anchor="middle" font-size="9" fill="#0E7490">communicated</text>
+        <line x1="545" y1="472" x2="560" y2="472" stroke="#0E7490" stroke-width="1" marker-end="url(#arrowTeal)"/>
+
+        <!-- 3.6 CEQA begins -->
+        <rect x="420" y="540" width="125" height="36" rx="6" fill="#F3E8FF" stroke="#6B46C1" stroke-width="1.5"/>
+        <text x="483" y="562" text-anchor="middle" font-size="9" font-weight="600" fill="#6B46C1">3.6 CEQA review begins</text>
+
+        <!-- 4.1 District review -->
+        <rect x="580" y="130" width="110" height="44" rx="6" fill="#2B6CB0" stroke="#2B6CB0" stroke-width="1.5"/>
+        <text x="635" y="148" text-anchor="middle" font-size="10" font-weight="600" fill="white">4.1 District</text>
+        <text x="635" y="161" text-anchor="middle" font-size="10" fill="#DBEAFE">review</text>
+        <line x1="545" y1="152" x2="580" y2="152" stroke="#2B6CB0" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+        <!-- 4.3 District supervisor -->
+        <rect x="580" y="255" width="110" height="44" rx="6" fill="#E8F5E9" stroke="#2D7D46" stroke-width="1.5"/>
+        <text x="635" y="273" text-anchor="middle" font-size="10" font-weight="600" fill="#2D7D46">4.3 District</text>
+        <text x="635" y="286" text-anchor="middle" font-size="10" fill="#2D7D46">supervisor</text>
+        <line x1="635" y1="174" x2="635" y2="255" stroke="#8A847C" stroke-width="1" marker-end="url(#arrowGray)"/>
+
+        <!-- 5. UIC Program Review -->
+        <rect x="720" y="355" width="120" height="50" rx="6" fill="#2D7D46" stroke="#2D7D46" stroke-width="1.5"/>
+        <text x="780" y="376" text-anchor="middle" font-size="11" font-weight="700" fill="white">5. UIC Program</text>
+        <text x="780" y="390" text-anchor="middle" font-size="11" fill="#D1FAE5">Review</text>
+        <line x1="635" y1="299" x2="635" y2="320" stroke="#8A847C" stroke-width="1"/>
+        <line x1="635" y1="320" x2="780" y2="320" stroke="#8A847C" stroke-width="1"/>
+        <line x1="780" y1="320" x2="780" y2="355" stroke="#8A847C" stroke-width="1" marker-end="url(#arrowGray)"/>
+
+        <!-- 6.1 District UIC confirmation -->
+        <rect x="720" y="255" width="120" height="44" rx="6" fill="#E8F5E9" stroke="#2D7D46" stroke-width="1.5"/>
+        <text x="780" y="273" text-anchor="middle" font-size="10" font-weight="600" fill="#2D7D46">6.1 District UIC</text>
+        <text x="780" y="286" text-anchor="middle" font-size="10" fill="#2D7D46">confirmation</text>
+        <line x1="780" y1="355" x2="780" y2="299" stroke="#2D7D46" stroke-width="1" marker-end="url(#arrowGreen)"/>
+
+        <!-- 6.2 Waters of concern? diamond -->
+        <polygon points="780,130 810,155 780,180 750,155" fill="#FFF5F5" stroke="#C53030" stroke-width="1.5"/>
+        <text x="780" y="152" text-anchor="middle" font-size="8" font-weight="600" fill="#C53030">6.2</text>
+        <text x="780" y="162" text-anchor="middle" font-size="7" fill="#C53030">Concern?</text>
+        <line x1="780" y1="255" x2="780" y2="180" stroke="#8A847C" stroke-width="1" marker-end="url(#arrowGray)"/>
+
+        <!-- 6.7 WB reviews PAL/sends NOL -->
+        <rect x="860" y="450" width="120" height="44" rx="6" fill="#E0F7FA" stroke="#0E7490" stroke-width="1.5"/>
+        <text x="920" y="468" text-anchor="middle" font-size="9" font-weight="600" fill="#0E7490">6.7 WB reviews</text>
+        <text x="920" y="481" text-anchor="middle" font-size="9" fill="#0E7490">PAL, sends NOL</text>
+
+        <!-- 3.7 CEQA final review -->
+        <rect x="860" y="540" width="120" height="36" rx="6" fill="#F3E8FF" stroke="#6B46C1" stroke-width="1.5"/>
+        <text x="920" y="562" text-anchor="middle" font-size="9" font-weight="600" fill="#6B46C1">3.7 CEQA final review</text>
+
+        <!-- 7. Final approval -->
+        <rect x="920" y="255" width="110" height="50" rx="8" fill="#6B46C1" stroke="#6B46C1" stroke-width="2"/>
+        <text x="975" y="276" text-anchor="middle" font-size="11" font-weight="700" fill="white">7. Final</text>
+        <text x="975" y="290" text-anchor="middle" font-size="11" fill="#E9D5FF">Approval</text>
+        <line x1="810" y1="155" x2="920" y2="155" stroke="#8A847C" stroke-width="1"/>
+        <line x1="975" y1="155" x2="975" y2="255" stroke="#6B46C1" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+
+        <!-- FINISH -->
+        <circle cx="1030" cy="280" r="10" fill="#2D7D46" stroke="#2D7D46" stroke-width="2"/>
+        <text x="1030" y="284" text-anchor="middle" font-size="8" font-weight="700" fill="white">F</text>
+        <line x1="1030" y1="280" x2="1030" y2="280" stroke="none"/>
+
+        <!-- Arrow markers -->
+        <defs>
+          <marker id="arrowAmber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#D4850F"/></marker>
+          <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#2B6CB0"/></marker>
+          <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#2D7D46"/></marker>
+          <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#8A847C"/></marker>
+          <marker id="arrowTeal" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#0E7490"/></marker>
+          <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#6B46C1"/></marker>
+        </defs>
+      </svg>
+    </div>
+    <div class="info-box blue-box">
+      <strong>Key Participants:</strong> Operator/Consultant → CalGEM Technical Lead → CalGEM Project Manager → CalGEM HQ (UIC Program Review) → Water Board → CalGEM CEQA. The District Supervisor provides approval at step 4.3 and final approval at step 7.
+    </div>
+  </div>
+
+  <div class="card green">
+    <h2><span class="icon">📂</span> Three Review Pathways at a Glance</h2>
+    <div class="grid-3">
+      <div class="info-box amber-box">
+        <strong>Project-by-Project Review</strong><br>
+        Full data package for new projects, expansions, or merges. Uses Attachment 2 checklist (March 2026). Requires complete Engineering Study, Geologic Study, and Injection Plan.
+      </div>
+      <div class="info-box blue-box">
+        <strong>Non-Expansion AOR</strong><br>
+        Adding wells (NOIs) to already-approved projects. Uses Attachment 3 checklist (Dec 2021). Focused on new well AOR, wellbore integrity, and incremental impact assessment.
+      </div>
+      <div class="info-box green-box">
+        <strong>Periodic Review</strong><br>
+        Per <span class="cite">§1724.6(d)</span>, CalGEM reviews existing projects at least every 3 years to verify compliance and ensure PAL conditions remain effective.
+      </div>
+    </div>
+  </div>
+
+  <div class="card teal">
+    <h2><span class="icon">🔗</span> Key Regulatory References</h2>
+    <div class="grid-2">
+      <div>
+        <p><strong>Title 14 CCR (CalGEM):</strong></p>
+        <p><span class="cite">§1720.1</span> Definitions (AOR, USDW, Freshwater, etc.)</p>
+        <p><span class="cite">§1724.6</span> Approval of UIC Projects</p>
+        <p><span class="cite">§1724.7</span> Project Data Requirements</p>
+        <p><span class="cite">§1724.7.1</span> Casing Diagrams</p>
+        <p><span class="cite">§1724.7.2</span> Liquid Analysis</p>
+        <p><span class="cite">§1724.8</span> Evaluation of Wells in AOR</p>
+        <p><span class="cite">§1724.10</span> Filing, Operating, Testing</p>
+        <p><span class="cite">§1724.10.1</span> MIT Part 1 – Casing</p>
+        <p><span class="cite">§1724.10.2</span> MIT Part 2 – Fluid Migration</p>
+        <p><span class="cite">§1724.10.3</span> MASIP</p>
+        <p><span class="cite">§1724.10.4</span> Continuous Pressure Monitoring</p>
+      </div>
+      <div>
+        <p><strong>California Water Code (CWC):</strong></p>
+        <p><span class="cite blue-cite">CWC §13260</span> Report of Waste Discharge</p>
+        <p><span class="cite blue-cite">CWC §13267</span> Investigation/Monitoring Authority</p>
+        <p><span class="cite blue-cite">CWC §13267.5</span> Additional Authority</p>
+        <p style="margin-top:12px"><strong>MOA Appendix Attachments:</strong></p>
+        <p>Att. 1 — Flowchart (Mar 2026)</p>
+        <p>Att. 2 — Full Checklist (Mar 2026)</p>
+        <p>Att. 3 — Non-Expansion Checklist (Dec 2021)</p>
+        <p>Att. 4 — RASCI Chart (Mar 2026)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: PROJECT-BY-PROJECT REVIEW -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-pbp" class="tab-content">
+
+  <div class="card amber">
+    <h2><span class="icon">📦</span> Project-by-Project Review — Full Data Package</h2>
+    <p>This applies to <strong>New Projects, Expansions, Merges, and Project-by-Project Reviews</strong>. Uses the March 2026 Attachment 2 checklist. The operator must demonstrate injected fluid will be confined to the approved injection zone and will not cause damage to life, health, property, or natural resources <span class="cite">§1724.7(a)</span>.</p>
+  </div>
+
+  <!-- Data Format -->
+  <div class="card blue">
+    <h2>DF — Data Format Requirements</h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:110px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">DF(1)</td><td class="ref-auth">§1724.7(c)</td><td>All data supporting the UIC project are in <strong>digital format</strong>.</td></tr>
+        <tr><td class="section-code">DF(2)</td><td class="ref-auth">§1724.7(c)</td><td>Maps are clearly labeled with: <strong>Title, Scale, North arrow, UIC project number, Legend, Well symbols/identifiers, AOR/project area/exemption boundaries, Other relevant data.</strong> Diagrams and exhibits clearly and appropriately labeled.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cover Letter -->
+  <div class="card green">
+    <h2>CL — Cover Letter</h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:110px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">CL(1)</td><td class="ref-auth">§1724.7(d)<br>CWC §13260</td><td>
+          Cover letter with statement that appropriate CA-licensed professionals are responsible for all data, interpretations, and calculations per BPC §6730-6749, §7835, §7835.1. Must include:<br>
+          • Statement on whether Class II fluids have migrated beyond exempt aquifer or into USDW<br>
+          • Stamp and signature of licensed professional(s)<br>
+          • If no licensed-professional-scope data, cover page must indicate and provide name(s)/signature(s) of preparer(s)
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Project Overview -->
+  <div class="card amber">
+    <h2>PO — Project Overview</h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:110px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">PO(1)</td><td class="ref-auth">§1724.6(a)<br>§1724.7(a)(1)(B)<br>§1724.8</td><td>
+          <strong>Project summary</strong> including: purpose, location (meridian/section/township/range), UIC number, current PAL date, injection zone names, AOR method, project duration, volume (historical if applicable), number of injectors, presence/absence of freshwater/USDW, regional location map.<br><br>
+          <strong>AOR Map</strong> showing: all wells within/adjacent to AOR boundary (surface + BH locations, wellbore paths, type/status), water supply wells, wells identified as potential USDW conduits, underground disposal/mining activities, cross-section traces, all faults.
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Geologic Study -->
+  <div class="card purple">
+    <h2>GS — Geologic Study</h2>
+    <div class="info-box purple-box">The geologic characterization must encompass: stratigraphy, injection zone, sealing mechanism, upper confining layer (caprock), lower confining layer, areas of potential migration/entrapment, and features that could cause fluid migration out of the injection zone.</div>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:110px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">GS(1)</td><td class="ref-auth">§1724.7(a)(2)(A)<br>§1724.7(a)(2)(C)</td><td><strong>Reservoir characteristics:</strong> porosity, permeability, thickness (min/max/avg), fracture gradient, original & current temperature/pressure, original & residual oil/gas/water saturations. <strong>Reservoir fluid data:</strong> oil gravity, viscosity, non-HC components (H₂S), gas specific gravity.</td></tr>
+        <tr><td class="section-code">GS(2)</td><td class="ref-auth">§1724.7(a)(2)(B)<br>§1724.7.2</td><td><strong>Water quality & TDS:</strong> Per §1724.7.2 — TDS, TPH as crude, major cations (Ca, Mg, Na, K, Fe, Mn, Sr, B), major anions (Cl, SO₄, HCO₃, CO₃, Br, I), total alkalinity/hydroxide, EC, pH, temperature. Samples must be representative (native condition, post-circulation). <span class="key-num">Within 5 years</span> for new/expansion apps.</td></tr>
+        <tr><td class="section-code">GS(3)</td><td class="ref-auth">§1724.7(a)(2)(F)<br>§1720.1(c)</td><td><strong>Representative electric type log:</strong> extends below deepest producing/injection zone, identifies geophysical curves, vertical scale, API #, all geologic units, injection zone(s), confining zone(s), freshwater aquifers, base of freshwater (≤<span class="key-num">3,000 mg/L TDS</span>), USDWs, base of USDW, oil/gas zones.</td></tr>
+        <tr><td class="section-code">GS(4)</td><td class="ref-auth">§1724.7(a)(2)(C)</td><td><strong>Structural contour maps</strong> for top/base of: upper confining layer, injection zone, lower confining layer. Must show faults, lateral containment features, well data, elevation tops, wellbore paths, cross-section lines. <strong>Fault analysis</strong> required if faults identified (pressure data, water quality, juxtaposition, shale gouge ratio).</td></tr>
+        <tr><td class="section-code">GS(5)</td><td class="ref-auth">§1724.7(a)(2)(D)</td><td><strong>Isopach contour maps (net)</strong> for injection zone(s), upper confining layer(s), lower confining layer(s). Well data values, identifiers, cross-section lines.</td></tr>
+        <tr><td class="section-code">GS(6)</td><td class="ref-auth">§1724.7(a)(2)(E)</td><td><strong>At least 2 geologic cross-sections</strong> (along strike + perpendicular). Must include: ≥3 wells, ≥1 injector, extend to surface from base of deepest zone, legend, API numbers, vertical depth (SubSea TVD) + horizontal scale, datum on sea-level, formations, faults, injection zone, confining units, freshwater/USDW zones, AOR extents, AE boundaries.</td></tr>
+        <tr><td class="section-code">GS(7)</td><td class="ref-auth">§1724.7(a)(2)(B)<br>§1724.7(a)(6)</td><td><strong>Non-USDW determination</strong> (if injection zone not exempted). Water quality samples within <span class="key-num">5 years</span>, or TDS log calculations validated within <span class="key-num">1 mile</span>. Lateral/vertical extent defined on maps. If TDS ><span class="key-num">10,000 mg/L</span>, written statement by PG/PE required.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Engineering Study -->
+  <div class="card teal">
+    <h2>ES — Engineering Study</h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:110px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">ES(1)</td><td class="ref-auth">§1724.7(a)(1)(A)<br>CWC §13260</td><td><strong>AOR rationale:</strong> calculations, variables (porosity, perm, thickness – net & gross), citations, assumptions, anticipated duration/daily rate/cumulative volume. <strong>Isobar map</strong> using idle well fluid levels within <span class="key-num">2 years</span>. <strong>Evaluation of overlapping ZEIs</strong> and neighboring projects. If production offsets pressure, provide calculations.</td></tr>
+        <tr><td class="section-code">ES(2)</td><td class="ref-auth">CWC §13260/13267</td><td><strong>AOR determination accuracy:</strong> Must use accurate representation of all relevant parameters including static pressures/current temperatures. If range of values, multiple AORs required for most conservative estimate. Must demonstrate ¼-mile fixed radius is adequate (if proposed). Consider reservoir heterogeneity. If calculated, method must be technically supported.</td></tr>
+        <tr><td class="section-code">ES(3)</td><td class="ref-auth">§1724.7(a)(1)(C)<br>§1724.7.1<br>§1724.8</td><td><strong>Well compendium:</strong> API numbers, wellbore paths, total depths, completion intervals, cement yield/calculations. <strong>Well construction diagrams</strong> for all wells/boreholes in AOR penetrating injection zone — depth, perforated intervals, cement, casing damage, geologic markers, base of freshwater/USDW, full well history.</td></tr>
+        <tr><td class="section-code">ES(4)</td><td class="ref-auth">§1724.7(a)(1)(D)<br>§1724.8</td><td><strong>Planned well-drilling program</strong> and <strong>P&A program</strong> (include idle well management plan ID). Flood pattern map (if applicable) showing all injection/production/P&A wells and unit boundaries.</td></tr>
+        <tr><td class="section-code">ES(5)</td><td class="ref-auth">CWC §13260/13267</td><td><strong>Water well survey within <span class="key-num">1 mile</span> of AOR.</strong> Map + table with: location, type (municipal/domestic/irrigation/industrial/stock), status (active/idle/abandoned/destroyed/unknown), owner, completion depth/zone, screen intervals. Sources: DWR well completion reports + GeoTracker GAMA.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Injection Plan -->
+  <div class="card red">
+    <h2>IP — Injection Plan</h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:110px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">IP(1)</td><td class="ref-auth">§1724.7(a)(3)(C)</td><td>Anticipated project duration, daily injection rate (by well, max values), cumulative net volume (max values).</td></tr>
+        <tr><td class="section-code">IP(2)</td><td class="ref-auth">§1724.7(a)(3)(D)</td><td>All wells in project: injectors, affected producers, water source wells (with depths), observation wells, planned wells.</td></tr>
+        <tr><td class="section-code">IP(3)</td><td class="ref-auth">CWC §13267<br>§1724.7.2</td><td><strong>Injectate water quality</strong> (within past year): TPH, cations, anions, alkalinity, EC, pH, temp. Source ID with zone/formation and volume %. Sampling after all additives/treatment. Sampling protocol for project-by-project.</td></tr>
+        <tr><td class="section-code">IP(4)</td><td class="ref-auth">§1724.7(a)(3)(F)</td><td>Method of injection, injection string configuration. Reject water treatment and disposal plan.</td></tr>
+        <tr><td class="section-code">IP(5)</td><td class="ref-auth">§1724.7(a)(3)(G)</td><td>Cathodic protection / corrosion prevention measures for plants, lines, wells (if warranted).</td></tr>
+        <tr><td class="section-code">IP(6)</td><td class="ref-auth">§1724.7(a)(3)(E)</td><td>Monitoring system / SOPs to ensure no damage and fluids confined to approved zone. If GW monitoring required, consult with SWRCB/RWQCB.</td></tr>
+        <tr><td class="section-code">IP(7)</td><td class="ref-auth">CWC §13260/13267</td><td>Aquifer Exemption conditions addressed. USDW conduit remediation/monitoring plan. Pressure front confirmation.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Other Info -->
+  <div class="card green">
+    <h2>SI / OI — Situational & Other Information</h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:110px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">SI(1)</td><td class="ref-auth">§1724.7(a)(6)</td><td>Other pertinent data: HPZ evaluation, isochore/isogor/isobar/WOR maps, 3D models, reservoir simulation, confining layer isopachs, temperature maps, LLNL HPSC risk factors, equipment diagrams, safety programs, <strong>SEMPP</strong> <span class="cite">§1724.11(b)(1)</span>.</td></tr>
+        <tr><td class="section-code">SI(2)</td><td class="ref-auth">§1724.7(e)</td><td>Alternative data accepted by Division in lieu of default requirements.</td></tr>
+        <tr><td class="section-code">SI(3)</td><td class="ref-auth">§1724.10(e)</td><td>If injector within <span class="key-num">500 linear ft</span> of water supply well: water treatment flow diagram, SDS for each additive, aggregate volume/weight, purpose of each additive (updated annually).</td></tr>
+        <tr><td class="section-code">OI(1)</td><td class="ref-auth">§1724.7(a)(4)<br>§1724.10.3</td><td>MASIP data for each well — all calculations, variables, citations, assumptions.</td></tr>
+        <tr><td class="section-code">OI(2)</td><td class="ref-auth">§1724.7(a)(5)</td><td>Copies of offset operator notification letters.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: NON-EXPANSION -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-nonexp" class="tab-content">
+
+  <div class="card blue">
+    <h2><span class="icon">➕</span> Non-Expansion AOR — Adding Wells to Approved Projects</h2>
+    <p>The Non-Expansion checklist (Attachment 3, Dec 2021) applies when adding new drill injection wells or converting wells to injection in <strong>already-approved</strong> UIC projects. This is a streamlined review — many project-level items can be incorporated by reference if previously approved.</p>
+    <div class="info-box red-box" style="margin-top:10px">
+      <strong>⚠ Critical:</strong> The non-expansion package has <strong>two parts</strong> — the CalGEM review section (top) and the <strong>Water Boards supplemental section</strong> (bottom, W- prefix items). Both must be complete before sending to Water Boards for consultation.
+    </div>
+  </div>
+
+  <!-- CalGEM Section -->
+  <div class="card amber">
+    <h2>CalGEM Non-Expansion Items</h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:130px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">IP(3)</td><td class="ref-auth">§1724.7(a)(3)(C)<br>§1724.7(b)</td><td>Anticipated daily injection rate (by well, max) for all newly proposed wells. Total injection volumes for disposal wells.</td></tr>
+        <tr><td class="section-code">OI(2)</td><td class="ref-auth">§1724.7(a)(4)<br>§1724.10.3<br>§1724.7(b)</td><td>MASIP data for each newly proposed injector — all calculations, variables, citations, assumptions.</td></tr>
+        <tr><td class="section-code">OI(3)</td><td class="ref-auth">§1724.7(a)(6)</td><td><strong>CalGEM ONLY:</strong> Copy of most recent PAL.</td></tr>
+        <tr><td class="section-code">OI(4)</td><td class="ref-auth">—</td><td><strong>CalGEM ONLY:</strong> Written statement that CalGEM staff has reviewed and agrees the non-expansion wells are consistent with existing PAL conditions.</td></tr>
+        <tr><td class="section-code">OI(5)</td><td class="ref-auth">§1724.7(b,c)</td><td>All updates to project-level material are clearly dated.</td></tr>
+        <tr><td class="section-code">DF(2)</td><td class="ref-auth">§1724.7(c)</td><td>All maps, diagrams, exhibits clearly labeled. Previously submitted maps must reflect current conditions. May use excerpts for NOIs.</td></tr>
+        <tr><td class="section-code">ES(1)</td><td class="ref-auth">§1724.7(a)(1)(A)<br>§1724.7(b)</td><td><strong>AOR determination</strong> for proposed injectors. Previously submitted calculations may be incorporated by reference <strong>if pressure is stable or decreasing</strong>. Updated calcs must be stamped/dated. For existing WD projects, current AOR must be determined. Include offset project interactions.</td></tr>
+        <tr><td class="section-code">ES(2)</td><td class="ref-auth">§1724.7(a)(1)(B)<br>§1724.8</td><td><strong>AOR map</strong> showing: (1) all wells within/adjacent to AOR, (2) water supply wells, (3) underground non-O&G activities, (4) cross-section traces. Show existing injectors, AOR(s), proposed well locations (surface + BH), type. If TDS <span class="key-num">&lt;10,000 ppm</span>, show AE boundary. If TDS <span class="key-num">≥10,000 ppm</span>, provide supporting data.</td></tr>
+        <tr><td class="section-code">ES(3)</td><td class="ref-auth">§1724.7(a)(1)(C)<br>§1724.7.1<br>§1724.8</td><td><strong>Well compendium</strong> for proposed injectors and wells within their AOR: API numbers, wellbore paths, total depths, completion intervals, water supply well type/status, casing diagrams per §1724.7.1. May incorporate by reference from recent project approval.</td></tr>
+        <tr><td class="section-code">ES(4)</td><td class="ref-auth">§1724.7(a)(1)(D)<br>§1724.8</td><td>Updated well-drilling and P&A program, updated flood-pattern map (if applicable).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Geologic Study Update -->
+  <div class="card purple">
+    <h2>GS — Geologic Study Update (Non-Expansion)</h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:70px">Code</th><th style="width:130px">Authority</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">GS(1)</td><td class="ref-auth">§1724.7(a)(2)(A)<br>§1724.7(a)(6)<br>§1724.7(b)</td><td>Updated reservoir characteristics (porosity, perm, thickness, fracture gradient, T&P). Latest pressure measurements with updated tables and maps. All data most current, accurate, relevant. All sources cited.</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box purple-box">
+      <strong>Project-level items below must be on file before sending to Water Boards:</strong> CP(1) Cover Page, GS(2)–GS(5) structural/isopach/cross-section/type log, IP(1) purpose statement, IP(4) well identification, SI(1) supplemental data, SI(2) alternative data.
+    </div>
+  </div>
+
+  <!-- Water Board Section -->
+  <div class="card teal">
+    <h2>W- Items — Water Board Supplemental Requirements</h2>
+    <div class="info-box teal-box">These are <strong>minimum supplemental items</strong> the Water Boards need. They may ask for additional information to protect water quality and beneficial use waters.</div>
+    <table class="checklist-table">
+      <thead><tr><th style="width:80px">Code</th><th>Requirement</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">W-CP</td><td>Statement + rationale that injected fluids have <strong>not and will not</strong> migrate beyond exempt aquifer or into USDW. Geologic/engineering interpretation must be by PG/PE, signed and stamped per BPC §6735, §7835, §7835.1.</td></tr>
+        <tr><td class="section-code">W-ES(1)</td><td>Rationale for non-expansion AOR (if not previously provided or different). Supporting calculations and assumptions.</td></tr>
+        <tr><td class="section-code">W-ES(2)</td><td>AOR calculations using accurate parameters from near the non-expansion AOR. Static pressures/temperatures <strong>measured within past year</strong>. Use remaining permitted duration and max daily rate. If range provided, calculate multiple AORs for most conservative estimate. ZEI calculation may satisfy.</td></tr>
+        <tr><td class="section-code">W-ES(3)</td><td>Evaluation of overlapping ZEIs, neighboring projects, flow barriers. If production offsets pressure, submit calculations with identified wells on maps.</td></tr>
+        <tr><td class="section-code">W-ES(4)</td><td>Non-expansion AOR map: (1) all wells with surface/BH locations and type/status labels, (2) faults within <span class="key-num">¼ mile</span> of non-expansion AOR, (3) potential USDW conduit wells, (4) historical + current exemption boundaries.</td></tr>
+        <tr><td class="section-code">W-ES(5)</td><td>Well construction diagrams for wells/boreholes in AOR that <strong>fail zonal isolation requirements</strong>: perforated intervals, cement plugs, casing damage, geologic markers, USDW, full well history.</td></tr>
+        <tr><td class="section-code">W-ES(6)</td><td><strong>Water well survey</strong> (not required if completed within past year). Within <span class="key-num">¼ mile</span> of non-expansion AOR boundary. Map + table. DWR reports + GeoTracker GAMA. Location, type, status, owner, depth, screen intervals.</td></tr>
+        <tr><td class="section-code">W-GS(1)</td><td>If not in WellSTAR: 2 cross-sections (along strike + dip) through non-expansion AOR. All supporting maps need AOR, project area, exemption boundaries, faults, scale, legend, north arrow.</td></tr>
+        <tr><td class="section-code">W-GS(2)</td><td>Type log (if provided) with labeled geophysical curves and vertical scale.</td></tr>
+        <tr><td class="section-code">W-GS(4)</td><td><strong>Non-USDW determination:</strong> Water samples within <span class="key-num">5 years</span>, representative of reservoir. Or TDS log calcs validated within <span class="key-num">1 mile</span>. If TDS ≥<span class="key-num">10,000 mg/L</span>, PG/PE written statement required. Previously approved determinations may be incorporated by reference.</td></tr>
+        <tr><td class="section-code">W-GS(5)</td><td>Groundwater quality / log analysis justifying injection (TDS ≥10,000) — PG/PE statement on representativeness. Previously stamped/approved work may be referenced.</td></tr>
+        <tr><td class="section-code">W-IP(3)</td><td>For waterflood/WD wells (if not in WellSTAR): injectate water quality within past year. Source ID + volume %. Sample after all additives/treatment. Follow latest NTO guidelines.</td></tr>
+        <tr><td class="section-code">W-SI</td><td>If isobaric map not in WellSTAR (created within <span class="key-num">2 years</span>): representative isobar map at top of injection zone showing flow direction. At least 1 downhole pressure + validated fluid levels from all idle/observation wells. If using active well data, calculate and validate shut-in time.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Key Differences diagram -->
+  <div class="card green">
+    <h2><span class="icon">⚖️</span> Non-Expansion vs. Full Review: Key Differences</h2>
+    <div class="svg-container">
+      <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+        <rect width="800" height="340" rx="10" fill="#FAFAF5" stroke="#E8E0D4"/>
+        <!-- Headers -->
+        <rect x="20" y="15" width="370" height="35" rx="6" fill="#D4850F"/>
+        <text x="205" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="white">Full Review (Attachment 2)</text>
+        <rect x="410" y="15" width="370" height="35" rx="6" fill="#2B6CB0"/>
+        <text x="595" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="white">Non-Expansion (Attachment 3)</text>
+        
+        <!-- Comparison rows -->
+        <g font-size="12" fill="#2D2A26">
+          <rect x="20" y="60" width="370" height="28" rx="4" fill="#FFF3E0"/><text x="30" y="78">Complete Engineering + Geologic + Injection Plan</text>
+          <rect x="410" y="60" width="370" height="28" rx="4" fill="#EBF4FF"/><text x="420" y="78">Incremental AOR + updated calcs (can reference)</text>
+          
+          <rect x="20" y="95" width="370" height="28" rx="4" fill="#FFF3E0"/><text x="30" y="113">Full structural/isopach maps required</text>
+          <rect x="410" y="95" width="370" height="28" rx="4" fill="#EBF4FF"/><text x="420" y="113">Project-level maps must be on file (can reference)</text>
+          
+          <rect x="20" y="130" width="370" height="28" rx="4" fill="#FFF3E0"/><text x="30" y="148">Water well survey within 1 mile of AOR</text>
+          <rect x="410" y="130" width="370" height="28" rx="4" fill="#EBF4FF"/><text x="420" y="148">WB: ¼ mile of non-expansion AOR (if not done in 1 yr)</text>
+          
+          <rect x="20" y="165" width="370" height="28" rx="4" fill="#FFF3E0"/><text x="30" y="183">All well construction diagrams in AOR</text>
+          <rect x="410" y="165" width="370" height="28" rx="4" fill="#EBF4FF"/><text x="420" y="183">Only wells failing zonal isolation (WB section)</text>
+          
+          <rect x="20" y="200" width="370" height="28" rx="4" fill="#FFF3E0"/><text x="30" y="218">Non-USDW determination with 5-yr samples</text>
+          <rect x="410" y="200" width="370" height="28" rx="4" fill="#EBF4FF"/><text x="420" y="218">Can incorporate previously approved determinations</text>
+          
+          <rect x="20" y="235" width="370" height="28" rx="4" fill="#FFF3E0"/><text x="30" y="253">Idle well fluid levels within 2 years</text>
+          <rect x="410" y="235" width="370" height="28" rx="4" fill="#EBF4FF"/><text x="420" y="253">WB: Isobaric map within 2 years (if not in WellSTAR)</text>
+          
+          <rect x="20" y="270" width="370" height="28" rx="4" fill="#FFF3E0"/><text x="30" y="288">AOR pressures/temps: current</text>
+          <rect x="410" y="270" width="370" height="28" rx="4" fill="#EBF4FF"/><text x="420" y="288">WB: Pressures/temps within past year</text>
+          
+          <rect x="20" y="305" width="370" height="28" rx="4" fill="#FFF3E0"/><text x="30" y="323">Complete injectate analysis within 1 year</text>
+          <rect x="410" y="305" width="370" height="28" rx="4" fill="#EBF4FF"/><text x="420" y="323">WB: Only if not in WellSTAR (WF/WD only)</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: PERIODIC REVIEW -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-periodic" class="tab-content">
+
+  <div class="card green">
+    <h2><span class="icon">🔁</span> Periodic Review — Every 3 Years Minimum</h2>
+    <p>Per <span class="cite">§1724.6(d)</span>, CalGEM reviews existing UIC projects periodically, <strong>not less than once every three years</strong>, to verify compliance with regulations and PAL conditions, and to ensure conditions remain effective in preventing damage to life, health, property, and natural resources.</p>
+    <div class="info-box green-box">
+      <strong>PALs are subject to suspension, modification, or rescission by the Division.</strong> If the Division determines operation is inconsistent with the subchapter or PAL conditions, or poses a threat, injection must cease immediately upon written notice <span class="cite">§1724.6(e)</span>.
+    </div>
+  </div>
+
+  <div class="card amber">
+    <h2>What CalGEM Checks During Periodic Review</h2>
+    <ol class="step-list">
+      <li><div class="step-num">1</div><div><strong>PAL Compliance:</strong> Are all PAL conditions being met? Are injection rates, pressures, and volumes within approved limits? Are all wells on the approved well list?</div></li>
+      <li><div class="step-num blue-step">2</div><div><strong>MIT Status:</strong> Are all Part 1 (casing integrity) and Part 2 (fluid migration) tests current per the required schedules? Any wells that lost injection approval automatically? <span class="cite">§1724.10(i)(4)</span></div></li>
+      <li><div class="step-num green-step">3</div><div><strong>MASIP Compliance:</strong> Are surface injection pressures within approved MASIP values? Continuous pressure monitoring records reviewed <span class="cite">§1724.10.4</span>.</div></li>
+      <li><div class="step-num teal-step">4</div><div><strong>Data Currency:</strong> Is the supporting data (pressure, temperature, water quality, maps) current and accurately reflective of the project setting? <span class="cite">§1724.7(a)</span></div></li>
+      <li><div class="step-num">5</div><div><strong>AOR Evaluation:</strong> Has the AOR changed due to updated reservoir conditions, new wells, or pressure changes? Any new concerns about fluid migration?</div></li>
+      <li><div class="step-num blue-step">6</div><div><strong>Well Integrity:</strong> Any wells in the AOR that have developed integrity concerns? Any new P&A wells that need evaluation? <span class="cite">§1724.8</span></div></li>
+      <li><div class="step-num green-step">7</div><div><strong>Surface Expressions:</strong> Any surface expressions reported? SEMPP current (if applicable)? <span class="cite">§1724.11</span></div></li>
+      <li><div class="step-num teal-step">8</div><div><strong>Injection Reports:</strong> Monthly injection reports filed on time? <span class="cite">§1724.10(c)</span> Chemical analysis filed when source changed? <span class="cite">§1724.10(d)</span></div></li>
+    </ol>
+  </div>
+
+  <div class="card red">
+    <h2><span class="icon">⏱️</span> Key Timelines & Deadlines for Periodic Compliance</h2>
+    <div class="svg-container">
+      <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+        <rect width="800" height="280" rx="10" fill="#FAFAF5" stroke="#E8E0D4"/>
+        <!-- Timeline axis -->
+        <line x1="50" y1="140" x2="750" y2="140" stroke="#C4B89A" stroke-width="2"/>
+        
+        <!-- Monthly -->
+        <circle cx="100" cy="140" r="18" fill="#D4850F"/>
+        <text x="100" y="145" text-anchor="middle" font-size="10" font-weight="700" fill="white">Mo</text>
+        <text x="100" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#2D2A26">Monthly</text>
+        <text x="100" y="170" text-anchor="middle" font-size="9" fill="#5C5650">Injection reports</text>
+        <text x="100" y="182" text-anchor="middle" font-size="9" fill="#5C5650">Max pressure</text>
+        <text x="100" y="194" text-anchor="middle" font-size="9" fill="#5C5650">report</text>
+        
+        <!-- Annually -->
+        <circle cx="230" cy="140" r="18" fill="#2B6CB0"/>
+        <text x="230" y="145" text-anchor="middle" font-size="10" font-weight="700" fill="white">1yr</text>
+        <text x="230" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#2D2A26">Annual</text>
+        <text x="230" y="170" text-anchor="middle" font-size="9" fill="#5C5650">Injectate WQ</text>
+        <text x="230" y="182" text-anchor="middle" font-size="9" fill="#5C5650">MIT Part 2: WD, Gas</text>
+        <text x="230" y="194" text-anchor="middle" font-size="9" fill="#5C5650">MIT Part 1: Gas Disp.</text>
+        <text x="230" y="206" text-anchor="middle" font-size="9" fill="#5C5650">SI(3) additive info</text>
+        
+        <!-- 2 years -->
+        <circle cx="370" cy="140" r="18" fill="#2D7D46"/>
+        <text x="370" y="145" text-anchor="middle" font-size="10" font-weight="700" fill="white">2yr</text>
+        <text x="370" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#2D2A26">Biennial</text>
+        <text x="370" y="170" text-anchor="middle" font-size="9" fill="#5C5650">MIT Part 2:</text>
+        <text x="370" y="182" text-anchor="middle" font-size="9" fill="#5C5650">WF, SF, SC, Gas</text>
+        <text x="370" y="194" text-anchor="middle" font-size="9" fill="#5C5650">Isobaric map data</text>
+        
+        <!-- 3 years -->
+        <circle cx="500" cy="140" r="18" fill="#6B46C1"/>
+        <text x="500" y="145" text-anchor="middle" font-size="10" font-weight="700" fill="white">3yr</text>
+        <text x="500" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#2D2A26">Triennial</text>
+        <text x="500" y="170" text-anchor="middle" font-size="9" fill="#5C5650">Periodic project</text>
+        <text x="500" y="182" text-anchor="middle" font-size="9" fill="#5C5650">review §1724.6(d)</text>
+        
+        <!-- 5 years -->
+        <circle cx="630" cy="140" r="18" fill="#C53030"/>
+        <text x="630" y="145" text-anchor="middle" font-size="10" font-weight="700" fill="white">5yr</text>
+        <text x="630" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#2D2A26">5-Year</text>
+        <text x="630" y="170" text-anchor="middle" font-size="9" fill="#5C5650">MIT Part 1: all</text>
+        <text x="630" y="182" text-anchor="middle" font-size="9" fill="#5C5650">(except gas disp.)</text>
+        <text x="630" y="194" text-anchor="middle" font-size="9" fill="#5C5650">MIT Part 2: low-use</text>
+        <text x="630" y="206" text-anchor="middle" font-size="9" fill="#5C5650">SC, SF w/ T&P</text>
+        <text x="630" y="218" text-anchor="middle" font-size="9" fill="#5C5650">GW samples (new/exp)</text>
+        
+        <!-- Tick marks -->
+        <line x1="100" y1="155" x2="100" y2="165" stroke="#D4850F" stroke-width="2"/>
+        <line x1="230" y1="155" x2="230" y2="165" stroke="#2B6CB0" stroke-width="2"/>
+        <line x1="370" y1="155" x2="370" y2="165" stroke="#2D7D46" stroke-width="2"/>
+        <line x1="500" y1="155" x2="500" y2="165" stroke="#6B46C1" stroke-width="2"/>
+        <line x1="630" y1="155" x2="630" y2="165" stroke="#C53030" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card blue">
+    <h2><span class="icon">🚨</span> Automatic Cease-Injection Triggers <span class="cite red-cite">§1724.13</span></h2>
+    <p>The operator <strong>must cease injection immediately and notify CalGEM</strong> if any of the following occur:</p>
+    <ol class="step-list">
+      <li><div class="step-num" style="background:#C53030">!</div><div>MIT not performed as required, or results not submitted</div></li>
+      <li><div class="step-num" style="background:#C53030">!</div><div>MIT failed or any indication of loss of mechanical integrity</div></li>
+      <li><div class="step-num" style="background:#C53030">!</div><div>Failure, breach, or hole in tubing/packer/cement/casing (including above packer)</div></li>
+      <li><div class="step-num" style="background:#C53030">!</div><div>Visible surface damage or erosion caused by injection</div></li>
+      <li><div class="step-num" style="background:#C53030">!</div><div>Any indication fluids not confined to approved injection zone</div></li>
+      <li><div class="step-num" style="background:#C53030">!</div><div>Indication of damage to life, health, property, natural resources, or loss of hydrocarbons</div></li>
+      <li><div class="step-num" style="background:#C53030">!</div><div>PRC §3227 information not provided</div></li>
+      <li><div class="step-num" style="background:#C53030">!</div><div>Well becomes idle (PRC §3008(d)), unless Division grants allowance</div></li>
+      <li><div class="step-num" style="background:#C53030">!</div><div>Division instructs suspension in writing</div></li>
+    </ol>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: FULL CHECKLIST REFERENCE -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-checklist" class="tab-content">
+  <div class="card amber">
+    <h2><span class="icon">✅</span> Quick-Reference: Project Information Fields</h2>
+    <p>Header fields required for all project types (from Attachment 2 checklist):</p>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="info-box amber-box">
+        <strong>Project Category:</strong> New Project, Expansion, Project-by-Project<br>
+        <strong>Project Type:</strong> Water Disposal, Gas Disposal, Waterflood, Cyclic Steam, Steamflood<br>
+        <strong>Operator:</strong><br>
+        <strong>Contact:</strong> Name, Email, Phone<br>
+        <strong>Field Name:</strong><br>
+        <strong>Direct Injection Zone(s):</strong>
+      </div>
+      <div class="info-box blue-box">
+        <strong># Wells within AOR:</strong><br>
+        <strong># Injectors:</strong><br>
+        <strong>Health Protection Zone?</strong> (NOI/facility restrictions)<br>
+        <strong>Project Number:</strong><br>
+        <strong>Date Submitted:</strong><br>
+        <strong>WellSTAR Form ID:</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card blue">
+    <h2><span class="icon">📊</span> Non-Expansion Project Information Fields</h2>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="info-box amber-box">
+        <strong>Project Category:</strong> Non-Expansion NOI(s) Only<br>
+        <strong>Project Type:</strong> Steam Injection, Water Flood, Water Disposal<br>
+        <strong># Proposed Injection Wells:</strong><br>
+        <strong># Existing Injection Wells:</strong><br>
+        <strong>Operator:</strong><br>
+        <strong>Project No.:</strong>
+      </div>
+      <div class="info-box blue-box">
+        <strong>Field Name:</strong><br>
+        <strong>Direct Injection Zone(s):</strong><br>
+        <strong>Date of Most Recent PAL:</strong><br>
+        <strong>Date of Most Recent Approval/Review:</strong><br>
+        <strong>CalGEM Reviewing Engineer:</strong><br>
+        <strong>Date Submitted:</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card green">
+    <h2><span class="icon">🔢</span> Critical Numbers to Remember</h2>
+    <div class="grid-3">
+      <div class="mit-card" style="border-color: var(--amber-border);">
+        <div class="well-type">AOR Default Radius</div>
+        <div class="freq">¼ mile</div>
+        <div class="freq-label">§1720.1(a)(2)</div>
+      </div>
+      <div class="mit-card" style="border-color: var(--blue-border);">
+        <div class="well-type">Freshwater TDS</div>
+        <div class="freq">≤3,000</div>
+        <div class="freq-label">mg/L — §1720.1(e)</div>
+      </div>
+      <div class="mit-card" style="border-color: var(--green-border);">
+        <div class="well-type">USDW TDS Threshold</div>
+        <div class="freq">&lt;10,000</div>
+        <div class="freq-label">mg/L — §1720.1(q)</div>
+      </div>
+      <div class="mit-card" style="border-color: var(--red-border);">
+        <div class="well-type">Water Supply Proximity</div>
+        <div class="freq">500 ft</div>
+        <div class="freq-label">linear — §1724.10(e)</div>
+      </div>
+      <div class="mit-card" style="border-color: var(--purple-border);">
+        <div class="well-type">MASIP Formula</div>
+        <div class="freq" style="font-size:16px">(IG−IFG)×TVD</div>
+        <div class="freq-label">IG = FG × 0.95</div>
+      </div>
+      <div class="mit-card" style="border-color: var(--teal-border);">
+        <div class="well-type">MIT Pressure Test</div>
+        <div class="freq">≤3%</div>
+        <div class="freq-label">change in 30 min</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: MIT & MASIP -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-mit" class="tab-content">
+
+  <div class="card blue">
+    <h2><span class="icon">🔧</span> Mechanical Integrity Testing (MIT)</h2>
+    <p>Two-part demonstration required for all injection wells <span class="cite">§1724.10(i)</span>. 48-hour advance notice to District required. Digital results within 60 days.</p>
+  </div>
+
+  <div class="card amber">
+    <h2>Part 1 — Casing Integrity (SAPT) <span class="cite">§1724.10.1</span></h2>
+    <p>Casing pressure test at MASIP. Required before first injection, after equipment repositioning, and on schedule:</p>
+    <div class="grid-3" style="margin-top:14px">
+      <div class="mit-card"><div class="well-type">Waterflood</div><div class="freq">5 yr</div></div>
+      <div class="mit-card"><div class="well-type">Water Disposal</div><div class="freq">5 yr</div></div>
+      <div class="mit-card"><div class="well-type">Steamflood</div><div class="freq">5 yr</div></div>
+      <div class="mit-card"><div class="well-type">Cyclic Steam</div><div class="freq">5 yr</div></div>
+      <div class="mit-card"><div class="well-type">Gas Injection</div><div class="freq">5 yr</div></div>
+      <div class="mit-card"><div class="well-type" style="color:var(--red)">Gas Disposal</div><div class="freq" style="color:var(--red)">1 yr</div></div>
+    </div>
+    <div class="info-box amber-box" style="margin-top:14px">
+      <strong>Pass criteria:</strong> ≤<span class="key-num">3%</span> pressure change over continuous 30 minutes. Cyclic steam: up to <span class="key-num">10%</span> increase is acceptable. Test at ≥<span class="key-num">200 psi</span> above surface pressure. Calibrated gauge within <span class="key-num">1%</span> accuracy. Record at least <span class="key-num">1/min</span>.
+    </div>
+  </div>
+
+  <div class="card teal">
+    <h2>Part 2 — Fluid Migration <span class="cite">§1724.10.2</span></h2>
+    <p>Required within 3 months after first injection, then on schedule:</p>
+    <div class="grid-3" style="margin-top:14px">
+      <div class="mit-card"><div class="well-type">Waterflood</div><div class="freq">2 yr</div></div>
+      <div class="mit-card"><div class="well-type" style="color:var(--red)">Water Disposal</div><div class="freq" style="color:var(--red)">1 yr</div></div>
+      <div class="mit-card"><div class="well-type">Steamflood</div><div class="freq">2 yr</div></div>
+      <div class="mit-card"><div class="well-type">SF w/ Tubing & Packer</div><div class="freq">5 yr</div></div>
+      <div class="mit-card"><div class="well-type">Cyclic Steam</div><div class="freq">2 yr</div></div>
+      <div class="mit-card"><div class="well-type">Low-Use Cyclic</div><div class="freq">5 yr</div></div>
+    </div>
+    <div class="info-box teal-box" style="margin-top:14px">
+      <strong>Methods:</strong> R/A Tracer Survey (while injecting), Temperature Survey (off injection 24–48 hrs), Noise Log (200 ft repeat section), or Division-approved alternative. Also triggered by ><span class="key-num">25%</span> unplanned pressure variance in 48 hours.
+    </div>
+  </div>
+
+  <div class="card purple">
+    <h2><span class="icon">📈</span> MASIP Calculation <span class="cite">§1724.10.3</span></h2>
+    <div class="svg-container">
+      <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+        <rect width="700" height="200" rx="10" fill="#FAFAF5" stroke="#E8E0D4"/>
+        <!-- Formula box -->
+        <rect x="30" y="20" width="640" height="60" rx="8" fill="#F3E8FF" stroke="#6B46C1" stroke-width="2"/>
+        <text x="350" y="50" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="20" font-weight="700" fill="#6B46C1">
+          MASIP = (IG − IFG) × TVD
+        </text>
+        <text x="350" y="70" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13" fill="#8A847C">
+          where IG = Fracture Gradient × 0.95
+        </text>
+        
+        <!-- Variable boxes -->
+        <rect x="30" y="100" width="200" height="80" rx="6" fill="#EBF4FF" stroke="#90C0F0"/>
+        <text x="130" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#2B6CB0">MASIP</text>
+        <text x="130" y="138" text-anchor="middle" font-size="11" fill="#2D2A26">Max Allowable Surface</text>
+        <text x="130" y="152" text-anchor="middle" font-size="11" fill="#2D2A26">Injection Pressure (psi)</text>
+        <text x="130" y="170" text-anchor="middle" font-size="10" fill="#5C5650">= lower of calc vs. MIT test</text>
+        
+        <rect x="250" y="100" width="200" height="80" rx="6" fill="#E8F5E9" stroke="#A5D6A7"/>
+        <text x="350" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#2D7D46">IG (Injection Gradient)</text>
+        <text x="350" y="138" text-anchor="middle" font-size="11" fill="#2D2A26">= Fracture Gradient × 0.95</text>
+        <text x="350" y="155" text-anchor="middle" font-size="10" fill="#5C5650">From step-rate test or</text>
+        <text x="350" y="168" text-anchor="middle" font-size="10" fill="#5C5650">approved baseline FG</text>
+        
+        <rect x="470" y="100" width="200" height="80" rx="6" fill="#FFF3E0" stroke="#F5C87A"/>
+        <text x="570" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#D4850F">TVD</text>
+        <text x="570" y="138" text-anchor="middle" font-size="11" fill="#2D2A26">True Vertical Depth of</text>
+        <text x="570" y="152" text-anchor="middle" font-size="11" fill="#2D2A26">shallowest point open</text>
+        <text x="570" y="166" text-anchor="middle" font-size="11" fill="#2D2A26">to injection zone</text>
+      </svg>
+    </div>
+    <div class="info-box purple-box">
+      <strong>MASIP is the LOWER of:</strong> (1) the calculated value above, or (2) the initial test pressure from the most recent successful MIT Part 1 casing test. If friction loss is factored in, use new coated tubing of largest diameter. Division may approve >0.95 multiplier on well-specific basis.
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: RASCI -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-rasci" class="tab-content">
+  <div class="card amber">
+    <h2><span class="icon">👥</span> RASCI Role Definitions — Attachment 4 (March 2026)</h2>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="info-box red-box"><span class="rasci r-ar">A & R</span> <strong>Accountable & Responsible:</strong> Does primary review/task AND approves. Most common for District team.</div>
+      <div class="info-box blue-box"><span class="rasci r-cs">C & S</span> <strong>Consulted & Supportive:</strong> Consulted, then produces a supportive document as directed.</div>
+      <div class="info-box" style="background:#FEF3C7; border:1px solid #FCD34D"><span class="rasci r-i">I</span> <strong>Informed:</strong> Kept in the loop. No specific task but may be activated.</div>
+      <div class="info-box" style="background:#D1FAE5; border:1px solid #6EE7B7"><span class="rasci r-is">I & S</span> <strong>Informed & Supportive:</strong> Informed and provides support when requested.</div>
+      <div class="info-box" style="background:#FCE7F3; border:1px solid #F9A8D4"><span class="rasci r-a">A</span> <strong>Accountable:</strong> Approves work. One party per stage. Last to review before completion.</div>
+      <div class="info-box" style="background:#E0E7FF; border:1px solid #A5B4FC"><span class="rasci r-s">S</span> <strong>Supportive:</strong> Provides data, resources, professional opinions. Not continuous.</div>
+    </div>
+  </div>
+
+  <div class="card blue">
+    <h2>Key RASCI Assignments by Section</h2>
+    <table class="checklist-table">
+      <thead><tr><th>Section</th><th>Item Summary</th><th>District</th><th>WBs</th><th>UIC Program</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">DF(1-2)</td><td>Data format & map labeling</td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-i">I</span></td><td><span class="rasci r-cs">C&S</span></td></tr>
+        <tr><td class="section-code">CL(1)</td><td>Cover letter, licensed professional statement</td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-i">I</span></td><td><span class="rasci r-cs">C&S</span></td></tr>
+        <tr><td class="section-code">PO(1)</td><td>Project overview & AOR map — conduits, faults</td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-cs">C&S</span></td><td><span class="rasci r-cs">C&S</span></td></tr>
+        <tr><td class="section-code">GS(1)</td><td>Reservoir characteristics</td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-cs">C&S</span></td><td><span class="rasci r-cs">C&S</span></td></tr>
+        <tr><td class="section-code">GS(2)</td><td>Water quality & TDS — sampling requirements</td><td><span class="rasci r-is">I&S</span></td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-i">I</span></td></tr>
+        <tr><td class="section-code">GS(7)</td><td>Non-USDW determination</td><td><span class="rasci r-is">I&S</span></td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-i">I</span></td></tr>
+        <tr><td class="section-code">ES(1)</td><td>AOR rationale, isobar map, overlapping ZEIs</td><td><span class="rasci r-cs">C&S</span></td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-cs">C&S</span></td></tr>
+        <tr><td class="section-code">ES(5)</td><td>Water well survey</td><td><span class="rasci r-cs">C&S</span></td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-cs">C&S</span></td></tr>
+        <tr><td class="section-code">IP(3)</td><td>Injectate water quality & analysis</td><td><span class="rasci r-r">R</span></td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-is">I&S</span></td></tr>
+        <tr><td class="section-code">IP(7)</td><td>AE conditions, USDW monitoring plan</td><td><span class="rasci r-is">I&S</span></td><td><span class="rasci r-ar">A&R</span></td><td><span class="rasci r-i">I</span></td></tr>
+      </tbody>
+    </table>
+    <div class="info-box blue-box" style="margin-top:10px">
+      <strong>Key takeaway:</strong> The <strong>District</strong> is A&R for most technical review items (data format, cover letter, geology, maps, well construction). The <strong>Water Boards</strong> are A&R for water quality, TDS/USDW determinations, AOR evaluation, water well surveys, and injectate analysis. <strong>UIC Program (HQ)</strong> primarily provides C&S oversight.
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: GLOSSARY -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-glossary" class="tab-content">
+  <div class="card amber">
+    <h2><span class="icon">📖</span> Key Definitions <span class="cite">§1720.1</span></h2>
+    <table class="checklist-table">
+      <thead><tr><th style="width:200px">Term</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td class="section-code">AOR</td><td>Area of Review — calculated lateral distance of pressure/temperature influence OR fixed ¼-mile radius. Proposed by operator, may be specified by Division.</td></tr>
+        <tr><td class="section-code">Freshwater</td><td>Water containing ≤<span class="key-num">3,000 mg/L TDS</span>.</td></tr>
+        <tr><td class="section-code">USDW</td><td>Underground Source of Drinking Water — aquifer not EPA-exempted that supplies (or could supply) a public water system and contains &lt;<span class="key-num">10,000 mg/L TDS</span>.</td></tr>
+        <tr><td class="section-code">Injection Zone</td><td>Defined 3D space with fixed boundaries where injected fluid is anticipated to occupy.</td></tr>
+        <tr><td class="section-code">UIC Project</td><td>Sustained/recurring injection into one or more wells over extended period into approved zone (EOR, disposal, storage, pressure maintenance, subsidence mitigation).</td></tr>
+        <tr><td class="section-code">PAL</td><td>Project Approval Letter — written record of Division's approval including conditions.</td></tr>
+        <tr><td class="section-code">MASIP</td><td>Maximum Allowable Surface Injection Pressure — per §1724.10.3 calculation.</td></tr>
+        <tr><td class="section-code">ZEI</td><td>Zone of Endangering Influence — per 40 CFR §146.6.</td></tr>
+        <tr><td class="section-code">Surface Expression</td><td>Flow/release from subsurface to surface outside a wellbore that appears caused by injection operations.</td></tr>
+        <tr><td class="section-code">Low-Use Cyclic</td><td>Cyclic steam well with ≤24 days injection/yr AND ≤12,000 bbl/yr (past 5 yrs) AND no surface expressions on project.</td></tr>
+        <tr><td class="section-code">Mechanical Integrity</td><td>All mechanical well barriers reliably perform containing pressure and are free from leakage.</td></tr>
+        <tr><td class="section-code">SEMPP</td><td>Surface Expression Monitoring and Prevention Plan — required for projects with known surface expressions or steam into diatomite.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card teal">
+    <h2><span class="icon">🔗</span> Additional Acronyms</h2>
+    <div class="grid-2">
+      <div>
+        <p><span class="key-num">AE</span> — Aquifer Exemption</p>
+        <p><span class="key-num">BFW</span> — Base of Fresh Water</p>
+        <p><span class="key-num">BPC</span> — Business and Professions Code</p>
+        <p><span class="key-num">CCR</span> — California Code of Regulations</p>
+        <p><span class="key-num">CWC</span> — California Water Code</p>
+        <p><span class="key-num">DWR</span> — Department of Water Resources</p>
+        <p><span class="key-num">GAMA</span> — Groundwater Ambient Monitoring & Assessment</p>
+        <p><span class="key-num">GIS</span> — Geographic Information System</p>
+      </div>
+      <div>
+        <p><span class="key-num">HPSC</span> — High Pressure Cyclic Steam</p>
+        <p><span class="key-num">LAS</span> — Log ASCII Standard</p>
+        <p><span class="key-num">LLNL</span> — Lawrence Livermore National Laboratory</p>
+        <p><span class="key-num">NTO</span> — Notice to Operators</p>
+        <p><span class="key-num">ROWD</span> — Report of Waste Discharge</p>
+        <p><span class="key-num">SCADA</span> — Supervisory Control & Data Acquisition</p>
+        <p><span class="key-num">WDR</span> — Waste Discharge Requirements</p>
+        <p><span class="key-num">WellSTAR</span> — Well State Tracking & Reporting</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card green">
+    <h2><span class="icon">📚</span> Document Sources</h2>
+    <p>This cheatsheet was compiled from the following official documents:</p>
+    <div style="margin-top:10px">
+      <p>• <strong>Revised MOA Appendix</strong> — Signed March 2026 (Lucchesi 3/20, Ito 3/19, Oppenheimer 3/27)</p>
+      <p>• <strong>Attachment 2</strong> — UIC Project Information Checklist (March 2026 version)</p>
+      <p>• <strong>Attachment 3</strong> — Non-Expansion Project Information Checklist (Dec 2021)</p>
+      <p>• <strong>Attachment 4</strong> — UIC Project Review RASCI Chart (March 2026)</p>
+      <p>• <strong>UIC Final Text of Regulations (Clean)</strong> — CCR Title 14, effective April 1, 2019</p>
+      <p>• <strong>UIC Regulations Summary</strong> — June 18, 2019</p>
+      <p>• <a href="https://www.conservation.ca.gov/calgem/general_information/Pages/UndergroundinjectionControl(UIC).aspx" target="_blank" style="color:var(--blue)">CalGEM UIC Program Page</a></p>
+      <p>• <a href="https://www.conservation.ca.gov/calgem/general_information/Pages/UICApplicationGuidance.aspx" target="_blank" style="color:var(--blue)">CalGEM UIC Application Guidance (For Operators)</a></p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .main -->
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// Collapsible sections
+document.querySelectorAll('.collapsible-header').forEach(header => {
+  header.addEventListener('click', () => {
+    header.classList.toggle('open');
+    header.nextElementSibling.classList.toggle('open');
+  });
+});
+</script>
+</body>
+</html>
