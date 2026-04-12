@@ -346,6 +346,152 @@ body {
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--cream-dark); }
 ::-webkit-scrollbar-thumb { background: #C4B89A; border-radius: 4px; }
+/* ── Quiz styles ── */
+.quiz-container { max-width: 800px; }
+.quiz-q {
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 26px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.3s;
+}
+.quiz-q.correct { border-color: var(--green); border-width: 2px; }
+.quiz-q.incorrect { border-color: var(--red); border-width: 2px; }
+.quiz-q .q-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.quiz-q .q-text {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--warm-white);
+}
+.quiz-opt:hover { border-color: var(--amber); background: var(--amber-light); }
+.quiz-opt.selected { border-color: var(--blue); background: var(--blue-light); }
+.quiz-opt.correct-answer { border-color: var(--green); background: var(--green-light); }
+.quiz-opt.wrong-answer { border-color: var(--red); background: var(--red-light); }
+.quiz-opt.disabled { pointer-events: none; opacity: 0.85; }
+.quiz-opt .opt-letter {
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.quiz-opt.selected .opt-letter { background: var(--blue); color: white; }
+.quiz-opt.correct-answer .opt-letter { background: var(--green); color: white; }
+.quiz-opt.wrong-answer .opt-letter { background: var(--red); color: white; }
+.quiz-explanation {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.55;
+  display: none;
+}
+.quiz-explanation.show { display: block; }
+.quiz-explanation.correct-exp { background: var(--green-light); border: 1px solid var(--green-border); }
+.quiz-explanation.incorrect-exp { background: var(--red-light); border: 1px solid var(--red-border); }
+.quiz-score-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 22px;
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.quiz-score-bar .score-circle {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 800;
+  color: white;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.quiz-score-bar .score-circle.good { background: var(--green); }
+.quiz-score-bar .score-circle.ok { background: var(--amber); }
+.quiz-score-bar .score-circle.bad { background: var(--red); }
+.quiz-progress {
+  flex: 1;
+  height: 8px;
+  background: var(--cream-dark);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%;
+  background: var(--amber);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.quiz-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.quiz-btn.primary { background: var(--amber); color: white; }
+.quiz-btn.primary:hover { background: #B8720D; }
+.quiz-btn.secondary { background: var(--cream-dark); color: var(--text-primary); }
+.quiz-btn.secondary:hover { background: var(--border); }
+.quiz-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+.quiz-category-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.tag-pbp { background: var(--amber-light); color: var(--amber); }
+.tag-nonexp { background: var(--blue-light); color: var(--blue); }
+.tag-periodic { background: var(--green-light); color: var(--green); }
+.tag-mit { background: var(--purple-light); color: var(--purple); }
+.tag-general { background: var(--teal-light); color: var(--teal); }
 </style>
 </head>
 <body>
@@ -364,6 +510,7 @@ body {
       <button class="tab-btn" onclick="showTab('mit')">MIT & MASIP</button>
       <button class="tab-btn" onclick="showTab('rasci')">RASCI Chart</button>
       <button class="tab-btn" onclick="showTab('glossary')">Glossary & Regs</button>
+      <button class="tab-btn" onclick="showTab('quiz')" style="background:rgba(212,133,15,0.25);color:#F5C87A">🧠 Quiz</button>
     </div>
   </div>
 </div>
@@ -1199,6 +1346,53 @@ body {
   </div>
 </div>
 
+<!-- ──────────────────────────────────────────────────── -->
+<!-- TAB: QUIZ -->
+<!-- ──────────────────────────────────────────────────── -->
+<div id="tab-quiz" class="tab-content">
+
+  <div class="card amber">
+    <h2><span class="icon">🧠</span> UIC Knowledge Quiz</h2>
+    <p>Test your knowledge of CalGEM's UIC program requirements. Questions cover Project-by-Project review, Non-Expansion AOR, Periodic Review, MIT, and general regulations. Select a category or take them all.</p>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px">
+      <button class="quiz-btn secondary" onclick="startQuiz('all')">All Questions</button>
+      <button class="quiz-btn secondary" onclick="startQuiz('pbp')">Project-by-Project <span class="quiz-category-tag tag-pbp">PBP</span></button>
+      <button class="quiz-btn secondary" onclick="startQuiz('nonexp')">Non-Expansion <span class="quiz-category-tag tag-nonexp">NE</span></button>
+      <button class="quiz-btn secondary" onclick="startQuiz('periodic')">Periodic Review <span class="quiz-category-tag tag-periodic">PR</span></button>
+      <button class="quiz-btn secondary" onclick="startQuiz('mit')">MIT & MASIP <span class="quiz-category-tag tag-mit">MIT</span></button>
+      <button class="quiz-btn secondary" onclick="startQuiz('general')">General <span class="quiz-category-tag tag-general">GEN</span></button>
+    </div>
+  </div>
+
+  <!-- Score bar -->
+  <div class="quiz-score-bar" id="quiz-score-bar" style="display:none">
+    <div class="score-circle" id="quiz-score-circle">0</div>
+    <div style="flex:1">
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px">
+        <span style="font-weight:600; font-size:14px" id="quiz-status-text">Question 1 of 20</span>
+        <span style="font-family:var(--mono); font-size:13px; color:var(--text-muted)" id="quiz-pct">0%</span>
+      </div>
+      <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Quiz questions container -->
+  <div class="quiz-container" id="quiz-questions"></div>
+
+  <!-- Quiz results -->
+  <div id="quiz-results" style="display:none">
+    <div class="card green">
+      <h2><span class="icon">🏆</span> Quiz Complete!</h2>
+      <p id="quiz-results-text"></p>
+      <div class="quiz-actions">
+        <button class="quiz-btn primary" onclick="startQuiz('all')">Retake All</button>
+        <button class="quiz-btn secondary" onclick="resetQuiz()">Choose Category</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 </div><!-- end .main -->
 
 <script>
@@ -1217,6 +1411,181 @@ document.querySelectorAll('.collapsible-header').forEach(header => {
     header.nextElementSibling.classList.toggle('open');
   });
 });
+// ── Quiz Engine ──
+const quizData = [
+  // === PROJECT-BY-PROJECT ===
+  {cat:'pbp', q:'What is the default Area of Review (AOR) radius if no mathematical model is used?', opts:['⅛ mile','¼ mile','½ mile','1 mile'], ans:1, exp:'Per §1720.1(a)(2), the default AOR is a fixed one-quarter-mile radius. An operator may propose a calculated AOR based on pressure/temperature migration distance instead.'},
+  {cat:'pbp', q:'How many geologic cross-sections are required at minimum in the Area of Review?', opts:['1','2','3','4'], ans:1, exp:'Per §1724.7(a)(2)(E), at least two geologic cross-sections are required — one along strike and one perpendicular to strike, through at least three wells including one injection well.'},
+  {cat:'pbp', q:'What TDS threshold defines "freshwater" under the UIC regulations?', opts:['1,000 mg/L','3,000 mg/L','5,000 mg/L','10,000 mg/L'], ans:1, exp:'Per §1720.1(e), freshwater is defined as water containing 3,000 mg/L TDS or less, regardless of hydrocarbon content or exemption status.'},
+  {cat:'pbp', q:'Within what timeframe must groundwater samples be collected for new and expansion UIC applications?', opts:['Within past 1 year','Within past 2 years','Within past 5 years','Within past 10 years'], ans:2, exp:'Per the GS(2) checklist item, injection zone groundwater samples should be collected within the past 5 years for new and expansion UIC applications.'},
+  {cat:'pbp', q:'What is the minimum distance for the water well survey from the AOR boundary in a full project review?', opts:['¼ mile','½ mile','1 mile','2 miles'], ans:2, exp:'Per ES(5) in the Attachment 2 checklist, a water well survey within 1 mile of the AOR is required. An expanded survey may be necessary based on risk to beneficial use water.'},
+  {cat:'pbp', q:'Which section code covers the Cover Letter requirement including the licensed professional statement?', opts:['DF(1)','PO(1)','CL(1)','GS(1)'], ans:2, exp:'CL(1) covers the Cover Letter requirement under §1724.7(d), including the statement that licensed professionals are responsible for all data, interpretations, and calculations.'},
+  {cat:'pbp', q:'What water quality data sources must be used at minimum for the water well survey?', opts:['Only DWR well completion reports','DWR reports + GeoTracker GAMA','EPA SafeWater database only','County health department records'], ans:1, exp:'Per ES(5), the water well survey should utilize at a minimum: DWR well completion reports and Water Data Library Station Map, plus GeoTracker GAMA information system.'},
+  {cat:'pbp', q:'Within what timeframe must idle well fluid level data be collected for the isobar map?', opts:['Within past 6 months','Within past 1 year','Within past 2 years','Within past 5 years'], ans:2, exp:'Per ES(1), the isobar map showing groundwater flow direction must use idle well fluid level data measured within the past 2 years for all idle wells within the AOR.'},
+  {cat:'pbp', q:'What TDS threshold triggers the requirement for a PG/PE written statement justifying injection?', opts:['3,000 mg/L','5,000 mg/L','10,000 mg/L','25,000 mg/L'], ans:2, exp:'Per GS(7), if TDS concentrations are greater than 10,000 mg/L, a written statement by a registered PG or PE is required indicating the degree to which the water quality data is representative.'},
+  {cat:'pbp', q:'Which checklist item requires the operator to provide injectate water quality data collected within the past year?', opts:['GS(2)','ES(1)','IP(3)','OI(1)'], ans:2, exp:'IP(3) requires representative water quality data of the injectate collected within the past year, including TPH, major cations, anions, alkalinity, EC, pH, and temperature.'},
+
+  // === NON-EXPANSION ===
+  {cat:'nonexp', q:'What is the Non-Expansion checklist attachment number and date?', opts:['Attachment 2, March 2026','Attachment 3, December 2021','Attachment 4, March 2026','Attachment 1, March 2026'], ans:1, exp:'The Non-Expansion Project Information Checklist is Attachment 3 to the MOA Appendix, dated December 2021.'},
+  {cat:'nonexp', q:'In a non-expansion review, can previously submitted AOR calculations be incorporated by reference?', opts:['Never — always recalculate','Only if pressure is stable or decreasing','Only if within the past 2 years','Only if the Division requests it'], ans:1, exp:'Per ES(1) in the non-expansion checklist, previously submitted calculations may be incorporated by reference if the pressure in the vicinity of proposed injectors is shown to be stable or decreasing. Updated calculations must be stamped and dated.'},
+  {cat:'nonexp', q:'What is the water well survey distance for the Water Board section (W-ES(6)) of the non-expansion review?', opts:['1 mile of AOR','½ mile of AOR','¼ mile of non-expansion AOR','Within project boundary only'], ans:2, exp:'Per W-ES(6), water well locations within ¼ mile of the non-expansion AOR boundary must be surveyed and presented on a map. This is narrower than the 1-mile survey in the full review.'},
+  {cat:'nonexp', q:'For W-ES(2) in non-expansion, what timeframe is required for static pressures/temperatures of injection zones and USDWs?', opts:['Within past 6 months','Within past year','Within past 2 years','Within past 5 years'], ans:1, exp:'Per W-ES(2), non-expansion AOR calculations must include static pressures or current temperatures measured within the past year within the non-expansion AOR.'},
+  {cat:'nonexp', q:'What must the W-ES(4) non-expansion AOR map show regarding faults?', opts:['All faults within 1 mile','All faults within ½ mile','All faults within ¼ mile of non-expansion AOR','Only faults crossing the AOR boundary'], ans:2, exp:'Per W-ES(4), the map must include all faults within one quarter mile of the non-expansion AOR, along with well type/status labels, USDW conduit wells, and historical + current exemption boundaries.'},
+  {cat:'nonexp', q:'In non-expansion, which wells need well construction diagrams per W-ES(5)?', opts:['All wells in the AOR','Only the proposed injection wells','Wells that fail zonal isolation requirements','Only P&A wells'], ans:2, exp:'Per W-ES(5), well construction diagrams are required only for wells and boreholes within the non-expansion AOR that fail to meet zonal isolation requirements — not all wells as in the full review.'},
+  {cat:'nonexp', q:'What W- prefix item covers the non-USDW determination in the non-expansion Water Board section?', opts:['W-CP','W-ES(2)','W-GS(4)','W-SI'], ans:2, exp:'W-GS(4) covers the non-USDW determination using water samples within 5 years or TDS log calcs validated within 1 mile. Previously approved determinations can be incorporated by reference.'},
+  {cat:'nonexp', q:'Which CalGEM-only items (OI(3) and OI(4)) are unique to the non-expansion process?', opts:['MASIP calculations and offset notifications','Copy of most recent PAL and written consistency statement','Water quality analysis and sampling protocol','CEQA compliance and SB 1137 evaluation'], ans:1, exp:'OI(3) requires CalGEM to include a copy of the most recent PAL, and OI(4) requires a written statement that CalGEM staff has reviewed and agrees the non-expansion wells are consistent with the existing PAL conditions.'},
+
+  // === PERIODIC REVIEW ===
+  {cat:'periodic', q:'How often must CalGEM review existing UIC projects at minimum?', opts:['Annually','Every 2 years','Every 3 years','Every 5 years'], ans:2, exp:'Per §1724.6(d), the Division will review existing projects periodically, but not less than once every three years, to verify compliance and ensure PAL conditions remain effective.'},
+  {cat:'periodic', q:'What happens if CalGEM determines a project is inconsistent with the PAL conditions?', opts:['A warning letter is issued with 90-day compliance period','Injection must cease immediately upon written notice','The PAL is automatically renewed with modified conditions','The operator has 30 days to submit a corrective action plan'], ans:1, exp:'Per §1724.6(e), if the Division determines operation is inconsistent with the subchapter or PAL conditions, or poses a threat, injection operations shall cease immediately (or as soon as safe) upon written notice.'},
+  {cat:'periodic', q:'Which regulation section gives CalGEM authority to suspend, modify, or rescind PALs?', opts:['§1724.6(b)','§1724.6(d)','§1724.7(a)','§1724.10(a)'], ans:1, exp:'§1724.6(d) states that PALs are subject to suspension, modification, or rescission by the Division during periodic reviews.'},
+  {cat:'periodic', q:'Within how many days of transfer to a new operator must the new operator meet with Division staff?', opts:['30 days','60 days','90 days','120 days'], ans:1, exp:'Per §1724.6(f), within 60 days after transfer of a UIC project to a new operator, the new operator shall meet with Division staff to ensure understanding of requirements and PAL conditions.'},
+  {cat:'periodic', q:'An injection well becomes idle per PRC §3008(d). What must the operator do?', opts:['Nothing — idle wells retain injection approval indefinitely','Cease injection and notify the Division immediately','File for a 5-year extension automatically','Convert the well to production within 90 days'], ans:1, exp:'Per §1724.13(a)(8), if a well becomes idle as defined by PRC §3008(d), the operator must cease injection and notify the Division, unless the Division grants an allowance for the well to remain approved.'},
+
+  // === MIT & MASIP ===
+  {cat:'mit', q:'What is the pass criterion for a casing pressure test (MIT Part 1) on a non-steam injection well?', opts:['≤1% change in 15 minutes','≤3% change in 30 minutes','≤5% change in 60 minutes','≤10% change in 30 minutes'], ans:1, exp:'Per §1724.10.1(b)(8), a pressure test is successful if the gauge does not show more than a 3% change from the initial test pressure over a continuous 30-minute period.'},
+  {cat:'mit', q:'How often must MIT Part 2 (fluid migration) testing be performed on a Water Disposal well?', opts:['Every 6 months','Every year','Every 2 years','Every 5 years'], ans:1, exp:'Per §1724.10.2(b)(1), disposal injection wells shall be tested for fluid migration at least once a year — more frequently than the standard 2-year cycle.'},
+  {cat:'mit', q:'What is the minimum advance notice to the District office before performing MIT?', opts:['24 hours','48 hours','72 hours','7 days'], ans:1, exp:'Per §1724.10(i)(1), the operator shall notify the appropriate Division district office at least 48 hours before performing any MIT testing so Division staff may witness operations.'},
+  {cat:'mit', q:'In the MASIP formula, what multiplier is applied to the fracture gradient to get the injection gradient?', opts:['0.85','0.90','0.95','1.00'], ans:2, exp:'Per §1724.10.3(a)(1), the injection gradient = fracture gradient × 0.95. The Division may approve a different multiplier on a well-specific basis.'},
+  {cat:'mit', q:'What happens if an injection well is not tested as required under MIT schedules?', opts:['A 90-day grace period applies','The well automatically loses injection approval','A warning letter is issued','The well is fined $10,000 per day'], ans:1, exp:'Per §1724.10(i)(4), any injection well that is not tested as required automatically loses approval to inject, and subsequent written approval from the Division is required to reinitiate injection.'},
+  {cat:'mit', q:'For MIT Part 1 alternative pressure monitoring, what is the minimum annular pressure required at all times?', opts:['50 psi','100 psi','200 psi','500 psi'], ans:1, exp:'Per §1724.10.1(c)(2)(B)(i), the casing-tubing annulus shall have a minimum of 100 psi pressure at all times, preferably with a nitrogen gas blanket.'},
+  {cat:'mit', q:'What unplanned pressure variance over 48 hours triggers a mandatory MIT Part 2 test?', opts:['>10%','>15%','>25%','>50%'], ans:2, exp:'Per §1724.10.2(b)(5), testing is required following an unplanned variance in injection pressure of more than 25% within a 48-hour period, unless the operator demonstrates it was unrelated to well integrity.'},
+  {cat:'mit', q:'Within how many days must remedial work be completed after a failed MIT?', opts:['90 days','120 days','180 days','365 days'], ans:2, exp:'Per §1724.10(i)(5), the necessary remedial work or testing shall be completed within 180 days, unless a longer timeframe is approved by the Division.'},
+
+  // === GENERAL ===
+  {cat:'general', q:'What TDS level defines the upper limit for Underground Source of Drinking Water (USDW)?', opts:['3,000 mg/L','5,000 mg/L','10,000 mg/L','25,000 mg/L'], ans:2, exp:'Per §1720.1(q)(2)(B), a USDW contains fewer than 10,000 mg/L TDS. Note this is distinct from freshwater which is ≤3,000 mg/L TDS.'},
+  {cat:'general', q:'Which agency has EPA-delegated primacy for Class II UIC wells in California?', opts:['State Water Resources Control Board','CalGEM (Geologic Energy Management Division)','California EPA','Regional Water Quality Control Boards'], ans:1, exp:'CalGEM has primacy authority delegated by the EPA under the Safe Drinking Water Act for Class II injection wells associated with oil and gas operations.'},
+  {cat:'general', q:'What defines a "low-use cyclic steam injection well" in terms of annual injection days?', opts:['≤12 days per year','≤24 days per year','≤36 days per year','≤48 days per year'], ans:1, exp:'Per §1720.1(i)(1), a low-use cyclic steam well must not have had more than 24 days of injection in a calendar year over the past 5 years, plus ≤12,000 bbl/yr, and no project surface expressions.'},
+  {cat:'general', q:'At what linear distance from a water supply well does §1724.10(e) trigger the annual chemical additive reporting requirement?', opts:['150 feet','300 feet','500 feet','1,000 feet'], ans:2, exp:'Per §1724.10(e), if an injection well has open perforations within 500 linear feet of a water supply well, the operator must provide annual reports on water treatment processes, chemical additives, and their purposes.'},
+  {cat:'general', q:'What is the relationship between the MOA Attachment 2 and Attachment 3 checklists?', opts:['Attachment 2 is for non-expansion, Attachment 3 is for full review','Both cover the same items but different formats','Attachment 2 is the full checklist, Attachment 3 is the streamlined non-expansion version','Attachment 3 supersedes Attachment 2 entirely'], ans:2, exp:'Attachment 2 (March 2026) is the full UIC Project Information Checklist for new/expansion/project-by-project reviews. Attachment 3 (Dec 2021) is the streamlined Non-Expansion checklist for adding wells to already-approved projects.'},
+  {cat:'general', q:'Which RASCI role is the Water Board primarily assigned for water quality and TDS/USDW determinations?', opts:['Informed (I)','Supportive (S)','Accountable & Responsible (A&R)','Consulted & Supportive (C&S)'], ans:2, exp:'Per the RASCI chart (Attachment 4), the Water Boards are assigned A&R for GS(2) water quality/TDS, GS(7) non-USDW determinations, ES(1) AOR evaluation, ES(5) water well surveys, and IP(3) injectate analysis.'},
+];
+
+let currentQuiz = [];
+let answered = 0;
+let correctCount = 0;
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz(category) {
+  const filtered = category === 'all' ? quizData : quizData.filter(q => q.cat === category);
+  currentQuiz = shuffleArray(filtered);
+  answered = 0;
+  correctCount = 0;
+
+  document.getElementById('quiz-results').style.display = 'none';
+  document.getElementById('quiz-score-bar').style.display = 'flex';
+  updateScoreBar();
+
+  const container = document.getElementById('quiz-questions');
+  container.innerHTML = '';
+
+  currentQuiz.forEach((q, idx) => {
+    const catLabels = {pbp:'PBP',nonexp:'NE',periodic:'PR',mit:'MIT',general:'GEN'};
+    const catClasses = {pbp:'tag-pbp',nonexp:'tag-nonexp',periodic:'tag-periodic',mit:'tag-mit',general:'tag-general'};
+    const div = document.createElement('div');
+    div.className = 'quiz-q';
+    div.id = 'quiz-q-' + idx;
+    div.innerHTML = `
+      <div class="q-num">Question ${idx+1} of ${currentQuiz.length} <span class="quiz-category-tag ${catClasses[q.cat]}">${catLabels[q.cat]}</span></div>
+      <div class="q-text">${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((opt, oi) => `
+          <div class="quiz-opt" onclick="selectAnswer(${idx}, ${oi})" id="opt-${idx}-${oi}">
+            <div class="opt-letter">${String.fromCharCode(65+oi)}</div>
+            <div>${opt}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="quiz-explanation" id="exp-${idx}">
+        <strong>Explanation:</strong> ${q.exp}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function selectAnswer(qIdx, optIdx) {
+  const q = currentQuiz[qIdx];
+  const qDiv = document.getElementById('quiz-q-' + qIdx);
+  if (qDiv.classList.contains('correct') || qDiv.classList.contains('incorrect')) return;
+
+  const isCorrect = optIdx === q.ans;
+  answered++;
+  if (isCorrect) correctCount++;
+
+  // Mark all options
+  q.opts.forEach((_, oi) => {
+    const optEl = document.getElementById('opt-' + qIdx + '-' + oi);
+    optEl.classList.add('disabled');
+    if (oi === q.ans) optEl.classList.add('correct-answer');
+    if (oi === optIdx && !isCorrect) optEl.classList.add('wrong-answer');
+    if (oi === optIdx) optEl.classList.add('selected');
+  });
+
+  // Show explanation
+  const expEl = document.getElementById('exp-' + qIdx);
+  expEl.classList.add('show');
+  expEl.classList.add(isCorrect ? 'correct-exp' : 'incorrect-exp');
+  qDiv.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+  updateScoreBar();
+
+  // Check if quiz is complete
+  if (answered === currentQuiz.length) {
+    setTimeout(showResults, 600);
+  }
+}
+
+function updateScoreBar() {
+  const total = currentQuiz.length;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  const answeredPct = total > 0 ? Math.round((answered / total) * 100) : 0;
+
+  document.getElementById('quiz-score-circle').textContent = correctCount;
+  document.getElementById('quiz-status-text').textContent = answered < total
+    ? `Answered ${answered} of ${total}`
+    : `Complete! ${correctCount}/${total}`;
+  document.getElementById('quiz-pct').textContent = pct + '%';
+  document.getElementById('quiz-progress-fill').style.width = answeredPct + '%';
+
+  const circle = document.getElementById('quiz-score-circle');
+  circle.className = 'score-circle';
+  if (answered > 0) {
+    const ratio = correctCount / answered;
+    if (ratio >= 0.8) circle.classList.add('good');
+    else if (ratio >= 0.5) circle.classList.add('ok');
+    else circle.classList.add('bad');
+  }
+}
+
+function showResults() {
+  const total = currentQuiz.length;
+  const pct = Math.round((correctCount / total) * 100);
+  let msg = '';
+  if (pct >= 90) msg = `Outstanding! You scored ${correctCount}/${total} (${pct}%). You know your UIC regulations inside and out.`;
+  else if (pct >= 70) msg = `Good job! You scored ${correctCount}/${total} (${pct}%). Solid understanding with a few areas to review.`;
+  else if (pct >= 50) msg = `You scored ${correctCount}/${total} (${pct}%). Review the sections where you missed questions — the checklist tabs have all the details.`;
+  else msg = `You scored ${correctCount}/${total} (${pct}%). Consider reviewing the cheatsheet tabs thoroughly before your next project review.`;
+
+  document.getElementById('quiz-results-text').textContent = msg;
+  document.getElementById('quiz-results').style.display = 'block';
+  document.getElementById('quiz-results').scrollIntoView({behavior:'smooth'});
+}
+
+function resetQuiz() {
+  document.getElementById('quiz-questions').innerHTML = '';
+  document.getElementById('quiz-score-bar').style.display = 'none';
+  document.getElementById('quiz-results').style.display = 'none';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
 </script>
 </body>
 </html>

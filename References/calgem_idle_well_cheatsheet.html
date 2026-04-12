@@ -118,6 +118,49 @@
   .qi{display:flex;justify-content:space-between;padding:8px 0;font-size:15px;border-bottom:1px solid var(--border);color:var(--text)}
   .qi:last-child{border-bottom:none}
   .qv{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:14px}
+
+  /* Flashcards */
+  .fc-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+  .fc-progress{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text2)}
+  .fc-progress .cur{color:var(--amber);font-weight:700;font-size:18px}
+  .fc-score{display:flex;gap:16px;font-size:14px;font-weight:600}
+  .fc-score .right{color:var(--green)}.fc-score .wrong{color:var(--red)}
+  .fc-wrap{width:100%;max-width:720px;margin:0 auto 24px}
+  .fc-card{width:100%;cursor:pointer;border-radius:16px;transition:box-shadow .2s}
+  .fc-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.08)}
+  .fc-face{border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 32px;text-align:center;min-height:260px}
+  .fc-front{background:var(--surface);border:2px solid var(--amber-br);box-shadow:0 4px 20px rgba(245,158,11,.12)}
+  .fc-front .fc-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+  .fc-front .fc-q{font-size:19px;font-weight:700;color:var(--text);line-height:1.55}
+  .fc-front .fc-hint{font-size:13px;color:var(--text3);margin-top:18px}
+  .fc-back{background:#1e3a5f;border:2px solid #2d5a8e;box-shadow:0 4px 20px rgba(30,58,95,.2);display:none;margin-top:-2px;border-top:none;border-radius:0 0 16px 16px}
+  .fc-card.flipped .fc-front{border-radius:16px 16px 0 0;border-bottom:none}
+  .fc-card.flipped .fc-back{display:flex}
+  .fc-back .fc-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+  .fc-back .fc-a{font-size:16px;font-weight:600;color:#f1f5f9;line-height:1.7;white-space:pre-line;max-width:100%;word-wrap:break-word}
+  .fc-back .fc-ref{font-family:'JetBrains Mono',monospace;font-size:12px;color:#94a3b8;margin-top:16px}
+  .fc-nav{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+  .fc-btn{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:12px 28px;border:none;border-radius:10px;cursor:pointer;transition:.15s}
+  .fc-btn.prev{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+  .fc-btn.prev:hover{background:var(--border)}
+  .fc-btn.next{background:#1e3a5f;color:#fbbf24}
+  .fc-btn.next:hover{background:#264a73}
+  .fc-btn.knew{background:var(--green-bg);color:var(--green);border:1px solid var(--green-br)}
+  .fc-btn.knew:hover{background:#a7f3d0}
+  .fc-btn.didnt{background:var(--red-bg);color:var(--red);border:1px solid var(--red-br)}
+  .fc-btn.didnt:hover{background:#fecaca}
+  .fc-btn.restart{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-br)}
+  .fc-btn.restart:hover{background:#fde68a}
+  .fc-btn:disabled{opacity:.4;cursor:not-allowed}
+  .fc-dots{display:flex;justify-content:center;gap:6px;margin:16px 0;flex-wrap:wrap}
+  .fc-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:.2s}
+  .fc-dot.active{border-color:var(--amber-br);background:var(--amber-br)}
+  .fc-dot.correct{border-color:var(--green-br);background:var(--green-br)}
+  .fc-dot.incorrect{border-color:var(--red-br);background:var(--red-br)}
+  .fc-result{text-align:center;padding:40px 20px}
+  .fc-result .big{font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:800;color:var(--amber)}
+  .fc-result .msg{font-size:18px;color:var(--text);margin-top:10px}
+  .fc-result .detail{font-size:15px;color:var(--text2);margin-top:6px}
 </style>
 </head>
 <body>
@@ -139,6 +182,7 @@
     <button class="tab" data-t="plans">Plans & Waivers</button>
     <button class="tab" data-t="15year">15-Year Analysis</button>
     <button class="tab" data-t="fees">Fees (2025)</button>
+    <button class="tab" data-t="quiz">🧠 Quiz</button>
   </div>
 
   <!-- ===== OVERVIEW ===== -->
@@ -693,8 +737,61 @@
     </div>
   </div>
 
-</div>
+  <!-- ===== QUIZ FLASHCARDS ===== -->
+  <div class="sec" id="s-quiz">
+    <div class="card amber">
+      <h2><span class="ic">🧠</span> Test Your Knowledge — Idle Well Flashcards</h2>
+      <p style="margin-bottom:6px">Click a card to reveal the answer. Track your score as you go.</p>
+    </div>
 
+    <div id="fc-app">
+      <div class="fc-controls">
+        <div class="fc-progress">Card <span class="cur" id="fc-cur">1</span> of <span id="fc-tot">25</span></div>
+        <div class="fc-score">
+          <span class="right" id="fc-right">✓ 0</span>
+          <span class="wrong" id="fc-wrong">✗ 0</span>
+        </div>
+      </div>
+
+      <div class="fc-dots" id="fc-dots"></div>
+
+      <div class="fc-wrap" id="fc-wrap">
+        <div class="fc-card" id="fc-card" onclick="flipCard()">
+          <div class="fc-face fc-front">
+            <div class="fc-label">Question</div>
+            <div class="fc-q" id="fc-q"></div>
+            <div class="fc-hint" id="fc-hint">Click to reveal answer ▼</div>
+          </div>
+          <div class="fc-face fc-back" id="fc-back">
+            <div class="fc-label">Answer</div>
+            <div class="fc-a" id="fc-a"></div>
+            <div class="fc-ref" id="fc-ref"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fc-nav" id="fc-nav">
+        <button class="fc-btn didnt" onclick="markCard(false)">✗ Didn't Know</button>
+        <button class="fc-btn knew" onclick="markCard(true)">✓ Knew It</button>
+      </div>
+
+      <div class="fc-nav" style="margin-top:10px">
+        <button class="fc-btn prev" id="fc-prev" onclick="prevCard()">← Previous</button>
+        <button class="fc-btn restart" onclick="restartQuiz()">↻ Restart</button>
+        <button class="fc-btn next" id="fc-next" onclick="nextCard()">Next →</button>
+      </div>
+
+      <div class="fc-result" id="fc-result" style="display:none">
+        <div class="big" id="fc-pct"></div>
+        <div class="msg" id="fc-msg"></div>
+        <div class="detail" id="fc-detail"></div>
+        <br>
+        <button class="fc-btn restart" onclick="restartQuiz()">↻ Try Again</button>
+      </div>
+    </div>
+  </div>
+
+</div>
 <script>
 document.getElementById('tabs').addEventListener('click',e=>{
   if(!e.target.classList.contains('tab'))return;
@@ -702,6 +799,206 @@ document.getElementById('tabs').addEventListener('click',e=>{
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   e.target.classList.add('active');
   document.getElementById('s-'+e.target.dataset.t).classList.add('active');
+});
+</script>
+
+<script>
+const cards=[
+  {q:"How long must a well have zero reported volumes to become an idle well?",
+   a:"24 consecutive months of zero reported production (oil, gas, water for stimulation) or zero injection. The idle start date is the first day of the month after the 24th month of no reporting.",
+   ref:"§1760(n) / PRC §3008(d)"},
+
+  {q:"How long must a well produce or inject continuously to EXIT idle well status?",
+   a:"6 continuous months of production of oil/gas, production of water for stimulation, or use for enhanced oil recovery, reservoir pressure management, or injection. The exit date is the first day of the month after the 6th month.",
+   ref:"§1760(n)"},
+
+  {q:"At what point does an idle well become a 'long-term idle well'?",
+   a:"After the well has been an idle well for 8 or more years.",
+   ref:"§1760(o) / PRC §3008(e)"},
+
+  {q:"What are the three required tests for idle wells and their initial deadlines?",
+   a:"1. Fluid Level Test — within 24 months, repeated every 24 months\n2. Casing Pressure Test — within 24 months, retest every 48–96 months depending on test PSI\n3. Clean Out Tag — within 8 years, retest every 48 months",
+   ref:"§1772.1(a)(1), (a)(2), (a)(3)"},
+
+  {q:"How often must a fluid level test be repeated?",
+   a:"At least once every 24 months for as long as the well remains idle. Not required if the operator has demonstrated the wellbore does not penetrate a USDW.",
+   ref:"§1772.1(a)(1)"},
+
+  {q:"What is the deadline for the first casing pressure test on a newly idle (roll-in) well?",
+   a:"Within 24 months of the well becoming idle. The test must cover from the surface to 100 ft MD above the uppermost perforation, above the deepest cemented casing shoe, or above the top of the landed liner — whichever is highest.",
+   ref:"§1772.1(a)(2)"},
+
+  {q:"What happens if a well cannot be safely and effectively tested?",
+   a:"The well is automatically deemed to have FAILED the pressure test. The operator then has 12 months to bring it into compliance, P&A, partially P&A, or schedule it on an approved plan.",
+   ref:"§1772.1(a)(2)"},
+
+  {q:"What is the pass criterion for a standard casing pressure test?",
+   a:"The pressure gauge must not show more than a 3% change from the initial test pressure over a continuous 30-minute period. The minimum initial pressure is 200 psi above surface pressure. Pressure must be recorded at least once per minute with a calibrated gauge accurate within 1%.",
+   ref:"§1772.1.1(a)(5), (a)(6)"},
+
+  {q:"What is the steam exception for pressure test pass criteria?",
+   a:"If the well is within the area of review for a cyclic steam injection well or a steamflood injection well, then an increase in pressure of as much as 10% is still considered a successful test (vs. the standard 3% change limit).",
+   ref:"§1772.1.1(a)(6)"},
+
+  {q:"If you test at 200 psi above surface pressure, when must you retest?",
+   a:"Within 48 months (4 years). This is the shortest retest interval because 200 psi is the minimum test pressure.",
+   ref:"§1772.1(a)(2)(A)"},
+
+  {q:"If you test at 500 psi above surface pressure, when must you retest?",
+   a:"Within 72 months (6 years).",
+   ref:"§1772.1(a)(2)(B)"},
+
+  {q:"If you test at 1,000 psi above surface pressure, when must you retest?",
+   a:"Within 96 months (8 years). This is the longest retest interval — testing at higher pressure earns a longer window before retesting.",
+   ref:"§1772.1(a)(2)(C)"},
+
+  {q:"When is a Clean Out Tag first required, and what does it involve?",
+   a:"Within 8 years of the well becoming idle. The operator must run open-ended tubing or a gauge ring (of the minimum P&A diameter) to the Division-approved depth. Must reach at least 25 ft below the uppermost perforation in the lowermost non-abandoned zone. Retest every 48 months.",
+   ref:"§1772.1(a)(3)"},
+
+  {q:"After a failed test, what are the four remedy options and the deadline?",
+   a:"Within 12 months, the operator must do ONE of:\nA) Bring the well into compliance (pass the test)\nB) Partially plug & abandon per §1752\nC) Fully plug & abandon per PRC §3208\nD) Schedule for P&A under an approved IWMP or Testing Waiver Plan",
+   ref:"§1772.1(b)"},
+
+  {q:"What is a Testing Waiver Plan and how long can it last?",
+   a:"A schedule to plug & abandon idle wells within up to 8 years. At least 10% of wells must be P&A'd each year. While on an approved plan and in compliance, the operator is exempt from testing requirements under §1772.1, §1772.1.1, and §1772.1.2.",
+   ref:"§1772.2"},
+
+  {q:"What happens if an operator fails to meet a Testing Waiver Plan schedule?",
+   a:"The Division may cancel the entire plan. The operator must then test ALL listed wells within 90 days. No new waiver plan will be considered until the operator is fully in compliance with all testing requirements under §1772.1.",
+   ref:"§1772.2(d)"},
+
+  {q:"What triggers the 15-year engineering analysis?",
+   a:"Due by the end of the month in which an idle well has been idle for 15 years. The operator must demonstrate to the Division's satisfaction that it is viable to return the well to operation. This requires both reservoir viability data (e-logs, structure maps, reservoir characterization) and mechanical integrity data (casing diagram, cement records, passing pressure test & clean out tag).",
+   ref:"§1772.1.2(a), (b), (c)"},
+
+  {q:"What is the new annual fee (2025) for a well idle 20+ years?",
+   a:"$22,500 per well per year, up from the previous $1,500 (a 15× increase). This was enacted by AB 1866 effective January 1, 2025. Fees are deposited into the Hazardous and Idle-Deserted Well Abatement Fund.",
+   ref:"PRC §3206 / AB 1866"},
+
+  {q:"What is the new fee for a well idle 0–2.99 years (2025)?",
+   a:"$1,000 per well per year. This is a new fee bracket — previously there was NO fee for wells idle less than 3 years. AB 1866 created this bracket effective January 1, 2025.",
+   ref:"PRC §3206 / AB 1866"},
+
+  {q:"What does 'elimination' mean under an IWMP?",
+   a:"Elimination means either:\n• P&A in accordance with PRC §3208, OR\n• 6 continuous months of production/injection\n\nIt does NOT include: converting to an observation well, converting to a monitoring well, or transferring the well to a new operator.",
+   ref:"PRC §3206 / §1772.3"},
+
+  {q:"What is a Low-Priority Idle Well?",
+   a:"An idle well that meets ALL four criteria:\n1) Does NOT penetrate a USDW\n2) No pressure at the surface and not open to atmosphere\n3) Not in an area of known geologic hazards\n4) Not a critical well, not in an urban area, and does not have an environmentally sensitive wellhead\n\nLow-priority wells may use passive testing (caliper survey) instead of a standard pressure test.",
+   ref:"§1760(p) / §1772.1.1(d)"},
+
+  {q:"What is the USDW definition and TDS threshold?",
+   a:"Underground Source of Drinking Water — an aquifer (not EPA-exempted) that:\n• Supplies a public water system, OR\n• Contains sufficient groundwater to supply one, AND either currently supplies drinking water OR contains fewer than 10,000 mg/L TDS.\n\nNote: Freshwater is separately defined as ≤ 3,000 mg/L TDS.",
+   ref:"§1760(x), §1760(j)"},
+
+  {q:"What advance notice must be given before conducting idle well tests?",
+   a:"The operator must give the appropriate Division district office at least 24 hours' notice (or shorter notice if acceptable to the district office) so that a Division inspector may witness the testing.",
+   ref:"§1772.1(c) / §1772.1.1(e)"},
+
+  {q:"How quickly must test results be submitted to the Division?",
+   a:"Within 60 days of the test date, in digital format.\nException: If a fluid level test indicates fluid is (or is presumed to be) above the base of a USDW, results must be submitted within 30 days.",
+   ref:"§1772.1(c)"},
+
+  {q:"What happens if an operator fails to pay idle well fees?",
+   a:"Failure to pay is conclusive evidence of desertion of the well under PRC §3206(c), which permits the Supervisor to order the well abandoned under §3237. Late fees incur a 10% penalty plus 1.5%/month non-compounding interest. After 2 months, the operator may be referred to the State Controller's Office.",
+   ref:"PRC §3206(c)"}
+];
+
+let idx=0, score={y:0,n:0}, answers=new Array(cards.length).fill(null);
+
+function render(){
+  const c=cards[idx];
+  document.getElementById('fc-q').textContent=c.q;
+  document.getElementById('fc-a').textContent=c.a;
+  document.getElementById('fc-ref').textContent=c.ref;
+  document.getElementById('fc-cur').textContent=idx+1;
+  document.getElementById('fc-tot').textContent=cards.length;
+  document.getElementById('fc-card').classList.remove('flipped');
+  document.getElementById('fc-hint').textContent='Click to reveal answer ▼';
+  document.getElementById('fc-prev').disabled=idx===0;
+  document.getElementById('fc-next').disabled=idx>=cards.length-1;
+  updateDots();
+  updateScore();
+  document.getElementById('fc-wrap').style.display='';
+  document.getElementById('fc-nav').style.display='';
+  document.querySelectorAll('.fc-nav')[1].style.display='';
+  document.getElementById('fc-result').style.display='none';
+  document.querySelector('.fc-controls').style.display='';
+  document.querySelector('.fc-dots').style.display='';
+}
+
+function flipCard(){
+  const card=document.getElementById('fc-card');
+  const isFlipped=card.classList.contains('flipped');
+  card.classList.toggle('flipped');
+  document.getElementById('fc-hint').textContent=isFlipped?'Click to reveal answer ▼':'Click to hide answer ▲';
+}
+
+function markCard(knew){
+  if(answers[idx]===null){
+    answers[idx]=knew;
+    if(knew) score.y++; else score.n++;
+  }
+  updateScore();updateDots();
+  // auto advance after short delay
+  setTimeout(()=>{
+    if(idx<cards.length-1) nextCard();
+    else showResult();
+  },400);
+}
+
+function nextCard(){if(idx<cards.length-1){idx++;render()}}
+function prevCard(){if(idx>0){idx--;render()}}
+
+function updateScore(){
+  document.getElementById('fc-right').textContent='✓ '+score.y;
+  document.getElementById('fc-wrong').textContent='✗ '+score.n;
+}
+
+function updateDots(){
+  const el=document.getElementById('fc-dots');
+  el.innerHTML='';
+  cards.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='fc-dot';
+    if(i===idx) d.classList.add('active');
+    if(answers[i]===true) d.classList.add('correct');
+    if(answers[i]===false) d.classList.add('incorrect');
+    d.onclick=()=>{idx=i;render()};
+    d.style.cursor='pointer';
+    el.appendChild(d);
+  });
+}
+
+function showResult(){
+  const total=score.y+score.n;
+  const pct=total?Math.round(score.y/total*100):0;
+  document.getElementById('fc-pct').textContent=pct+'%';
+  let msg='';
+  if(pct>=90) msg='Outstanding! You really know your idle well regs.';
+  else if(pct>=70) msg='Solid knowledge! A few areas to brush up on.';
+  else if(pct>=50) msg='Getting there — review the tabs above for the topics you missed.';
+  else msg='Time to study! Use the cheatsheet tabs to review the regulations.';
+  document.getElementById('fc-msg').textContent=msg;
+  document.getElementById('fc-detail').textContent=score.y+' correct, '+score.n+' missed out of '+total+' cards';
+  document.getElementById('fc-result').style.display='';
+  document.getElementById('fc-wrap').style.display='none';
+  document.getElementById('fc-nav').style.display='none';
+  document.querySelectorAll('.fc-nav')[1].style.display='none';
+}
+
+function restartQuiz(){
+  idx=0;score={y:0,n:0};answers=new Array(cards.length).fill(null);
+  // shuffle
+  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
+  render();
+}
+
+// init
+document.addEventListener('DOMContentLoaded',()=>{
+  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
+  render();
 });
 </script>
 </body>
