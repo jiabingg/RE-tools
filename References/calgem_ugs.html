@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CalGEM Underground Gas Storage — Knowledge Base</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#f8f6f1; color:#2c2416; line-height:1.6; font-size:15px; }
+code, .mono { font-family:'JetBrains Mono',monospace; }
+
+/* ── HEADER ── */
+.header { background:linear-gradient(135deg,#1e3a5f 0%,#15304f 100%); color:#fff; padding:40px 32px 32px; position:relative; overflow:hidden; }
+.header::after { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; border-radius:50%; background:rgba(251,191,36,.08); }
+.header h1 { font-size:28px; font-weight:800; color:#fbbf24; margin-bottom:6px; position:relative; }
+.header .subtitle { font-size:15px; color:#94a3b8; font-weight:500; margin-bottom:12px; }
+.header .reg-badges { display:flex; flex-wrap:wrap; gap:6px; }
+.reg-badge { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; background:rgba(251,191,36,.15); color:#fbbf24; padding:3px 8px; border-radius:4px; letter-spacing:.3px; }
+
+/* ── TABS ── */
+.tab-bar { display:flex; gap:0; overflow-x:auto; background:#fff; border-bottom:2px solid #e5e0d5; padding:0 16px; position:sticky; top:0; z-index:100; }
+.tab-btn { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; padding:12px 18px; border:none; background:transparent; color:#8a7f6e; cursor:pointer; white-space:nowrap; border-bottom:3px solid transparent; transition:all .2s; letter-spacing:.3px; }
+.tab-btn:hover { color:#2c2416; }
+.tab-btn.active { color:#fbbf24; background:#1e3a5f; border-bottom:3px solid #fbbf24; border-radius:6px 6px 0 0; }
+
+/* ── CONTENT ── */
+.content { max-width:960px; margin:0 auto; padding:24px 16px 60px; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ── CARDS ── */
+.card { background:#fff; border-radius:10px; padding:22px 24px; margin-bottom:18px; box-shadow:0 1px 4px rgba(0,0,0,.06); border-left:5px solid #e5e0d5; }
+.card h3 { font-size:17px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.card p, .card li { font-size:15px; color:#3d3526; }
+.card ul { padding-left:20px; }
+.card ul li { margin-bottom:6px; }
+.card ul li::marker { color:#f59e0b; }
+
+.card.amber  { border-left-color:#f59e0b; }
+.card.blue   { border-left-color:#3b82f6; }
+.card.green  { border-left-color:#10b981; }
+.card.red    { border-left-color:#ef4444; }
+.card.purple { border-left-color:#8b5cf6; }
+.card.cyan   { border-left-color:#06b6d4; }
+
+/* ── DEFINITION BOX ── */
+.def-box { background:#f0ede6; border-left:4px solid #f59e0b; padding:14px 18px; border-radius:0 8px 8px 0; margin:14px 0; }
+.def-box .term { font-weight:700; font-size:15px; color:#b45309; margin-bottom:4px; }
+.def-box .desc { font-size:14px; color:#5c5243; }
+
+/* ── QUICK REF ── */
+.quick-ref { border:2px solid #f59e0b; border-radius:10px; background:#fffbeb; padding:18px 22px; margin-bottom:18px; }
+.quick-ref h4 { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:#b45309; margin-bottom:12px; text-transform:uppercase; letter-spacing:.5px; }
+.qr-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f5deb3; font-size:14px; }
+.qr-row:last-child { border-bottom:none; }
+.qr-key { color:#5c5243; font-weight:500; }
+.qr-val { font-family:'JetBrains Mono',monospace; font-weight:700; color:#b45309; }
+
+/* ── WARNING / SUCCESS / NOTE ── */
+.alert { padding:14px 18px; border-radius:8px; margin:14px 0; font-size:14px; }
+.alert.warn { background:#fee2e2; color:#b91c1c; border-left:4px solid #ef4444; }
+.alert.success { background:#d1fae5; color:#047857; border-left:4px solid #10b981; }
+.alert.note { background:#fef3c7; color:#b45309; border-left:4px solid #f59e0b; }
+
+/* ── TABLES ── */
+.tbl-wrap { overflow-x:auto; margin:14px 0; }
+table { width:100%; border-collapse:collapse; font-size:14px; }
+th { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; background:#f0ede6; color:#5c5243; padding:10px 12px; text-align:left; }
+td { padding:10px 12px; border-bottom:1px solid #e5e0d5; color:#3d3526; }
+tr:hover td { background:#faf8f4; }
+
+/* ── FLOW STEPS ── */
+.flow-steps { counter-reset:step; }
+.flow-step { display:flex; gap:14px; margin-bottom:16px; align-items:flex-start; }
+.flow-num { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#f59e0b; min-width:36px; text-align:center; line-height:1; padding-top:3px; }
+.flow-body h4 { font-size:15px; font-weight:700; margin-bottom:2px; }
+.flow-body p { font-size:14px; color:#5c5243; }
+
+/* ── CHECKLIST ── */
+.checklist li { list-style:none; padding:4px 0 4px 20px; position:relative; font-size:14px; }
+.checklist li::before { content:'▸'; position:absolute; left:0; color:#f59e0b; font-weight:700; }
+
+/* ── SVG DIAGRAM ── */
+.diagram-wrap { background:#fff; border-radius:10px; padding:20px; margin:18px 0; box-shadow:0 1px 4px rgba(0,0,0,.06); overflow-x:auto; }
+.diagram-wrap svg { display:block; margin:0 auto; max-width:100%; height:auto; }
+
+/* ── QUIZ ── */
+.quiz-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+.quiz-score { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:#1e3a5f; }
+.progress-dots { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:18px; }
+.dot { width:14px; height:14px; border-radius:50%; background:#e5e0d5; cursor:pointer; transition:all .2s; border:2px solid transparent; }
+.dot.correct { background:#10b981; }
+.dot.incorrect { background:#ef4444; }
+.dot.current { border-color:#f59e0b; background:#fbbf24; }
+.dot:hover { transform:scale(1.2); }
+
+.quiz-card { background:#fff; border:2px solid #f59e0b; border-radius:10px; padding:22px; margin-bottom:16px; cursor:pointer; transition:all .2s; }
+.quiz-card:hover { box-shadow:0 2px 8px rgba(0,0,0,.08); }
+.quiz-q { font-size:16px; font-weight:600; color:#2c2416; }
+.quiz-a { background:#1e3a5f; color:#e2e8f0; padding:16px; border-radius:8px; margin-top:12px; font-size:14px; white-space:pre-line; line-height:1.65; display:none; }
+.quiz-a.show { display:block; }
+.quiz-btns { display:flex; gap:10px; margin-top:12px; }
+.quiz-btns button { font-family:'Inter',sans-serif; font-size:13px; font-weight:600; padding:8px 18px; border-radius:6px; border:none; cursor:pointer; transition:all .15s; }
+.btn-knew { background:#d1fae5; color:#047857; }
+.btn-knew:hover { background:#a7f3d0; }
+.btn-didnt { background:#fee2e2; color:#b91c1c; }
+.btn-didnt:hover { background:#fecaca; }
+.btn-restart { background:#1e3a5f; color:#fbbf24; padding:10px 24px; font-size:14px; border:none; border-radius:8px; cursor:pointer; font-weight:700; }
+.btn-restart:hover { background:#162e4a; }
+
+.quiz-nav { display:flex; justify-content:space-between; align-items:center; margin-top:18px; gap:12px; }
+.btn-nav { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; padding:10px 22px; border-radius:8px; border:2px solid #1e3a5f; background:#fff; color:#1e3a5f; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:6px; }
+.btn-nav:hover:not(:disabled) { background:#1e3a5f; color:#fbbf24; }
+.btn-nav:disabled { opacity:.35; cursor:not-allowed; border-color:#c4bfb4; color:#c4bfb4; }
+
+.quiz-final { text-align:center; padding:32px; }
+.quiz-final .pct { font-family:'JetBrains Mono',monospace; font-size:48px; font-weight:700; color:#1e3a5f; }
+.quiz-final .msg { font-size:16px; margin-top:8px; color:#5c5243; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .header { padding:28px 16px 24px; }
+  .header h1 { font-size:22px; }
+  .tab-btn { padding:10px 12px; font-size:11px; }
+  .card { padding:16px 18px; }
+  .qr-row { flex-direction:column; gap:2px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<div class="header">
+  <h1>Underground Gas Storage (UGS)</h1>
+  <div class="subtitle">CalGEM Regulatory Knowledge Base — California Code of Regulations, Title 14</div>
+  <div class="reg-badges">
+    <span class="reg-badge">CCR §1726–§1726.10</span>
+    <span class="reg-badge">PRC §3180–§3187</span>
+    <span class="reg-badge">SB 463 (Stern, 2019)</span>
+    <span class="reg-badge">49 CFR §192.12 (PHMSA)</span>
+  </div>
+</div>
+
+<!-- ════════ TAB BAR ════════ -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('overview')">OVERVIEW</button>
+  <button class="tab-btn" onclick="showTab('regulations')">REGULATIONS</button>
+  <button class="tab-btn" onclick="showTab('wells')">WELL REQUIREMENTS</button>
+  <button class="tab-btn" onclick="showTab('rmp')">RISK & MONITORING</button>
+  <button class="tab-btn" onclick="showTab('fields')">CA STORAGE FIELDS</button>
+  <button class="tab-btn" onclick="showTab('inspections')">INSPECTIONS</button>
+  <button class="tab-btn" onclick="showTab('quiz')">QUIZ</button>
+</div>
+
+<!-- ════════ CONTENT ════════ -->
+<div class="content">
+
+<!-- ────── OVERVIEW TAB ────── -->
+<div id="overview" class="tab-panel active">
+
+  <div class="card amber">
+    <h3>🔶 What Is Underground Gas Storage?</h3>
+    <p>In California, natural gas is stored underground in depleted oil or gas fields to maintain reliable supply for electrical power generation, industrial, residential, and commercial use. Gas is injected through storage wells and withdrawn when needed. CalGEM's UGS program ensures storage operations are conducted safely through comprehensive regulation.</p>
+  </div>
+
+  <div class="quick-ref">
+    <h4>⚡ Quick Reference</h4>
+    <div class="qr-row"><span class="qr-key">Active UGS Fields in California</span><span class="qr-val">12 fields</span></div>
+    <div class="qr-row"><span class="qr-key">Core Regulations (State)</span><span class="qr-val">CCR §1726–§1726.10</span></div>
+    <div class="qr-row"><span class="qr-key">Core Statutes (State)</span><span class="qr-val">PRC §3180–§3187</span></div>
+    <div class="qr-row"><span class="qr-key">Federal Oversight</span><span class="qr-val">PHMSA 49 CFR §192.12</span></div>
+    <div class="qr-row"><span class="qr-key">Regulations Effective Date</span><span class="qr-val">October 1, 2018</span></div>
+    <div class="qr-row"><span class="qr-key">SB 463 Chemical Regs Effective</span><span class="qr-val">July 1, 2025</span></div>
+    <div class="qr-row"><span class="qr-key">UROW Inspections</span><span class="qr-val">~25% of wells annually</span></div>
+    <div class="qr-row"><span class="qr-key">Key Design Principle</span><span class="qr-val">No single point of failure</span></div>
+  </div>
+
+  <div class="def-box">
+    <div class="term">Underground Gas Storage Project</div>
+    <div class="desc">A project for the injection and withdrawal of natural gas into an underground reservoir for storage purposes. Includes the storage reservoir, confining strata, gas storage wells, observation wells, wellheads, and attendant facilities and appurtenances.</div>
+  </div>
+
+  <div class="def-box">
+    <div class="term">Field Capacity</div>
+    <div class="desc">The total gas storage capacity, including both base (cushion) gas and working gas, of an underground gas storage facility, measured in cubic feet.</div>
+  </div>
+
+  <div class="def-box">
+    <div class="term">Working Gas vs. Base Gas</div>
+    <div class="desc"><strong>Base (cushion) gas</strong> is the permanent inventory needed to maintain adequate pressure and deliverability. <strong>Working gas</strong> is the volume above the cushion gas that is available to the marketplace for sale and delivery.</div>
+  </div>
+
+  <div class="def-box">
+    <div class="term">Deliverability</div>
+    <div class="desc">The amount of natural gas that can be withdrawn from a storage facility on a daily basis, usually expressed in millions of cubic feet per day (MMcf/d).</div>
+  </div>
+
+  <!-- SVG DIAGRAM: UGS Concept -->
+  <div class="diagram-wrap">
+    <h3 style="text-align:center;margin-bottom:14px;font-size:16px;">How Underground Gas Storage Works</h3>
+    <svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+      <!-- Surface -->
+      <rect x="0" y="0" width="800" height="100" fill="#e8f4f8"/>
+      <text x="20" y="25" font-family="JetBrains Mono" font-size="11" fill="#0e7490" font-weight="700">SURFACE</text>
+      <!-- Gas plant -->
+      <rect x="60" y="30" width="120" height="55" rx="6" fill="#1e3a5f" stroke="#fbbf24" stroke-width="2"/>
+      <text x="120" y="55" font-family="Inter" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="700">Gas Processing</text>
+      <text x="120" y="70" font-family="Inter" font-size="10" fill="#94a3b8" text-anchor="middle">Facility</text>
+      <!-- Pipeline -->
+      <rect x="220" y="30" width="100" height="55" rx="6" fill="#1e3a5f" stroke="#fbbf24" stroke-width="2"/>
+      <text x="270" y="55" font-family="Inter" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="700">Pipeline</text>
+      <text x="270" y="70" font-family="Inter" font-size="10" fill="#94a3b8" text-anchor="middle">Network</text>
+      <line x1="180" y1="57" x2="220" y2="57" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Wellhead -->
+      <rect x="420" y="25" width="80" height="65" rx="6" fill="#b45309" stroke="#f59e0b" stroke-width="2"/>
+      <text x="460" y="50" font-family="Inter" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">Wellhead</text>
+      <text x="460" y="63" font-family="Inter" font-size="9" fill="#fef3c7" text-anchor="middle">Injection /</text>
+      <text x="460" y="74" font-family="Inter" font-size="9" fill="#fef3c7" text-anchor="middle">Withdrawal</text>
+      <line x1="320" y1="57" x2="420" y2="57" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Observation well -->
+      <rect x="600" y="30" width="80" height="55" rx="6" fill="#047857" stroke="#10b981" stroke-width="2"/>
+      <text x="640" y="52" font-family="Inter" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">Observation</text>
+      <text x="640" y="65" font-family="Inter" font-size="10" fill="#d1fae5" text-anchor="middle">Well</text>
+      <!-- Ground line -->
+      <line x1="0" y1="100" x2="800" y2="100" stroke="#8a7f6e" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="780" y="96" font-family="JetBrains Mono" font-size="10" fill="#8a7f6e" text-anchor="end">GROUND SURFACE</text>
+      <!-- Subsurface -->
+      <rect x="0" y="100" width="800" height="80" fill="#f0ede6"/>
+      <text x="20" y="120" font-family="JetBrains Mono" font-size="11" fill="#5c5243" font-weight="700">OVERBURDEN</text>
+      <!-- Casing -->
+      <rect x="452" y="90" width="16" height="100" fill="#8a7f6e" rx="2"/>
+      <text x="490" y="145" font-family="Inter" font-size="10" fill="#5c5243">Casing &amp; Cement</text>
+      <rect x="632" y="90" width="16" height="100" fill="#6d9e84" rx="2"/>
+      <!-- Caprock -->
+      <rect x="0" y="180" width="800" height="30" fill="#a78060" opacity=".6"/>
+      <text x="20" y="200" font-family="JetBrains Mono" font-size="11" fill="#fff" font-weight="700">CONFINING LAYER (CAPROCK)</text>
+      <!-- Reservoir -->
+      <rect x="0" y="210" width="800" height="140" rx="0" fill="#1e3a5f" opacity=".85"/>
+      <text x="20" y="235" font-family="JetBrains Mono" font-size="11" fill="#fbbf24" font-weight="700">STORAGE RESERVOIR (Depleted Oil/Gas Field)</text>
+      <!-- Gas bubbles -->
+      <circle cx="200" cy="280" r="18" fill="#fbbf24" opacity=".25"/><circle cx="300" cy="300" r="22" fill="#fbbf24" opacity=".2"/>
+      <circle cx="420" cy="290" r="25" fill="#fbbf24" opacity=".3"/><circle cx="550" cy="275" r="20" fill="#fbbf24" opacity=".22"/>
+      <circle cx="650" cy="305" r="15" fill="#fbbf24" opacity=".18"/><circle cx="150" cy="310" r="12" fill="#fbbf24" opacity=".15"/>
+      <text x="400" y="330" font-family="Inter" font-size="13" fill="#fbbf24" text-anchor="middle" font-weight="600">Natural Gas ⟵ Injected &amp; Stored ⟶</text>
+      <!-- Labels -->
+      <text x="200" y="260" font-family="Inter" font-size="10" fill="#94a3b8" text-anchor="middle">Base Gas</text>
+      <text x="550" y="260" font-family="Inter" font-size="10" fill="#e2e8f0" text-anchor="middle">Working Gas</text>
+      <!-- Bottom -->
+      <rect x="0" y="350" width="800" height="70" fill="#2c2416" opacity=".3"/>
+      <text x="20" y="375" font-family="JetBrains Mono" font-size="11" fill="#8a7f6e" font-weight="700">BASEMENT / DEEPER FORMATIONS</text>
+      <!-- Well lines down -->
+      <rect x="452" y="190" width="16" height="160" fill="#b45309" rx="2" opacity=".7"/>
+      <rect x="632" y="190" width="16" height="100" fill="#047857" rx="2" opacity=".5"/>
+      <!-- Arrow marker -->
+      <defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#fbbf24"/></marker></defs>
+    </svg>
+  </div>
+
+  <div class="card blue">
+    <h3>🔷 Federal & State Dual Oversight</h3>
+    <p><strong>CalGEM</strong> regulates UGS under California law (CCR §1726–§1726.10, PRC §3180–§3187). <strong>PHMSA</strong> (Pipeline and Hazardous Materials Safety Administration) provides federal oversight under 49 CFR §192.12. CalGEM has a §60106 agreement with PHMSA to act as a state partner, inspecting UGS facilities on PHMSA's behalf.</p>
+  </div>
+
+  <div class="card green">
+    <h3>🟢 Key Regulatory Milestones</h3>
+    <ul>
+      <li><strong>Oct 1, 2018:</strong> Comprehensive UGS regulations (CCR §1726–§1726.10) took effect — covering safety, risk management, monitoring, reporting, and testing for all gas storage operators.</li>
+      <li><strong>SB 463 (2019):</strong> Directed CalGEM to address Aliso Canyon root causes and develop chemical inventory reporting requirements.</li>
+      <li><strong>Jul 1, 2025:</strong> SB 463 chemical inventory and root cause analysis regulations took effect — requiring chemical tracking, expanded corrosion evaluation, and well-specific well control plans.</li>
+      <li><strong>Jul 2022:</strong> CalGEM formalized its Unannounced Random Onsite Well (UROW) inspection program.</li>
+    </ul>
+  </div>
+
+</div><!-- /overview -->
+
+<!-- ────── REGULATIONS TAB ────── -->
+<div id="regulations" class="tab-panel">
+
+  <div class="card amber">
+    <h3>🔶 Regulatory Framework</h3>
+    <p>Underground Gas Storage in California is governed by Article 5 of CCR Title 14, Chapter 4, Subchapter 1 — sections 1726 through 1726.10. These regulations are separate from the UIC program (Article 4) and set specific requirements for gas storage well construction, testing, monitoring, risk management, and emergency response.</p>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>Section</th><th>Title</th><th>Scope</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">§1726</td><td>General Requirements</td><td>Scope, applicability, and general operational requirements for UGS projects</td></tr>
+        <tr><td class="mono">§1726.1</td><td>Definitions</td><td>Key terms specific to underground gas storage operations</td></tr>
+        <tr><td class="mono">§1726.2</td><td>Underground Gas Storage Project Approval</td><td>Project application, approval process, and required data submissions</td></tr>
+        <tr><td class="mono">§1726.3</td><td>Risk Management Plans (RMP)</td><td>Requirements for threat/hazard evaluation, prevention & mitigation protocols</td></tr>
+        <tr><td class="mono">§1726.3.1</td><td>RMP Prevention & Mitigation</td><td>Specific prevention and mitigation protocol requirements including subsurface safety valves</td></tr>
+        <tr><td class="mono">§1726.4</td><td>Project Data Requirements</td><td>Data that must be submitted for UGS projects including well data, geology, area of review</td></tr>
+        <tr><td class="mono">§1726.4.1</td><td>Well Data Requirements</td><td>Casing diagrams, flat file data for all wells in area of review</td></tr>
+        <tr><td class="mono">§1726.5</td><td>Well Construction & Maintenance</td><td>Dual barrier design, casing, cementing, no single point of failure requirements</td></tr>
+        <tr><td class="mono">§1726.6</td><td>Gas Storage Well Testing</td><td>Mechanical integrity testing, pressure testing, corrosion evaluation requirements</td></tr>
+        <tr><td class="mono">§1726.7</td><td>Monitoring Requirements</td><td>Continuous and periodic monitoring of well integrity, reservoir, and surface conditions</td></tr>
+        <tr><td class="mono">§1726.8</td><td>Emergency Response Plans (ERP)</td><td>Requirements for emergency planning, notification, and response procedures</td></tr>
+        <tr><td class="mono">§1726.9</td><td>Reportable Leaks</td><td>Definition and reporting requirements for gas storage leaks requiring agency response</td></tr>
+        <tr><td class="mono">§1726.10</td><td>Record Keeping & Reporting</td><td>Documentation and reporting obligations for UGS operators</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card blue">
+    <h3>🔷 Enabling Statutes (Public Resources Code)</h3>
+    <p>The statutory foundation for CalGEM's UGS authority comes from the Public Resources Code, Division 3, Chapter 1:</p>
+    <ul>
+      <li><strong>PRC §3106:</strong> General authority of the State Oil and Gas Supervisor to supervise operations</li>
+      <li><strong>PRC §3180:</strong> Legislative findings on UGS safety</li>
+      <li><strong>PRC §3181:</strong> CalGEM authority over gas storage well integrity</li>
+      <li><strong>PRC §3183:</strong> Well construction and testing standards</li>
+      <li><strong>PRC §3185:</strong> Mandatory UROW inspections of gas storage wells annually</li>
+      <li><strong>PRC §3186:</strong> Whistleblower protections for gas storage employees</li>
+      <li><strong>PRC §3187:</strong> Financial responsibility requirements</li>
+      <li><strong>PRC §3220:</strong> Prevention of damage to natural resources</li>
+      <li><strong>PRC §3403.5:</strong> Supervisory authority over gas storage operations</li>
+    </ul>
+  </div>
+
+  <div class="card purple">
+    <h3>🟣 SB 463 (Stern, 2019) — Root Cause & Chemical Inventory</h3>
+    <p>Senate Bill 463 directed CalGEM to revise UGS regulations to address root causes identified in the Aliso Canyon 2015 well leak investigation and develop new chemical inventory reporting requirements. The resulting regulations (effective July 1, 2025) require:</p>
+    <ul>
+      <li>Operators must track chemicals that could be emitted from a UGS well during a reportable leak</li>
+      <li>Expanded corrosion evaluation, mitigation, and monitoring requirements</li>
+      <li>Well-specific well control plans for each gas storage well</li>
+    </ul>
+  </div>
+
+  <div class="alert warn">
+    <strong>⚠ Separate from UIC:</strong> Underground Gas Storage regulations (CCR §1726–§1726.10) are Article 5 — distinct from the Underground Injection Control program (CCR §1724.5–§1724.13, Article 4). Different well types, different requirements.
+  </div>
+
+</div><!-- /regulations -->
+
+<!-- ────── WELL REQUIREMENTS TAB ────── -->
+<div id="wells" class="tab-panel">
+
+  <div class="card red">
+    <h3>🔴 Core Design Principle: No Single Point of Failure</h3>
+    <p>UGS regulations require that gas storage wells are constructed to ensure <strong>no single point of failure</strong>. Injected gas must be confined to the approved storage reservoir at all times. This is achieved through dual mechanical barrier design as specified in §1726.5.</p>
+  </div>
+
+  <div class="card amber">
+    <h3>🔶 Well Construction Requirements — §1726.5</h3>
+    <ul>
+      <li><strong>Dual Barrier Design:</strong> Wells must have at least two independent mechanical barriers between the stored gas and the surface/underground sources of drinking water</li>
+      <li><strong>Primary Barrier:</strong> Production casing and tubing with packer — injection/withdrawal through tubing only (no casing-head injection)</li>
+      <li><strong>Secondary Barrier:</strong> Additional casing string(s) with cement providing redundant containment</li>
+      <li><strong>Cement Requirements:</strong> Cement must isolate the storage zone and protect all underground sources of drinking water</li>
+      <li><strong>Alternative Methods:</strong> Operators may propose alternatives but must demonstrate they meet the performance standards of the regulation</li>
+    </ul>
+  </div>
+
+  <div class="alert warn">
+    <strong>⚠ Critical:</strong> No injection/withdrawal method other than through tubing with packer (primary mechanical barrier per §1726.5(b)(1)(A)) is permitted by UGS regulations.
+  </div>
+
+  <div class="card blue">
+    <h3>🔷 Mechanical Integrity Testing — §1726.6</h3>
+    <p>Gas storage wells must undergo regular mechanical integrity testing to verify well construction integrity:</p>
+    <ul>
+      <li>Pressure testing of casing and tubing at required intervals</li>
+      <li>Verification of packer integrity</li>
+      <li>Corrosion evaluation and monitoring (expanded under SB 463 regulations)</li>
+      <li>Logging and diagnostic testing as required by the Division</li>
+    </ul>
+  </div>
+
+  <div class="card cyan">
+    <h3>🔵 Area of Review — §1726.4</h3>
+    <p>Operators must evaluate all wells within the Area of Review (AoR) for their UGS project:</p>
+    <ul>
+      <li>All wells completed in or penetrating through the storage reservoir must be identified and evaluated for containment assurance</li>
+      <li>Wells in the same or deeper zone require casing diagrams and flat file data (§1726.4.1)</li>
+      <li>Wells in shallower zones must also be identified with total depth and estimated top of storage reservoir</li>
+      <li>Evaluation must consider design of storage operation volumes, pressures, and flow rates</li>
+    </ul>
+  </div>
+
+  <!-- SVG: Well Construction Diagram -->
+  <div class="diagram-wrap">
+    <h3 style="text-align:center;margin-bottom:14px;font-size:16px;">Gas Storage Well — Dual Barrier Design</h3>
+    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <!-- Wellhead -->
+      <rect x="180" y="10" width="140" height="50" rx="6" fill="#1e3a5f" stroke="#fbbf24" stroke-width="2"/>
+      <text x="250" y="32" font-family="Inter" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="700">Wellhead Assembly</text>
+      <text x="250" y="47" font-family="Inter" font-size="9" fill="#94a3b8" text-anchor="middle">Surface Controls &amp; Valves</text>
+      <!-- Surface casing -->
+      <rect x="195" y="60" width="110" height="60" rx="3" fill="#8a7f6e" opacity=".4" stroke="#8a7f6e" stroke-width="1"/>
+      <text x="250" y="85" font-family="Inter" font-size="10" fill="#2c2416" text-anchor="middle" font-weight="600">Surface Casing</text>
+      <text x="250" y="100" font-family="Inter" font-size="9" fill="#5c5243" text-anchor="middle">+ Cement</text>
+      <text x="165" y="90" font-family="JetBrains Mono" font-size="9" fill="#8a7f6e" text-anchor="end">USDW</text>
+      <text x="165" y="100" font-family="JetBrains Mono" font-size="9" fill="#8a7f6e" text-anchor="end">Protection</text>
+      <!-- Production casing (secondary barrier) -->
+      <rect x="208" y="120" width="84" height="200" rx="3" fill="none" stroke="#3b82f6" stroke-width="3"/>
+      <text x="370" y="160" font-family="Inter" font-size="10" fill="#1d4ed8" font-weight="700">SECONDARY BARRIER</text>
+      <text x="370" y="175" font-family="Inter" font-size="9" fill="#5c5243">Production Casing</text>
+      <text x="370" y="188" font-family="Inter" font-size="9" fill="#5c5243">+ Cement Annulus</text>
+      <line x1="305" y1="170" x2="345" y2="170" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- Cement shading -->
+      <rect x="200" y="120" width="8" height="200" fill="#3b82f6" opacity=".15"/>
+      <rect x="292" y="120" width="8" height="200" fill="#3b82f6" opacity=".15"/>
+      <!-- Tubing (primary barrier) -->
+      <rect x="232" y="65" width="36" height="290" rx="2" fill="#b45309" opacity=".3" stroke="#f59e0b" stroke-width="2"/>
+      <text x="100" y="270" font-family="Inter" font-size="10" fill="#b45309" font-weight="700" text-anchor="end">PRIMARY BARRIER</text>
+      <text x="100" y="285" font-family="Inter" font-size="9" fill="#5c5243" text-anchor="end">Tubing + Packer</text>
+      <line x1="108" y1="278" x2="230" y2="310" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- Packer -->
+      <rect x="210" y="310" width="80" height="18" rx="4" fill="#f59e0b" stroke="#b45309" stroke-width="2"/>
+      <text x="250" y="323" font-family="JetBrains Mono" font-size="9" fill="#fff" text-anchor="middle" font-weight="700">PACKER</text>
+      <!-- Storage zone -->
+      <rect x="160" y="340" width="180" height="100" rx="6" fill="#1e3a5f" opacity=".7"/>
+      <text x="250" y="370" font-family="Inter" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="700">Storage Reservoir</text>
+      <text x="250" y="388" font-family="Inter" font-size="10" fill="#e2e8f0" text-anchor="middle">Depleted Oil / Gas Field</text>
+      <!-- Perforations -->
+      <line x1="232" y1="370" x2="220" y2="365" stroke="#fbbf24" stroke-width="1.5"/>
+      <line x1="232" y1="380" x2="218" y2="378" stroke="#fbbf24" stroke-width="1.5"/>
+      <line x1="232" y1="390" x2="220" y2="393" stroke="#fbbf24" stroke-width="1.5"/>
+      <line x1="268" y1="370" x2="280" y2="365" stroke="#fbbf24" stroke-width="1.5"/>
+      <line x1="268" y1="380" x2="282" y2="378" stroke="#fbbf24" stroke-width="1.5"/>
+      <line x1="268" y1="390" x2="280" y2="393" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="250" y="415" font-family="Inter" font-size="9" fill="#94a3b8" text-anchor="middle">Perforations</text>
+      <!-- Caprock -->
+      <rect x="160" y="330" width="180" height="12" rx="2" fill="#a78060" opacity=".7"/>
+      <text x="360" y="340" font-family="Inter" font-size="9" fill="#a78060">Caprock / Confining Strata</text>
+      <!-- Gas flow arrows -->
+      <text x="250" y="470" font-family="JetBrains Mono" font-size="10" fill="#5c5243" text-anchor="middle">↑ Withdrawal  |  ↓ Injection</text>
+    </svg>
+  </div>
+
+  <div class="alert note">
+    <strong>💡 Note:</strong> Existing wells that do not meet new construction standards may require workover or upgrade. Operators must demonstrate alternative methods meet the performance standards of the regulation if the default method cannot be applied.
+  </div>
+
+</div><!-- /wells -->
+
+<!-- ────── RISK & MONITORING TAB ────── -->
+<div id="rmp" class="tab-panel">
+
+  <div class="card amber">
+    <h3>🔶 Risk Management Plans (RMP) — §1726.3</h3>
+    <p>Every UGS operator must develop and maintain a Risk Management Plan for each storage project. RMPs evaluate threats and hazards to safety, health, and the environment and must identify prevention and mitigation protocols that effectively address those threats.</p>
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-body">
+        <h4>Threat & Hazard Identification</h4>
+        <p>Systematically identify all threats and hazards associated with project operations, including well integrity, reservoir containment, surface facilities, and natural hazards.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-body">
+        <h4>Risk Assessment</h4>
+        <p>Evaluate the likelihood and consequence of each identified threat/hazard. Consider well age, construction, geological conditions, and operational history.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-body">
+        <h4>Prevention & Mitigation Protocols — §1726.3.1</h4>
+        <p>Develop specific protocols to prevent and mitigate each identified risk. Must consider whether subsurface safety valves are appropriate. Risk-based, site-specific approach required.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-body">
+        <h4>Implementation & Documentation</h4>
+        <p>Implement all protocols and maintain documentation. Plans must be updated immediately as conditions change.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-body">
+        <h4>Ongoing Review & Update</h4>
+        <p>RMPs must be reviewed and updated regularly. CalGEM reviews RMP submissions and may require modifications.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card blue">
+    <h3>🔷 Monitoring Requirements — §1726.7</h3>
+    <ul>
+      <li><strong>Continuous Monitoring:</strong> Wellhead pressure, annular pressure, and flow rate monitoring</li>
+      <li><strong>Periodic Monitoring:</strong> Reservoir pressure surveys, gas composition testing, subsurface monitoring</li>
+      <li><strong>Surface Monitoring:</strong> Gas leak detection using FLIR cameras and other methods</li>
+      <li><strong>Corrosion Monitoring:</strong> Expanded under SB 463 — comprehensive corrosion evaluation program</li>
+    </ul>
+  </div>
+
+  <div class="card red">
+    <h3>🔴 Emergency Response Plans (ERP) — §1726.8</h3>
+    <p>Each UGS project must have an Emergency Response Plan covering any and all leaks that require response — from small anomalies to major incidents. ERPs must include:</p>
+    <ul>
+      <li>Notification procedures for CalGEM and other agencies</li>
+      <li>Response actions for different leak scenarios</li>
+      <li>Key personnel and contact information</li>
+      <li>Coordination with local emergency services</li>
+    </ul>
+  </div>
+
+  <div class="alert warn">
+    <strong>⚠ ERP Triennial Review:</strong> Emergency Response Plans must be reviewed at least every 3 years statewide. ERPs must also be updated when key personnel change, and are reviewed as part of RMP updates.
+  </div>
+
+  <div class="card purple">
+    <h3>🟣 Reportable Leaks — §1726.9</h3>
+    <p>Section 1726.9 defines leaks that require full-scale response from CalGEM and other regulatory agencies due to potential severity. These are distinct from the smaller leaks addressed under the ERP — reportable leaks demand "all hands on deck" response.</p>
+  </div>
+
+  <div class="card green">
+    <h3>🟢 SB 463 Chemical Inventory (Eff. July 1, 2025)</h3>
+    <p>Operators must now maintain an inventory of chemicals that could potentially be emitted from a UGS well during a reportable leak. This addresses recommendations from the Aliso Canyon root cause investigation and helps emergency responders understand potential exposure risks.</p>
+  </div>
+
+</div><!-- /rmp -->
+
+<!-- ────── CA STORAGE FIELDS TAB ────── -->
+<div id="fields" class="tab-panel">
+
+  <div class="card amber">
+    <h3>🔶 California's Underground Gas Storage Projects</h3>
+    <p>California has 12 active underground natural gas storage fields operated by utilities and independent storage providers. All are depleted natural gas or oil fields converted for storage use, located close to consumption areas.</p>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>Operator</th><th>Field</th><th>County</th><th>Storage Formation</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Central Valley Gas Storage, LLC</td><td>Princeton Gas</td><td>Colusa</td><td class="mono">Kione</td></tr>
+        <tr><td>Gill Ranch Storage, LLC</td><td>Gill Ranch Gas</td><td>Madera</td><td class="mono">Panoche</td></tr>
+        <tr><td>Lodi Gas Storage, LLC</td><td>Kirby Hill Gas (Domengine)</td><td>Solano</td><td class="mono">Domengine</td></tr>
+        <tr><td>Lodi Gas Storage, LLC</td><td>Kirby Hill Gas (Wagenet)</td><td>Solano</td><td class="mono">Wagenet</td></tr>
+        <tr><td>Lodi Gas Storage, LLC</td><td>Lodi Gas (Domengine)</td><td>San Joaquin</td><td class="mono">Domengine</td></tr>
+        <tr><td>Lodi Gas Storage, LLC</td><td>Lodi Gas (Midland)</td><td>San Joaquin</td><td class="mono">Midland</td></tr>
+        <tr><td>Pacific Gas & Electric Co.</td><td>Los Medanos Gas</td><td>Contra Costa</td><td class="mono">Domengine</td></tr>
+        <tr><td>Pacific Gas & Electric Co.</td><td>McDonald Island Gas</td><td>San Joaquin</td><td class="mono">Midland</td></tr>
+        <tr><td>Pacific Gas & Electric Co.</td><td>Pleasant Creek Gas</td><td>Yolo</td><td class="mono">Peters</td></tr>
+        <tr><td>Southern California Gas Co.</td><td>Aliso Canyon</td><td>Los Angeles</td><td class="mono">Sesnon-Frew</td></tr>
+        <tr><td>Southern California Gas Co.</td><td>Honor Rancho</td><td>Los Angeles</td><td class="mono">Wayside</td></tr>
+        <tr><td>Southern California Gas Co.</td><td>La Goleta Gas</td><td>Santa Barbara</td><td class="mono">Vaqueros</td></tr>
+        <tr><td>Southern California Gas Co.</td><td>Playa Del Rey</td><td>Los Angeles</td><td class="mono">Puente</td></tr>
+        <tr><td>Wild Goose Storage, LLC</td><td>Wild Goose Gas</td><td>Butte</td><td class="mono">Kione</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card blue">
+    <h3>🔷 Principal Operator Types</h3>
+    <ul>
+      <li><strong>Utilities (Local Distribution Companies):</strong> PG&E (Northern CA) and SoCalGas (Southern CA) — serve millions of residential, commercial, and industrial customers</li>
+      <li><strong>Independent Storage Providers:</strong> Lodi Gas Storage, Wild Goose Storage, Gill Ranch Storage, Central Valley Gas Storage — provide competitive third-party storage services</li>
+    </ul>
+  </div>
+
+  <div class="alert note">
+    <strong>💡 Important:</strong> Operators of UGS facilities are not necessarily the owners of the natural gas held in storage. Most working gas is held under lease with shippers, utilities, or end users who own the gas.
+  </div>
+
+  <div class="card red">
+    <h3>🔴 Aliso Canyon — Largest CA Storage Facility</h3>
+    <p>The Aliso Canyon facility in Los Angeles County is California's largest UGS facility, with a capacity of over 86 billion cubic feet. Converted from oil production to gas storage in the early 1970s by SoCalGas, it was the site of the massive 2015 well blowout (SS-25) that displaced thousands of residents. This event drove major regulatory reform including the 2018 UGS regulations and SB 463.</p>
+  </div>
+
+</div><!-- /fields -->
+
+<!-- ────── INSPECTIONS TAB ────── -->
+<div id="inspections" class="tab-panel">
+
+  <div class="card amber">
+    <h3>🔶 UROW Inspection Program</h3>
+    <p>Pursuant to PRC §3185, CalGEM is required to perform <strong>Unannounced Random Onsite Well (UROW)</strong> inspections of some gas storage wells annually. CalGEM formalized and updated this program in July 2022.</p>
+  </div>
+
+  <div class="quick-ref">
+    <h4>⚡ UROW Key Facts</h4>
+    <div class="qr-row"><span class="qr-key">Legal Authority</span><span class="qr-val">PRC §3185</span></div>
+    <div class="qr-row"><span class="qr-key">Inspection Rate</span><span class="qr-val">~25% of wells / year</span></div>
+    <div class="qr-row"><span class="qr-key">Selection Method</span><span class="qr-val">Random selection statewide</span></div>
+    <div class="qr-row"><span class="qr-key">Notice to Operator</span><span class="qr-val">NONE — unannounced</span></div>
+    <div class="qr-row"><span class="qr-key">Program Formalized</span><span class="qr-val">July 2022</span></div>
+    <div class="qr-row"><span class="qr-key">Annual Reports Available</span><span class="qr-val">2022, 2023, 2024</span></div>
+  </div>
+
+  <div class="card blue">
+    <h3>🔷 What UROW Inspections Cover</h3>
+    <p>During a UROW inspection, a CalGEM field engineer visits the randomly selected well site and performs:</p>
+    <ul>
+      <li><strong>Environmental Well Inspection:</strong> Visual inspection of wellhead, cellar, and surrounding area</li>
+      <li><strong>Gas Leak Detection Inspection:</strong> FLIR (Forward Looking InfraRed) camera survey for gas leaks at surface</li>
+      <li><strong>Well Sign Check:</strong> Per CCR §1722.1.1(a) — visible, legible, permanently affixed sign with operator name, lease name/number, and well number</li>
+      <li><strong>Waste/Refuse Check:</strong> Per CCR §1775(a) — no oilfield waste disposed in manner causing damage to life, health, property, or water resources</li>
+    </ul>
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-body">
+        <h4>Random Well Selection</h4>
+        <p>CalGEM selects approximately 25% of all gas storage wells statewide at random for the year's inspection program.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-body">
+        <h4>Unannounced Arrival</h4>
+        <p>CalGEM field engineers arrive at UGS fields without advance warning. The well list is not shared with operators.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-body">
+        <h4>On-Site Inspection</h4>
+        <p>Environmental well inspection and gas leak detection using FLIR cameras are conducted on the selected wells.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-body">
+        <h4>Findings Documented</h4>
+        <p>Results are documented. Any violations or concerns are addressed through CalGEM's enforcement process.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-body">
+        <h4>Annual Report Published</h4>
+        <p>CalGEM publishes annual UROW inspection reports summarizing the program and findings.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert success">
+    <strong>✅ UROW is Additive:</strong> The UROW program is an <em>addition to</em>, and does not replace, CalGEM's other routine inspections, facility oversight, well test witnessing, and regulatory oversight activities.
+  </div>
+
+  <div class="card green">
+    <h3>🟢 CalGEM's Broader UGS Oversight</h3>
+    <p>Beyond UROW inspections, CalGEM's ongoing UGS oversight includes:</p>
+    <ul>
+      <li>Reviewing and approving Risk Management Plans</li>
+      <li>Witnessing well tests and integrity evaluations</li>
+      <li>Performing periodic facility inspections</li>
+      <li>Permitting and overseeing well work activities</li>
+      <li>Reviewing production/injection data and records</li>
+      <li>Inspecting wells and facilities for potential hazards and leaks</li>
+      <li>Reviewing abandonment operations</li>
+    </ul>
+  </div>
+
+  <div class="card purple">
+    <h3>🟣 PHMSA Federal Inspections</h3>
+    <p>CalGEM also acts as PHMSA's state partner under a §60106 agreement, inspecting UGS facilities on behalf of the federal agency. Enforcement letters resulting from CalGEM inspections are issued by PHMSA and published on their stakeholder outreach website.</p>
+  </div>
+
+</div><!-- /inspections -->
+
+<!-- ────── QUIZ TAB ────── -->
+<div id="quiz" class="tab-panel">
+
+  <div class="quiz-header">
+    <h3 style="font-size:18px;">📝 UGS Knowledge Quiz</h3>
+    <div class="quiz-score" id="quizScore">Card 1 of 30</div>
+  </div>
+  <div class="progress-dots" id="progressDots"></div>
+  <div id="quizArea"></div>
+
+</div><!-- /quiz -->
+
+</div><!-- /content -->
+
+<script>
+// ═══════ TAB SYSTEM ═══════
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════ QUIZ SYSTEM ═══════
+const quizData = [
+  {q:"What CCR sections govern Underground Gas Storage in California?",a:"CCR Title 14, §1726 through §1726.10\n(Article 5 of Chapter 4, Subchapter 1 — Onshore Well Regulations)\nThese are separate from UIC regulations (Article 4, §1724.5–§1724.13)."},
+  {q:"What is the core design principle for gas storage well construction?",a:"No single point of failure.\nWells must be constructed to ensure there is no single point of failure and that injected gas is confined to the approved storage reservoir.\n(CCR §1726.5)"},
+  {q:"When did the comprehensive UGS regulations (CCR §1726–§1726.10) take effect?",a:"October 1, 2018.\nThese regulations require all existing and new gas storage operators to follow comprehensive safety, risk management, monitoring, reporting, and testing requirements."},
+  {q:"How many underground natural gas storage fields are there in California?",a:"12 active underground gas storage fields.\nOperated by utilities (PG&E, SoCalGas) and independent storage providers (Lodi Gas Storage, Wild Goose Storage, Gill Ranch Storage, Central Valley Gas Storage)."},
+  {q:"What is the federal agency that also regulates UGS facilities?",a:"PHMSA — Pipeline and Hazardous Materials Safety Administration\n(U.S. Department of Transportation)\nFederal regulations: 49 CFR §192.12\nCalGEM has a §60106 agreement to act as PHMSA's state partner for inspections."},
+  {q:"What is a Risk Management Plan (RMP) and which regulation requires it?",a:"CCR §1726.3 requires every UGS operator to develop and maintain an RMP for each storage project.\nRMPs evaluate threats and hazards to safety, health, and the environment, and must identify prevention and mitigation protocols that effectively address those threats and hazards."},
+  {q:"What does UROW stand for and what is its legal basis?",a:"Unannounced Random Onsite Well inspections.\nLegal basis: PRC §3185\nCalGEM must perform UROW inspections of some gas storage wells annually.\nProgram formalized in July 2022."},
+  {q:"What percentage of gas storage wells does CalGEM inspect annually through UROW?",a:"Approximately 25% of all gas storage wells statewide.\nWells are selected at random, and inspections are unannounced — the well list is not shared with operators."},
+  {q:"What two types of inspections are conducted during a UROW visit?",a:"1. Environmental Well Inspection — visual inspection of wellhead, cellar, and surrounding area.\n2. Gas Leak Detection Inspection — using FLIR (Forward Looking InfraRed) cameras to detect gas leaks at the surface."},
+  {q:"What is SB 463 and what did it require?",a:"SB 463 (Stern, 2019) directed CalGEM to:\n1. Revise UGS regulations to address root causes identified in the Aliso Canyon 2015 well leak\n2. Develop chemical inventory reporting requirements for UGS wells\nResulting regulations took effect July 1, 2025."},
+  {q:"What are the new requirements under SB 463's regulations (effective July 2025)?",a:"1. Operators must track chemicals that could be emitted from a UGS well during a reportable leak\n2. Expanded corrosion evaluation, mitigation, and monitoring requirements\n3. Well-specific well control plans for each gas storage well"},
+  {q:"What is the difference between 'base gas' and 'working gas'?",a:"Base (cushion) gas — permanent inventory in the storage reservoir to maintain adequate pressure and deliverability rates throughout the withdrawal process.\nWorking gas — the volume above the base gas level that is available to the marketplace for sale and delivery."},
+  {q:"What is 'deliverability' in the context of UGS?",a:"The amount of natural gas that can be withdrawn from a storage facility on a daily basis.\nUsually expressed in millions of cubic feet per day (MMcf/d).\nInjection capacity (or rate) is the complement — how much can be injected daily."},
+  {q:"What type of reservoirs are used for underground gas storage in California?",a:"Depleted natural gas or oil fields.\nThese are close to consumption areas and may take advantage of existing wells, gathering systems, and pipeline connections when converted from production to storage."},
+  {q:"What is the primary mechanical barrier in a UGS well per §1726.5?",a:"Tubing with packer.\nAll injection and withdrawal must be conducted through tubing — no casing-head injection/withdrawal is permitted.\nThis is specified in §1726.5(b)(1)(A)."},
+  {q:"What is the secondary mechanical barrier in a UGS well?",a:"Additional casing string(s) with cement.\nProvides redundant containment between stored gas and the surface/underground sources of drinking water.\nTogether with the primary barrier (tubing + packer), this creates the dual barrier design."},
+  {q:"What is the 'Area of Review' requirement under §1726.4?",a:"Operators must identify and evaluate ALL wells within the Area of Review:\n• Wells in the same or deeper zone: require casing diagrams and flat file data (§1726.4.1)\n• Wells in shallower zones: must be identified with total depth and estimated reservoir top\n• All wells penetrating the storage reservoir must be evaluated for containment assurance."},
+  {q:"Which California UGS field is the largest?",a:"Aliso Canyon — Los Angeles County\nCapacity: over 86 billion cubic feet of natural gas\nOperator: Southern California Gas Company\nStorage Formation: Sesnon-Frew\nConverted from oil production to gas storage in the early 1970s."},
+  {q:"What event drove major UGS regulatory reform in California?",a:"The Aliso Canyon well blowout of 2015 (well SS-25).\nThis massive gas leak displaced thousands of Porter Ranch residents and led to:\n• Governor's state of emergency (Jan 2016)\n• SB 826 (CCST independent review)\n• Comprehensive 2018 UGS regulations\n• SB 463 (2019) for root cause and chemical inventory requirements"},
+  {q:"What are Emergency Response Plans (ERPs) and which regulation governs them?",a:"CCR §1726.8 requires each UGS project to have an ERP.\nERPs cover ANY and ALL leaks requiring response — from small anomalies to major incidents.\nMust include: notification procedures, response actions, key personnel contacts, local emergency service coordination.\nReviewed at least every 3 years (triennial review)."},
+  {q:"How often must ERPs be reviewed?",a:"At least every 3 years (triennial review) statewide.\nAlso must be updated when key personnel change.\nAdditionally reviewed as part of the RMP whenever that plan is updated.\n(CCR §1726.8)"},
+  {q:"What is the difference between §1726.8 (ERP) and §1726.9 (Reportable Leaks)?",a:"§1726.8 ERP — covers any and all leaks requiring any response (even small anomalies, valve closures, etc.)\n§1726.9 Reportable Leaks — covers severe leaks requiring 'all hands on deck' response from CalGEM and other agencies.\nReportable leaks are a subset of what the ERP addresses."},
+  {q:"What PRC sections provide CalGEM's statutory authority over UGS?",a:"PRC §3106 — General supervisory authority\nPRC §3180 — Legislative findings on UGS safety\nPRC §3181 — Authority over gas storage well integrity\nPRC §3183 — Well construction and testing standards\nPRC §3185 — Mandatory UROW inspections\nPRC §3186 — Whistleblower protections\nPRC §3187 — Financial responsibility\nPRC §3220 — Prevention of damage to natural resources\nPRC §3403.5 — Supervisory authority over gas storage"},
+  {q:"What is CalGEM's §60106 agreement with PHMSA?",a:"CalGEM has entered a §60106 agreement with PHMSA (Pipeline and Hazardous Materials Safety Administration) to act as a state partner and inspect UGS facilities on behalf of the federal agency.\nEnforcement letters resulting from CalGEM inspections are issued by PHMSA."},
+  {q:"What does CCR §1726.3.1 specifically address?",a:"Prevention and Mitigation Protocols within the Risk Management Plan.\nLists specific issues and items that must be considered, including whether subsurface safety valves are appropriate.\nUses a risk-based, site-specific approach rather than blanket requirements."},
+  {q:"What well sign requirements apply to UGS wells?",a:"Per CCR §1722.1.1(a):\nEach well location must have a clearly visible, legible, permanently affixed sign with:\n• Name of the operator\n• Name or number of the lease\n• Number of the well\nThis is checked during UROW inspections."},
+  {q:"Name all four SoCalGas underground gas storage facilities.",a:"1. Aliso Canyon — Los Angeles County (Sesnon-Frew formation)\n2. Honor Rancho — Los Angeles County (Wayside formation)\n3. La Goleta Gas — Santa Barbara County (Vaqueros formation)\n4. Playa Del Rey — Los Angeles County (Puente formation)"},
+  {q:"What is a Storage Integrity Management Program (SIMP)?",a:"A program designed to enhance the safety and integrity of storage wells and reservoirs through:\n• Recurring assessments of risks and threats\n• Mitigation of potential safety issues\n• Data collection and integration on storage asset conditions\n• Risk modeling and prioritization\nComplies with CCR §1726 and 49 CFR §192.12."},
+  {q:"Who are the principal operators of independent UGS facilities in California?",a:"1. Lodi Gas Storage, LLC — Kirby Hill Gas (Solano) and Lodi Gas (San Joaquin)\n2. Wild Goose Storage, LLC — Wild Goose Gas (Butte)\n3. Gill Ranch Storage, LLC — Gill Ranch Gas (Madera)\n4. Central Valley Gas Storage, LLC — Princeton Gas (Colusa)\nThese are independent storage service providers (not utilities)."},
+  {q:"What waste disposal rule applies to UGS well sites per CCR §1775(a)?",a:"Oilfield wastes (oil, water, chemicals, mud, cement) must be disposed of in a manner that does not cause damage to:\n• Life, health, or property\n• Freshwater aquifers or surface waters\n• Natural resources\n• Public safety\nDisposal sites must also conform to State Water Resources Control Board and Regional Water Quality Control Board regulations."}
+];
+
+let quizState = {
+  cards: [],
+  current: 0,
+  answers: [],
+  revealed: false,
+  finished: false
+};
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initQuiz() {
+  quizState.cards = shuffleArray(quizData);
+  quizState.current = 0;
+  quizState.answers = new Array(quizState.cards.length).fill(null);
+  quizState.revealed = false;
+  quizState.finished = false;
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const area = document.getElementById('quizArea');
+  const dots = document.getElementById('progressDots');
+  const score = document.getElementById('quizScore');
+
+  if (quizState.finished) {
+    const correct = quizState.answers.filter(a => a === true).length;
+    const total = quizState.cards.length;
+    const pct = Math.round(correct / total * 100);
+    let msg = pct >= 90 ? "Outstanding! You're a UGS regulatory expert!" :
+              pct >= 70 ? "Great work! Solid knowledge of UGS regulations." :
+              pct >= 50 ? "Good effort. Review the tabs above to strengthen your knowledge." :
+              "Keep studying! The knowledge base tabs have everything you need.";
+    area.innerHTML = `<div class="quiz-final"><div class="pct">${pct}%</div><div class="msg">${correct} of ${total} correct — ${msg}</div><br><button class="btn-restart" onclick="initQuiz()">🔄 Restart Quiz</button></div>`;
+    score.textContent = `Final Score: ${correct}/${total}`;
+    renderDots();
+    return;
+  }
+
+  const c = quizState.cards[quizState.current];
+  score.textContent = `Card ${quizState.current + 1} of ${quizState.cards.length}`;
+
+  let html = `<div class="quiz-card" onclick="revealAnswer()">
+    <div class="quiz-q">${c.q}</div>
+    <div class="quiz-a ${quizState.revealed ? 'show' : ''}" id="quizAnswer">${c.a}</div>`;
+  if (quizState.revealed) {
+    html += `<div class="quiz-btns">
+      <button class="btn-knew" onclick="event.stopPropagation();answerCard(true)">✓ Knew It</button>
+      <button class="btn-didnt" onclick="event.stopPropagation();answerCard(false)">✗ Didn't Know</button>
+    </div>`;
+  } else {
+    html += `<div style="margin-top:10px;font-size:13px;color:#8a7f6e;">Click to reveal answer</div>`;
+  }
+  html += `</div>`;
+  // Nav buttons
+  const isFirst = quizState.current === 0;
+  const isLast = quizState.current === quizState.cards.length - 1;
+  html += `<div class="quiz-nav">
+    <button class="btn-nav" onclick="navCard(-1)" ${isFirst ? 'disabled' : ''}>← Previous</button>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8a7f6e;">${quizState.current+1} / ${quizState.cards.length}</span>
+    <button class="btn-nav" onclick="navCard(1)" ${isLast ? 'disabled' : ''}>Next →</button>
+  </div>`;
+  area.innerHTML = html;
+  renderDots();
+}
+
+function renderDots() {
+  const dots = document.getElementById('progressDots');
+  let html = '';
+  for (let i = 0; i < quizState.cards.length; i++) {
+    let cls = 'dot';
+    if (i === quizState.current && !quizState.finished) cls += ' current';
+    if (quizState.answers[i] === true) cls += ' correct';
+    if (quizState.answers[i] === false) cls += ' incorrect';
+    html += `<div class="${cls}" onclick="jumpTo(${i})" title="Card ${i+1}"></div>`;
+  }
+  dots.innerHTML = html;
+}
+
+function revealAnswer() {
+  if (!quizState.revealed) {
+    quizState.revealed = true;
+    renderQuiz();
+  }
+}
+
+function answerCard(knew) {
+  quizState.answers[quizState.current] = knew;
+  quizState.revealed = false;
+  if (quizState.current < quizState.cards.length - 1) {
+    quizState.current++;
+  } else {
+    quizState.finished = true;
+  }
+  renderQuiz();
+}
+
+function jumpTo(i) {
+  if (quizState.finished) return;
+  quizState.current = i;
+  quizState.revealed = quizState.answers[i] !== null;
+  renderQuiz();
+}
+
+function navCard(dir) {
+  const next = quizState.current + dir;
+  if (next < 0 || next >= quizState.cards.length) return;
+  quizState.current = next;
+  quizState.revealed = quizState.answers[next] !== null;
+  renderQuiz();
+}
+
+// Init quiz on load
+initQuiz();
+</script>
+</body>
+</html>
