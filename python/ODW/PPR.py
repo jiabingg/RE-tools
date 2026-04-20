@@ -252,6 +252,7 @@ SELECT
     cd.well_api_nbr                AS api_number,
     wd.wlbr_api_suff_nbr           AS wellbore_suffix,
     wd.wlbr_incl_type_desc         AS wellbore_type,
+    cd.prim_purp_type_cde          AS well_type,
     cd.cmpl_state_type_cde         AS status,
     cd.in_svc_indc                 AS in_service,
     cd.init_prod_dte               AS initial_prod_date

@@ -3,509 +3,1657 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CalGEM Permitting, Forms & Compliance — Knowledge Base</title>
+<title>CalGEM Well Activity Permits — Regulatory Requirements Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#f8f6f1;--sf:#ffffff;--sf2:#f0ede6;--br:#ddd6c8;--tx:#2c2416;--tx2:#5c5243;--tx3:#8a7f6e;--am:#b45309;--am-bg:#fef3c7;--am-br:#f59e0b;--bl:#1d4ed8;--bl-bg:#dbeafe;--bl-br:#3b82f6;--gn:#047857;--gn-bg:#d1fae5;--gn-br:#10b981;--rd:#b91c1c;--rd-bg:#fee2e2;--rd-br:#ef4444;--pu:#6d28d9;--pu-bg:#ede9fe;--pu-br:#8b5cf6;--cy:#0e7490;--cy-bg:#cffafe;--cy-br:#06b6d4;--navy:#1e3a5f}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.7;font-size:16px}
-.hdr{background:var(--navy);padding:40px 32px 32px;position:relative;overflow:hidden}
-.hdr::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 60%);pointer-events:none}
-.hdr h1{font-family:'JetBrains Mono',monospace;font-size:28px;color:#fbbf24;position:relative}
-.hdr .sub{font-size:15px;color:#cbd5e1;margin-top:6px;position:relative}
-.hdr .src{font-family:'JetBrains Mono',monospace;font-size:11px;color:#94a3b8;margin-top:12px;position:relative}
-.ctr{max-width:1140px;margin:0 auto;padding:24px 18px}
-.tabs{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:24px;background:var(--sf);border-radius:12px;padding:6px;border:1px solid var(--br);box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.tab{font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 16px;border:none;background:0 0;color:var(--tx2);cursor:pointer;border-radius:9px;transition:.15s;white-space:nowrap;font-weight:500}
-.tab:hover{color:var(--tx);background:var(--sf2)}.tab.active{background:var(--navy);color:#fbbf24;font-weight:700;box-shadow:0 2px 6px rgba(30,58,95,.2)}
-.sec{display:none}.sec.active{display:block}
-.card{background:var(--sf);border:1px solid var(--br);border-radius:14px;padding:26px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.03)}
-.card::before{content:'';position:absolute;top:0;left:0;width:5px;height:100%;border-radius:14px 0 0 14px}
-.card.amber::before{background:var(--am-br)}.card.blue::before{background:var(--bl-br)}.card.green::before{background:var(--gn-br)}.card.red::before{background:var(--rd-br)}.card.purple::before{background:var(--pu-br)}.card.cyan::before{background:var(--cy-br)}
-.card h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:9px}
-.card h3{font-size:15px;font-weight:700;margin:16px 0 8px;color:var(--am)}
-.badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 9px;border-radius:5px;font-weight:700;letter-spacing:.3px;vertical-align:middle}
-.badge.amber{background:var(--am-bg);color:var(--am)}.badge.blue{background:var(--bl-bg);color:var(--bl)}.badge.green{background:var(--gn-bg);color:var(--gn)}.badge.red{background:var(--rd-bg);color:var(--rd)}.badge.purple{background:var(--pu-bg);color:var(--pu)}.badge.cyan{background:var(--cy-bg);color:var(--cy)}
-.db{background:var(--sf2);border-left:4px solid var(--am-br);padding:14px 20px;border-radius:0 9px 9px 0;margin:10px 0;font-size:15px}
-.db strong{color:var(--am)}.db.bl{border-left-color:var(--bl-br)}.db.bl strong{color:var(--bl)}.db.rd{border-left-color:var(--rd-br)}.db.rd strong{color:var(--rd)}.db.gn{border-left-color:var(--gn-br)}.db.gn strong{color:var(--gn)}.db.pu{border-left-color:var(--pu-br)}.db.pu strong{color:var(--pu)}.db.cy{border-left-color:var(--cy-br)}.db.cy strong{color:var(--cy)}
-.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0}
-.tbl th{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx2);text-align:left;padding:10px 12px;border-bottom:2px solid var(--br);background:var(--sf2)}
-.tbl td{padding:10px 12px;border-bottom:1px solid var(--br);vertical-align:top}
-.tbl tr:hover td{background:rgba(245,158,11,.04)}
-.cl{list-style:none;margin:8px 0}.cl li{position:relative;padding:9px 0 9px 30px;font-size:15px;border-bottom:1px solid var(--br)}.cl li::before{content:'▸';position:absolute;left:8px;top:9px;color:var(--am);font-size:15px;font-weight:700}
-.note{font-size:14px;color:var(--tx2);margin-top:10px;padding:12px 16px;background:var(--am-bg);border-radius:8px;border:1px solid #fcd34d;line-height:1.6}
-.warn{background:var(--rd-bg);border:1px solid #fca5a5;border-radius:10px;padding:14px 18px;margin:12px 0;font-size:15px;color:var(--rd)}.warn strong{color:#991b1b}
-.ok{background:var(--gn-bg);border:1px solid #6ee7b7;border-radius:10px;padding:14px 18px;margin:12px 0;font-size:15px;color:var(--gn)}.ok strong{color:#065f46}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:720px){.two{grid-template-columns:1fr}.hdr h1{font-size:22px}}
-.qr{background:var(--sf);border:2px solid var(--am-br);border-radius:14px;padding:18px 22px;margin-bottom:22px;box-shadow:0 2px 8px rgba(245,158,11,.08)}
-.qr h3{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--am);margin-bottom:10px}
-.qi{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid var(--br)}.qi:last-child{border-bottom:none}
-.qv{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--bl);font-size:13px}
-.fs{display:flex;align-items:flex-start;gap:14px;background:var(--sf2);border-radius:9px;padding:14px 18px;border:1px solid var(--br);margin-bottom:10px}
-.fn{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:800;color:var(--am);min-width:32px;line-height:1.2}
-.ft{font-size:15px}.ft strong{color:var(--tx)}.ft .det{font-size:14px;color:var(--tx2);margin-top:4px;line-height:1.6}
-/* Flashcards */
-.fc-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
-.fc-progress{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--tx2)}
-.fc-progress .cur{color:var(--am);font-weight:700;font-size:18px}
-.fc-score{display:flex;gap:14px;font-size:14px;font-weight:600}.fc-score .right{color:var(--gn)}.fc-score .wrong{color:var(--rd)}
-.fc-wrap{width:100%;max-width:720px;margin:0 auto 22px}
-.fc-card{width:100%;cursor:pointer;border-radius:16px}
-.fc-face{border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;text-align:center;min-height:220px}
-.fc-front{background:var(--sf);border:2px solid var(--am-br);box-shadow:0 4px 16px rgba(245,158,11,.1)}
-.fc-front .fc-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--am);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
-.fc-front .fc-q{font-size:18px;font-weight:700;color:var(--tx);line-height:1.55}
-.fc-front .fc-hint{font-size:13px;color:var(--tx3);margin-top:16px}
-.fc-back{background:var(--navy);border:2px solid #2d5a8e;display:none;margin-top:-2px;border-top:none;border-radius:0 0 16px 16px}
-.fc-card.flipped .fc-front{border-radius:16px 16px 0 0;border-bottom:none}
-.fc-card.flipped .fc-back{display:flex}
-.fc-back .fc-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
-.fc-back .fc-a{font-size:15px;font-weight:600;color:#f1f5f9;line-height:1.7;white-space:pre-line;max-width:100%;word-wrap:break-word}
-.fc-back .fc-ref{font-family:'JetBrains Mono',monospace;font-size:11px;color:#94a3b8;margin-top:14px}
-.fc-nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px}
-.fc-btn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:10px 24px;border:none;border-radius:9px;cursor:pointer;transition:.15s}
-.fc-btn.prev{background:var(--sf2);color:var(--tx2);border:1px solid var(--br)}.fc-btn.prev:hover{background:var(--br)}
-.fc-btn.next{background:var(--navy);color:#fbbf24}.fc-btn.next:hover{background:#264a73}
-.fc-btn.knew{background:var(--gn-bg);color:var(--gn);border:1px solid var(--gn-br)}.fc-btn.knew:hover{background:#a7f3d0}
-.fc-btn.didnt{background:var(--rd-bg);color:var(--rd);border:1px solid var(--rd-br)}.fc-btn.didnt:hover{background:#fecaca}
-.fc-btn.restart{background:var(--am-bg);color:var(--am);border:1px solid var(--am-br)}.fc-btn.restart:hover{background:#fde68a}
-.fc-btn:disabled{opacity:.35;cursor:not-allowed}
-.fc-dots{display:flex;justify-content:center;gap:5px;margin:14px 0;flex-wrap:wrap}
-.fc-dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--br);background:transparent;transition:.2s;cursor:pointer}
-.fc-dot.active{border-color:var(--am-br);background:var(--am-br)}.fc-dot.correct{border-color:var(--gn-br);background:var(--gn-br)}.fc-dot.incorrect{border-color:var(--rd-br);background:var(--rd-br)}
-.fc-result{text-align:center;padding:36px 18px}
-.fc-result .big{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:800;color:var(--am)}
-.fc-result .msg{font-size:17px;color:var(--tx);margin-top:8px}.fc-result .detail{font-size:14px;color:var(--tx2);margin-top:5px}
-.dw{background:var(--sf2);border-radius:10px;padding:18px;margin:14px 0;overflow-x:auto;border:1px solid var(--br)}.dw svg{width:100%;height:auto;display:block}
+:root {
+  --bg: #f8f6f1;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --text: #2c2416;
+  --text-secondary: #5c5243;
+  --text-muted: #8a7f6e;
+  --header-bg: #1e3a5f;
+  --header-gold: #fbbf24;
+  --amber-text: #b45309;
+  --amber-bg: #fef3c7;
+  --amber-border: #f59e0b;
+  --blue-text: #1d4ed8;
+  --blue-bg: #dbeafe;
+  --blue-border: #3b82f6;
+  --green-text: #047857;
+  --green-bg: #d1fae5;
+  --green-border: #10b981;
+  --red-text: #b91c1c;
+  --red-bg: #fee2e2;
+  --red-border: #ef4444;
+  --purple-text: #6d28d9;
+  --purple-bg: #ede9fe;
+  --purple-border: #8b5cf6;
+  --cyan-text: #0e7490;
+  --cyan-bg: #cffafe;
+  --cyan-border: #06b6d4;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* HEADER */
+.header {
+  background: var(--header-bg);
+  color: #fff;
+  padding: 36px 32px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 300px; height: 100%;
+  background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--header-gold);
+  margin-bottom: 6px;
+}
+.header .subtitle {
+  font-size: 15px;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 10px;
+}
+.header .citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.header .cite-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.12);
+  color: var(--header-gold);
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* TAB BAR */
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  background: var(--surface2);
+  padding: 8px 12px 0;
+  border-bottom: 2px solid #e5e0d5;
+}
+.tab-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 16px 9px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.5); }
+.tab-btn.active {
+  background: var(--header-bg);
+  color: var(--header-gold);
+}
+
+/* TAB CONTENT */
+.tab-content { display: none; padding: 24px 20px; max-width: 1100px; margin: 0 auto; }
+.tab-content.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border-left: 5px solid var(--amber-border);
+}
+.card.blue { border-left-color: var(--blue-border); }
+.card.green { border-left-color: var(--green-border); }
+.card.red { border-left-color: var(--red-border); }
+.card.purple { border-left-color: var(--purple-border); }
+.card.cyan { border-left-color: var(--cyan-border); }
+.card h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card h3 .icon { font-size: 20px; }
+
+/* DEFINITION BOX */
+.def-box {
+  background: var(--surface2);
+  border-left: 4px solid var(--amber-border);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 14px 0;
+}
+.def-box.blue-def { border-left-color: var(--blue-border); }
+.def-box.green-def { border-left-color: var(--green-border); }
+.def-box.red-def { border-left-color: var(--red-border); }
+.def-box .def-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--amber-text);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.def-box.blue-def .def-label { color: var(--blue-text); }
+
+/* QUICK REF */
+.quick-ref {
+  background: var(--amber-bg);
+  border: 1.5px solid var(--amber-border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 16px 0;
+}
+.quick-ref h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--amber-text);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.quick-ref table { width: 100%; border-collapse: collapse; }
+.quick-ref th, .quick-ref td {
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(180,83,9,0.15);
+}
+.quick-ref th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--amber-text);
+  text-transform: uppercase;
+}
+
+/* FLOW STEPS */
+.flow-steps { margin: 16px 0; }
+.flow-step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.flow-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--amber-border);
+  min-width: 36px;
+  text-align: center;
+  line-height: 1.3;
+}
+.flow-body h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.flow-body p { font-size: 14px; color: var(--text-secondary); }
+
+/* WARNING / SUCCESS / NOTE BOXES */
+.warning-box {
+  background: var(--red-bg);
+  border: 1.5px solid var(--red-border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 14px 0;
+  font-size: 14px;
+  color: var(--red-text);
+}
+.warning-box strong { display: block; margin-bottom: 4px; }
+.success-box {
+  background: var(--green-bg);
+  border: 1.5px solid var(--green-border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 14px 0;
+  font-size: 14px;
+  color: var(--green-text);
+}
+.note-box {
+  background: var(--amber-bg);
+  border: 1.5px solid var(--amber-border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 14px 0;
+  font-size: 14px;
+  color: var(--amber-text);
+}
+
+/* CHECKLIST */
+.checklist { list-style: none; margin: 10px 0; }
+.checklist li {
+  padding: 5px 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.checklist li::before {
+  content: '▸';
+  color: var(--amber-border);
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+/* BADGE */
+.reg-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--blue-bg);
+  color: var(--blue-text);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* SECTION HEADER */
+.section-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--header-bg);
+  margin: 24px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--amber-border);
+}
+
+/* SVG DIAGRAM CONTAINER */
+.diagram-container {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 18px 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  overflow-x: auto;
+}
+
+/* TABLES */
+table.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+}
+table.info-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  background: var(--surface2);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid #e5e0d5;
+}
+table.info-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+table.info-table tr:hover td { background: #fefcf8; }
+
+/* QUIZ */
+.quiz-container { max-width: 700px; margin: 0 auto; }
+.quiz-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+.quiz-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #ddd;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.quiz-dot.current { background: var(--amber-border); transform: scale(1.3); }
+.quiz-dot.correct { background: var(--green-border); }
+.quiz-dot.incorrect { background: var(--red-border); }
+.quiz-card {
+  background: var(--surface);
+  border: 2px solid var(--amber-border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.quiz-question {
+  padding: 22px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+.quiz-question::after {
+  content: 'Click to reveal answer';
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+.quiz-question.revealed::after { content: ''; }
+.quiz-answer {
+  display: none;
+  background: var(--header-bg);
+  color: #fff;
+  padding: 20px 24px;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.quiz-answer.show { display: block; }
+.quiz-answer .answer-cite {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--header-gold);
+  display: block;
+  margin-top: 8px;
+}
+.quiz-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.quiz-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.quiz-btn:active { transform: scale(0.97); }
+.quiz-btn.knew {
+  background: var(--green-bg);
+  color: var(--green-text);
+  border: 1.5px solid var(--green-border);
+}
+.quiz-btn.didnt {
+  background: var(--red-bg);
+  color: var(--red-text);
+  border: 1.5px solid var(--red-border);
+}
+.quiz-score {
+  text-align: center;
+  padding: 30px;
+  background: var(--surface);
+  border-radius: 12px;
+  border: 2px solid var(--amber-border);
+}
+.quiz-score h3 { font-size: 22px; margin-bottom: 8px; color: var(--header-bg); }
+.quiz-score .pct { font-size: 48px; font-weight: 800; color: var(--amber-border); }
+.quiz-score .msg { font-size: 15px; color: var(--text-secondary); margin: 10px 0 18px; }
+.quiz-restart {
+  padding: 12px 28px;
+  background: var(--header-bg);
+  color: var(--header-gold);
+  border: none;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .header { padding: 24px 16px 20px; }
+  .header h1 { font-size: 22px; }
+  .tab-bar { padding: 6px 8px 0; }
+  .tab-btn { font-size: 10px; padding: 8px 10px 7px; }
+  .tab-content { padding: 16px 12px; }
+  .card { padding: 16px; }
+}
 </style>
 </head>
 <body>
-<div class="hdr">
-  <h1>CalGEM Permitting, Forms & Compliance</h1>
-  <div class="sub">Interactive Knowledge Base — Oil & Gas Operator Requirements in California</div>
-  <div class="src">Source: conservation.ca.gov/calgem · CCR Title 14 · PRC Division 3</div>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>CalGEM Well Activity Permits</h1>
+  <div class="subtitle">Regulatory Requirements Guide — New Drill, Sidetrack, Rework, Deepen, Abandon, Re-Abandon</div>
+  <div class="citations">
+    <span class="cite-badge">PRC §3203–§3205</span>
+    <span class="cite-badge">CCR §1720–§1724</span>
+    <span class="cite-badge">CCR §1722–§1723</span>
+    <span class="cite-badge">OG106 / OG150 / OG160</span>
+  </div>
 </div>
-<div class="ctr">
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-t="overview">Overview</button>
-    <button class="tab" data-t="drilling">Drill New Wells</button>
-    <button class="tab" data-t="rework">Rework / Redrill</button>
-    <button class="tab" data-t="pa">Plugging & Abandonment</button>
-    <button class="tab" data-t="injection">Injection / UIC</button>
-    <button class="tab" data-t="forms">Key Forms</button>
-    <button class="tab" data-t="compliance">Compliance</button>
-    <button class="tab" data-t="assess">Assessments & Fees</button>
-    <button class="tab" data-t="quiz">🧠 Quiz</button>
+
+<!-- TAB BAR -->
+<div class="tab-bar" id="tabBar">
+  <button class="tab-btn active" data-tab="newdrill">New Drill</button>
+  <button class="tab-btn" data-tab="sidetrack">Sidetrack</button>
+  <button class="tab-btn" data-tab="rework">Rework</button>
+  <button class="tab-btn" data-tab="deepen">Deepen</button>
+  <button class="tab-btn" data-tab="abandon">Abandon</button>
+  <button class="tab-btn" data-tab="reabandon">Re-Abandon</button>
+</div>
+
+<!-- ========== NEW DRILL TAB ========== -->
+<div class="tab-content active" id="tab-newdrill">
+  <h2 class="section-title">New Drill — Drill a New Well Hole</h2>
+
+  <div class="def-box">
+    <div class="def-label">Definition</div>
+    Drilling a new wellbore from the surface into the earth for the purpose of producing oil, gas, or geothermal resources, or for injection, observation, or disposal. This is the most comprehensively reviewed permit type under CalGEM.
   </div>
 
-  <!-- ===== OVERVIEW ===== -->
-  <div class="sec active" id="s-overview">
-    <div class="qr">
-      <h3>⚡ Quick Reference</h3>
-      <div class="qi"><span>Primary permit form</span><span class="qv">OG106 (Notice of Intention)</span></div>
-      <div class="qi"><span>Agent designation form</span><span class="qv">OG150</span></div>
-      <div class="qi"><span>Contact questionnaire</span><span class="qv">OGD7</span></div>
-      <div class="qi"><span>Bond form</span><span class="qv">OG160</span></div>
-      <div class="qi"><span>Disposition / transfer notice</span><span class="qv">OG30A</span></div>
-      <div class="qi"><span>Permit validity (NOI)</span><span class="qv">24 months from receipt</span></div>
-      <div class="qi"><span>UIC project review cycle</span><span class="qv">At least every 3 years</span></div>
-      <div class="qi"><span>Casing pressure test (UIC)</span><span class="qv">Every 5 years (1 yr for gas disposal)</span></div>
-      <div class="qi"><span>MIT Part 2 (fluid migration)</span><span class="qv">Every 2 years (varies by type)</span></div>
-      <div class="qi"><span>Assessment rate 2025/26</span><span class="qv">$1.2796 per equiv. BBL</span></div>
-    </div>
-    <div class="card amber">
-      <h2><span style="font-size:20px">🔄</span> Permitting Lifecycle — Master Flow</h2>
-      <div class="dw">
-        <svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg">
-          <rect x="310" y="6" width="280" height="46" rx="23" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
-          <text x="450" y="35" text-anchor="middle" fill="#92400e" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">OPERATOR WANTS TO ACT</text>
-          <line x1="450" y1="52" x2="450" y2="82" stroke="#d1d5db" stroke-width="2"/><polygon points="444,78 450,86 456,78" fill="#d1d5db"/>
-          <rect x="280" y="82" width="340" height="44" rx="9" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
-          <text x="450" y="109" text-anchor="middle" fill="#1d4ed8" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">1. DESIGNATE AGENT (OG150 + OGD7)</text>
-          <line x1="450" y1="126" x2="450" y2="150" stroke="#d1d5db" stroke-width="2"/><polygon points="444,146 450,154 456,146" fill="#d1d5db"/>
-          <rect x="280" y="150" width="340" height="44" rx="9" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
-          <text x="450" y="177" text-anchor="middle" fill="#047857" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">2. CEQA COMPLIANCE (local agency)</text>
-          <line x1="450" y1="194" x2="450" y2="218" stroke="#d1d5db" stroke-width="2"/><polygon points="444,214 450,222 456,214" fill="#d1d5db"/>
-          <rect x="260" y="218" width="380" height="44" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
-          <text x="450" y="245" text-anchor="middle" fill="#92400e" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">3. SUBMIT NOI (OG106) + BOND (OG160)</text>
-          <line x1="450" y1="262" x2="450" y2="286" stroke="#d1d5db" stroke-width="2"/><polygon points="444,282 450,290 456,282" fill="#d1d5db"/>
-          <rect x="290" y="286" width="320" height="44" rx="9" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
-          <text x="450" y="313" text-anchor="middle" fill="#6d28d9" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">4. CALGEM REVIEW & APPROVAL</text>
-          <line x1="450" y1="330" x2="450" y2="354" stroke="#d1d5db" stroke-width="2"/><polygon points="444,350 450,358 456,350" fill="#d1d5db"/>
-          <rect x="280" y="354" width="340" height="44" rx="9" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
-          <text x="450" y="381" text-anchor="middle" fill="#047857" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">5. RECEIVE P-REPORT → BEGIN WORK</text>
-          <!-- Side notes -->
-          <rect x="10" y="218" width="220" height="44" rx="9" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
-          <text x="120" y="245" text-anchor="middle" fill="#b91c1c" font-family="Inter,sans-serif" font-size="11" font-weight="700">NOI valid 24 months only</text>
-          <line x1="230" y1="240" x2="260" y2="240" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3"/>
-          <rect x="670" y="286" width="220" height="44" rx="9" fill="#cffafe" stroke="#06b6d4" stroke-width="1.5"/>
-          <text x="780" y="307" text-anchor="middle" fill="#0e7490" font-family="Inter,sans-serif" font-size="11" font-weight="700">Post P-report at site</text>
-          <text x="780" y="321" text-anchor="middle" fill="#0e7490" font-family="Inter,sans-serif" font-size="11">at all times</text>
-          <line x1="610" y1="308" x2="670" y2="308" stroke="#06b6d4" stroke-width="1" stroke-dasharray="4,3"/>
-          <!-- Applies to -->
-          <text x="450" y="430" text-anchor="middle" fill="#5c5243" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">APPLIES TO ALL: NEW WELLS · REWORKS · REDRILLS · P&A · INJECTION</text>
-          <rect x="150" y="414" width="600" height="32" rx="8" fill="rgba(245,158,11,.06)" stroke="rgba(245,158,11,.3)" stroke-width="1"/>
-        </svg>
-      </div>
-    </div>
+  <!-- REGULATORY REQUIREMENTS -->
+  <div class="card">
+    <h3><span class="icon">📋</span> Regulatory Requirements <span class="reg-badge">PRC §3203</span></h3>
+    <ul class="checklist">
+      <li>Operator must file a written Notice of Intention (NOI) before commencing drilling — no work until CalGEM approves <span class="reg-badge">PRC §3203(a)</span></li>
+      <li>CalGEM has 10 working days from receipt to respond; silence = deemed approved <span class="reg-badge">PRC §3203(a)</span></li>
+      <li>NOI valid for 24 months from date CalGEM received it — cannot be extended; deemed cancelled if not commenced <span class="reg-badge">PRC §3203(a)</span></li>
+      <li>Must designate a California-resident agent before filing NOI <span class="reg-badge">OG150</span></li>
+      <li>CEQA compliance must be completed prior to submitting NOI <span class="reg-badge">PRC §3203.5</span></li>
+      <li>Must file an individual indemnity bond with the NOI, or have a blanket bond on file <span class="reg-badge">PRC §3204</span></li>
+      <li>All operations must comply with CalGEM Field Rules for the applicable field <span class="reg-badge">CCR §1722(k)</span></li>
+      <li>Protection of all hydrocarbon zones and freshwater required via proper casing and cementing <span class="reg-badge">CCR §1722.2–§1722.4</span></li>
+      <li>Adequate blowout prevention equipment (BOPE) required per MO7 <span class="reg-badge">CCR §1722.5</span></li>
+      <li>Well spacing must conform to applicable spacing rules <span class="reg-badge">CCR §1721–§1721.9</span></li>
+      <li>Spill contingency plan must be on file <span class="reg-badge">CCR §1722(b)</span></li>
+      <li>Copy of local land use authorization required with NOI submission <span class="reg-badge">PRC §3203.5</span></li>
+    </ul>
   </div>
 
-  <!-- ===== DRILL NEW WELLS ===== -->
-  <div class="sec" id="s-drilling">
-    <div class="card blue">
-      <h2><span style="font-size:20px">🛢️</span> Drilling New Wells — Step by Step</h2>
-      <div class="fs"><div class="fn">1</div><div class="ft"><strong>Designate a California Agent</strong><div class="det">Must be an individual (not a company) who resides in California. Serves as company contact for all correspondence, permits, and legal process. File form <strong>OG150</strong> + <strong>OGD7</strong> (Contact Questionnaire) with the district office where the well is located. Separate forms needed for each designated area.</div></div></div>
-      <div class="fs"><div class="fn">2</div><div class="ft"><strong>Submit Notice of Intention (OG106)</strong><div class="det">Filed in duplicate with the appropriate CalGEM district office. Must include: complete drilling program, lease map/plat, lease description, proposed wellbore schematic, and a technical contact name + email. Must be consistent with CalGEM Field Rules — any deviation requires explanation and justification.</div></div></div>
-      <div class="fs"><div class="fn">3</div><div class="ft"><strong>CEQA Compliance</strong><div class="det">Must be completed PRIOR to submitting the NOI. Usually involves permits from a local land-use agency. Attach a copy of the local jurisdiction's Notice of Determination or Notice of Exemption to the OG106.</div></div></div>
-      <div class="fs"><div class="fn">4</div><div class="ft"><strong>Submit Bond (OG160)</strong><div class="det">Individual indemnity or cash bond must accompany each NOI unless a blanket bond is already on file. Individual bond amounts are based on well depth. Form OG160 replaces all prior bond forms.</div></div></div>
-      <div class="fs"><div class="fn">5</div><div class="ft"><strong>Receive CalGEM Approval (P-Report)</strong><div class="det">CalGEM issues a Permit to Conduct Well Operations. The P-Report must be posted at the drill site at all times. It lists all mandatory tests and inspections that CalGEM inspectors must witness and approve.</div></div></div>
-      <div class="warn"><strong>⚠ 24-Month Expiration:</strong> If operations have not commenced within 24 months of CalGEM receiving the NOI, it is deemed canceled and cannot be extended. A Well Status Inquiry letter may be used to request a one-year extension prior to expiration. (PRC §3203(a))</div>
-      <div class="note">📋 All new wells require: protection of all hydrocarbon zones and fresh waters through adequate casing & cementing, adequate blowout prevention equipment (MO7), and proper well spacing (§1721–1721.9 CCR).</div>
-    </div>
+  <!-- FORMS NEEDED -->
+  <div class="card blue">
+    <h3><span class="icon">📝</span> Forms & Information Required</h3>
+    <table class="info-table">
+      <tr><th>Form</th><th>Purpose</th><th>Key Information Needed</th></tr>
+      <tr>
+        <td><strong class="mono">OG150</strong></td>
+        <td>Agent Designation & Org Info</td>
+        <td>Name of CA-resident individual agent, company info, area of state designation, submitted to district office where well is located</td>
+      </tr>
+      <tr>
+        <td><strong class="mono">OGD7</strong></td>
+        <td>Contact Questionnaire</td>
+        <td>Technical contact name, email, phone; submitted with OG150</td>
+      </tr>
+      <tr>
+        <td><strong class="mono">OG106</strong></td>
+        <td>Notice of Intention (NOI)</td>
+        <td>Well location (coordinates, lease), proposed total depth, complete drilling program, proposed wellbore schematic, casing program, cementing plan, drilling fluid program, BOPE plan, directional survey plan, lease map/plat, lease description</td>
+      </tr>
+      <tr>
+        <td><strong class="mono">OG160</strong></td>
+        <td>Oil and Gas Bond</td>
+        <td>Individual indemnity or cash bond; $25,000 per well &lt;10,000 ft; $40,000 per well ≥10,000 ft. Not needed if blanket bond on file.</td>
+      </tr>
+      <tr>
+        <td><strong>CEQA Doc</strong></td>
+        <td>Environmental Compliance</td>
+        <td>Copy of local jurisdiction's Notice of Determination or Notice of Exemption attached to OG106</td>
+      </tr>
+    </table>
   </div>
 
-  <!-- ===== REWORK ===== -->
-  <div class="sec" id="s-rework">
-    <div class="card purple">
-      <h2><span style="font-size:20px">🔧</span> Rework / Redrill Operations <span class="badge purple">§1720(b)</span></h2>
-      <div class="db pu"><strong>Definition:</strong> "Rework" means any operation subsequent to drilling that involves deepening, redrilling, plugging, or permanently altering in any manner the casing of a well or its function.</div>
-      <h3>Requirements</h3>
-      <ul class="cl">
-        <li>Submit <strong>OG106</strong> (Notice of Intention) to the district office — filed in duplicate</li>
-        <li>Include wellbore schematic diagram and CEQA document (if required by local agency)</li>
-        <li>Note any changes in completion zone, Field, and/or Area for recompletions, redrills, or deepenings</li>
-        <li>Receive Permit to Rework/Redrill (P-Report) before commencing — must be posted at well site</li>
-        <li>Adequate BOPE required (see MO7). All operations in urban areas require BOPE regardless.</li>
-      </ul>
-      <div class="note">PRC §3219: Operators must maintain well control during ANY well operation, whether or not a permit is required.</div>
+  <!-- FLOW -->
+  <div class="card green">
+    <h3><span class="icon">🔄</span> Permit Process Flow</h3>
+    <div class="flow-steps">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-body"><h4>Designate CA Agent</h4><p>File OG150 + OGD7 with district office. Agent must be an individual residing in CA.</p></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-body"><h4>Complete CEQA</h4><p>Obtain local land-use permits. Secure Notice of Determination or Exemption before filing NOI.</p></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-body"><h4>Submit NOI (OG106) + Bond (OG160)</h4><p>File in duplicate with district office. Attach drilling program, wellbore schematic, lease map, CEQA document, bond.</p></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-body"><h4>CalGEM Review (10 working days)</h4><p>CalGEM examines completeness, field rule compliance, freshwater protection, BOPE adequacy, well spacing, CEQA. Issues P-Report if approved.</p></div></div>
+      <div class="flow-step"><div class="flow-num">5</div><div class="flow-body"><h4>Post P-Report & Commence Operations</h4><p>P-Report must be posted at drill site at all times. Comply with all mandatory tests/inspections listed.</p></div></div>
     </div>
   </div>
 
-  <!-- ===== P&A ===== -->
-  <div class="sec" id="s-pa">
-    <div class="card red">
-      <h2><span style="font-size:20px">🔒</span> Plugging & Abandonment</h2>
-      <h3>Before P&A Operations</h3>
-      <ul class="cl">
-        <li>Submit <strong>OG106</strong> (replaces former OG108 and OG123)</li>
-        <li>Include wellbore schematic: casing intervals/sizes, perforation locations, cement plug depths inside casing, cement location outside casing</li>
-        <li>Also used for re-entering a well to replace cement plugs and re-abandon</li>
-      </ul>
-      <h3>Special Requirements</h3>
-      <div class="db rd"><strong>Radioactive Sources (§1722(j)):</strong> Loss of radioactive materials in a well (except tracers for injection surveys) must be promptly reported to the Department of Health Services at (916) 327-5106 and OES at 1-800-852-7550, plus the CalGEM district office. Special plugging instructions per §1723(g) will be issued.</div>
-      <div class="warn"><strong>⚠ Conductor Pipe:</strong> Once set, if not to be used (e.g., permit cancelled), it must be properly secured or covered to prevent falls. CalGEM must be contacted for plugging requirements to minimize contamination and surface hazards.</div>
+  <!-- WHAT CalGEM EXAMINES -->
+  <div class="card purple">
+    <h3><span class="icon">🔍</span> What CalGEM Examines During Review</h3>
+    <ul class="checklist">
+      <li><strong>Completeness:</strong> All required forms, attachments, and data present (drilling program, wellbore schematic, lease map, CEQA doc, bond)</li>
+      <li><strong>Field Rule Compliance:</strong> Proposed casing, depth, spacing, and completion consistent with established field rules; deviations must be justified</li>
+      <li><strong>Freshwater Protection:</strong> Adequate casing program and cementing plan to protect all freshwater aquifers and hydrocarbon zones</li>
+      <li><strong>Well Spacing:</strong> Proposed location meets well spacing patterns under CCR §1721–§1721.9 for the applicable pool</li>
+      <li><strong>BOPE Adequacy:</strong> Blowout prevention equipment plan meets MO7 requirements; critical/high-pressure wells may require BOP control plan</li>
+      <li><strong>CEQA Compliance:</strong> Valid local land-use authorization and environmental review on file; local permit expiration dates checked</li>
+      <li><strong>Bonding:</strong> Individual bond amount correct for proposed depth, or valid blanket bond on file</li>
+      <li><strong>Operator Standing:</strong> No outstanding violations, unpaid civil penalties, or unresolved compliance orders that would trigger denial under PRC §3203(c)</li>
+      <li><strong>Drilling Fluid Program:</strong> Appropriate weight, type, and properties for anticipated downhole conditions</li>
+      <li><strong>Directional Survey Plan:</strong> Adequate survey plan to confirm well path within permitted boundaries</li>
+    </ul>
+  </div>
+
+  <div class="quick-ref">
+    <h4>Quick Reference — New Drill</h4>
+    <table>
+      <tr><th>Item</th><th>Value</th></tr>
+      <tr><td>NOI Form</td><td class="mono">OG106 (filed in duplicate)</td></tr>
+      <tr><td>NOI Validity</td><td>24 months from receipt — no extensions</td></tr>
+      <tr><td>Review Period</td><td>10 working days (silence = approval)</td></tr>
+      <tr><td>Bond (&lt;10k ft)</td><td>$25,000 individual</td></tr>
+      <tr><td>Bond (≥10k ft)</td><td>$40,000 individual</td></tr>
+      <tr><td>Blanket Bond (≤50 wells)</td><td>$200,000</td></tr>
+      <tr><td>Blanket Bond (51–500)</td><td>$400,000</td></tr>
+      <tr><td>Blanket Bond (501–10k)</td><td>$2,000,000</td></tr>
+      <tr><td>Blanket Bond (&gt;10k)</td><td>$3,000,000</td></tr>
+      <tr><td>CEQA</td><td>Required before NOI submission</td></tr>
+    </table>
+  </div>
+
+  <div class="warning-box">
+    <strong>⚠️ Critical Compliance</strong>
+    If CalGEM does not respond within 10 working days, the NOI is deemed approved. However, the operator must still comply with ALL well construction requirements. If operations are not commenced within 24 months, the NOI is automatically cancelled and cannot be extended. The operator may also be denied approval if there are outstanding violations, unpaid penalties, or unresolved orders (PRC §3203(c)).
+  </div>
+
+  <!-- CEMENT REQUIREMENTS DIAGRAM -->
+  <h2 class="section-title">Cement Requirements — Wellbore Visualization</h2>
+  <p style="font-size:14px;color:var(--text-secondary);margin-bottom:14px;">Toggle between <strong>active well casing cement</strong> requirements (CCR §1722.3–§1722.4) and <strong>plugging &amp; abandonment</strong> cement plug placement requirements (CCR §1723–§1723.5).</p>
+
+  <div class="diagram-container" style="padding:20px 16px;">
+    <div style="display:flex;gap:6px;margin-bottom:18px;">
+      <button id="cmt-btn-active" onclick="setCementMode('active')" style="padding:9px 18px;border:2px solid var(--header-bg);background:var(--header-bg);color:var(--header-gold);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;transition:all .2s;">ACTIVE WELL — CASING CEMENT</button>
+      <button id="cmt-btn-pa" onclick="setCementMode('pa')" style="padding:9px 18px;border:2px solid var(--header-bg);background:transparent;color:var(--header-bg);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;transition:all .2s;">PLUGGING &amp; ABANDONMENT</button>
+    </div>
+
+    <!-- ===== ACTIVE WELL DIAGRAM ===== -->
+    <div id="cement-active">
+    <svg width="100%" viewBox="0 0 680 820" xmlns="http://www.w3.org/2000/svg" style="max-width:680px;">
+      <defs>
+        <linearGradient id="earth-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A3896B" stop-opacity=".10"/><stop offset="100%" stop-color="#7B6547" stop-opacity=".16"/></linearGradient>
+      </defs>
+      <!-- Ground surface -->
+      <rect x="40" y="36" width="600" height="4" rx="1" fill="#2c2416" opacity=".22"/>
+      <text x="56" y="30" font-size="11" fill="#8a7f6e" font-family="Inter">Ground surface</text>
+      <!-- Earth bg -->
+      <rect x="40" y="40" width="600" height="780" fill="url(#earth-g)"/>
+
+      <!-- === CONDUCTOR CASING === -->
+      <rect x="232" y="40" width="16" height="100" fill="#888" opacity=".45" rx="0"/>
+      <rect x="392" y="40" width="16" height="100" fill="#888" opacity=".45" rx="0"/>
+      <rect x="248" y="40" width="144" height="100" fill="none" stroke="#2c2416" stroke-width="2.5" opacity=".4"/>
+      <rect x="230" y="136" width="180" height="4" rx="1" fill="#2c2416" opacity=".3"/>
+
+      <!-- === SURFACE CASING + CEMENT (shoe to surface) === -->
+      <rect x="232" y="40" width="20" height="240" fill="#B0B0B0" opacity=".32"/>
+      <rect x="388" y="40" width="20" height="240" fill="#B0B0B0" opacity=".32"/>
+      <rect x="252" y="40" width="12" height="240" fill="#5A8DB8" opacity=".35"/>
+      <rect x="376" y="40" width="12" height="240" fill="#5A8DB8" opacity=".35"/>
+      <rect x="250" y="276" width="140" height="4" rx="1" fill="#3B7AAD" opacity=".55"/>
+
+      <!-- === INTERMEDIATE CASING + CEMENT === -->
+      <rect x="252" y="120" width="16" height="360" fill="#A0A0A0" opacity=".25"/>
+      <rect x="372" y="120" width="16" height="360" fill="#A0A0A0" opacity=".25"/>
+      <rect x="268" y="40" width="10" height="440" fill="#8B6DAF" opacity=".3"/>
+      <rect x="362" y="40" width="10" height="440" fill="#8B6DAF" opacity=".3"/>
+      <rect x="266" y="476" width="108" height="4" rx="1" fill="#7B5DAF" opacity=".45"/>
+
+      <!-- === PRODUCTION CASING + CEMENT === -->
+      <rect x="268" y="380" width="14" height="330" fill="#909090" opacity=".25"/>
+      <rect x="358" y="380" width="14" height="330" fill="#909090" opacity=".25"/>
+      <rect x="282" y="40" width="8" height="670" fill="#C87533" opacity=".35"/>
+      <rect x="350" y="40" width="8" height="670" fill="#C87533" opacity=".35"/>
+      <rect x="280" y="706" width="80" height="3" rx="1" fill="#C87533" opacity=".45"/>
+
+      <!-- Tubing -->
+      <rect x="306" y="60" width="4" height="600" fill="#2c2416" opacity=".25"/>
+      <rect x="330" y="60" width="4" height="600" fill="#2c2416" opacity=".25"/>
+      <!-- Packer -->
+      <rect x="290" y="640" width="60" height="12" rx="3" fill="#2c2416" opacity=".45"/>
+
+      <!-- Perforations -->
+      <g opacity=".6">
+        <line x1="282" y1="662" x2="275" y2="662" stroke="#C87533" stroke-width="2"/>
+        <line x1="282" y1="670" x2="275" y2="670" stroke="#C87533" stroke-width="2"/>
+        <line x1="282" y1="678" x2="275" y2="678" stroke="#C87533" stroke-width="2"/>
+        <line x1="282" y1="686" x2="275" y2="686" stroke="#C87533" stroke-width="2"/>
+        <line x1="358" y1="662" x2="365" y2="662" stroke="#C87533" stroke-width="2"/>
+        <line x1="358" y1="670" x2="365" y2="670" stroke="#C87533" stroke-width="2"/>
+        <line x1="358" y1="678" x2="365" y2="678" stroke="#C87533" stroke-width="2"/>
+        <line x1="358" y1="686" x2="365" y2="686" stroke="#C87533" stroke-width="2"/>
+      </g>
+
+      <!-- ZONE BANDS -->
+      <rect x="40" y="155" width="192" height="70" fill="#3B8BD4" opacity=".06"/>
+      <rect x="408" y="155" width="232" height="70" fill="#3B8BD4" opacity=".06"/>
+      <text x="56" y="195" font-size="11" fill="#3B8BD4" opacity=".6" font-family="Inter">Freshwater zone</text>
+      <rect x="40" y="650" width="240" height="60" fill="#D4873B" opacity=".06"/>
+      <rect x="370" y="650" width="270" height="60" fill="#D4873B" opacity=".06"/>
+      <text x="56" y="685" font-size="11" fill="#D4873B" opacity=".6" font-family="Inter">Oil / gas zone</text>
+
+      <!-- Open hole -->
+      <rect x="290" y="710" width="60" height="90" fill="#2c2416" opacity=".03"/>
+      <text x="320" y="770" text-anchor="middle" font-size="11" fill="#8a7f6e" opacity=".5" font-family="Inter">Open hole</text>
+      <text x="320" y="808" text-anchor="middle" font-size="11" fill="#8a7f6e" font-family="JetBrains Mono" font-weight="700">TD ▼</text>
+
+      <!-- ====== RIGHT LABELS ====== -->
+      <line x1="408" y1="80" x2="458" y2="60" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="408" cy="80" r="2" fill="#8a7f6e"/>
+      <text x="464" y="56" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Conductor casing</text>
+      <text x="464" y="72" font-size="12" fill="#5c5243" font-family="Inter">Cemented or driven to ≤100 ft</text>
+      <text x="464" y="86" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1722.3(a)</text>
+
+      <line x1="408" y1="160" x2="458" y2="118" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="408" cy="160" r="2" fill="#8a7f6e"/>
+      <text x="464" y="114" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Surface casing</text>
+      <text x="464" y="130" font-size="12" fill="#5c5243" font-family="Inter">Cement: shoe to surface (full fill)</text>
+      <text x="464" y="144" font-size="12" fill="#5c5243" font-family="Inter">Min 200 ft, max 1,500 ft depth</text>
+      <text x="464" y="158" font-size="12" fill="#5c5243" font-family="Inter">≥10% of proposed TD (prospect wells)</text>
+      <text x="464" y="172" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1722.3(b), §1722.4</text>
+
+      <line x1="230" y1="200" x2="170" y2="250" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="230" cy="200" r="2" fill="#8a7f6e"/>
+      <text x="56" y="246" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Freshwater protection</text>
+      <text x="56" y="262" font-size="12" fill="#5c5243" font-family="Inter">Cement ≥100 ft above base of</text>
+      <text x="56" y="276" font-size="12" fill="#5c5243" font-family="Inter">freshwater zone behind casing</text>
+      <text x="56" y="290" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1722.4</text>
+
+      <line x1="408" y1="380" x2="458" y2="310" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="408" cy="380" r="2" fill="#8a7f6e"/>
+      <text x="464" y="306" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Intermediate casing</text>
+      <text x="464" y="322" font-size="12" fill="#5c5243" font-family="Inter">Cement ≥500 ft above O&amp;G zones</text>
+      <text x="464" y="336" font-size="12" fill="#5c5243" font-family="Inter">and anomalous pressure intervals</text>
+      <text x="464" y="350" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1722.4</text>
+
+      <line x1="408" y1="560" x2="458" y2="420" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="408" cy="560" r="2" fill="#8a7f6e"/>
+      <text x="464" y="416" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Production casing</text>
+      <text x="464" y="432" font-size="12" fill="#5c5243" font-family="Inter">Cemented; tested for fluid shutoff</text>
+      <text x="464" y="446" font-size="12" fill="#5c5243" font-family="Inter">≥100 ft overlap if not to surface</text>
+      <text x="464" y="460" font-size="12" fill="#5c5243" font-family="Inter">Overlap cemented + pressure tested</text>
+      <text x="464" y="474" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1722.3(d), §1722.4</text>
+
+      <line x1="230" y1="450" x2="170" y2="390" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="230" cy="450" r="2" fill="#8a7f6e"/>
+      <text x="56" y="386" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Cement evaluation</text>
+      <text x="56" y="402" font-size="12" fill="#5c5243" font-family="Inter">District deputy may require CBL,</text>
+      <text x="56" y="416" font-size="12" fill="#5c5243" font-family="Inter">temperature survey, or other survey</text>
+      <text x="56" y="430" font-size="12" fill="#5c5243" font-family="Inter">to verify cement behind casing</text>
+      <text x="56" y="444" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1722.4</text>
+
+      <line x1="350" y1="646" x2="170" y2="550" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="350" cy="646" r="2" fill="#8a7f6e"/>
+      <text x="56" y="546" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Tubing &amp; packer (UIC)</text>
+      <text x="56" y="562" font-size="12" fill="#5c5243" font-family="Inter">Required for injection wells;</text>
+      <text x="56" y="576" font-size="12" fill="#5c5243" font-family="Inter">packer set ≤100 ft above approved</text>
+      <text x="56" y="590" font-size="12" fill="#5c5243" font-family="Inter">injection zone</text>
+      <text x="56" y="604" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1724.10(g)</text>
+
+      <line x1="365" y1="674" x2="458" y2="580" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="365" cy="674" r="2" fill="#8a7f6e"/>
+      <text x="464" y="576" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Perforated interval</text>
+      <text x="464" y="592" font-size="12" fill="#5c5243" font-family="Inter">Production / injection zone</text>
+
+      <!-- LEGEND -->
+      <rect x="40" y="780" width="600" height="1" fill="#2c2416" opacity=".08"/>
+      <circle cx="60" cy="800" r="5" fill="#888" opacity=".5"/>
+      <text x="72" y="804" font-size="11" fill="#5c5243" font-family="Inter">Annular cement</text>
+      <circle cx="180" cy="800" r="5" fill="#5A8DB8" opacity=".45"/>
+      <text x="192" y="804" font-size="11" fill="#5c5243" font-family="Inter">Surface csg</text>
+      <circle cx="285" cy="800" r="5" fill="#8B6DAF" opacity=".4"/>
+      <text x="297" y="804" font-size="11" fill="#5c5243" font-family="Inter">Intermediate csg</text>
+      <circle cx="420" cy="800" r="5" fill="#C87533" opacity=".45"/>
+      <text x="432" y="804" font-size="11" fill="#5c5243" font-family="Inter">Production csg</text>
+      <circle cx="555" cy="800" r="5" fill="#2c2416" opacity=".3"/>
+      <text x="567" y="804" font-size="11" fill="#5c5243" font-family="Inter">Tubing</text>
+    </svg>
+    </div>
+
+    <!-- ===== P&A DIAGRAM ===== -->
+    <div id="cement-pa" style="display:none;">
+    <svg width="100%" viewBox="0 0 680 920" xmlns="http://www.w3.org/2000/svg" style="max-width:680px;">
+      <defs>
+        <linearGradient id="earth-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A3896B" stop-opacity=".10"/><stop offset="100%" stop-color="#7B6547" stop-opacity=".16"/></linearGradient>
+      </defs>
+      <style>
+        @keyframes cement-pour{to{stroke-dashoffset:-16}}
+        .cem-anim{stroke-dasharray:4 4;animation:cement-pour 1.2s linear infinite}
+        @media(prefers-reduced-motion:reduce){.cem-anim{animation:none}}
+      </style>
+
+      <!-- Ground surface -->
+      <rect x="40" y="36" width="600" height="4" rx="1" fill="#2c2416" opacity=".22"/>
+      <text x="56" y="30" font-size="11" fill="#8a7f6e" font-family="Inter">Ground surface</text>
+      <rect x="40" y="40" width="600" height="880" fill="url(#earth-g2)"/>
+
+      <!-- Wellbore shaft -->
+      <rect x="270" y="0" width="100" height="900" fill="#ffffff" opacity=".5"/>
+      <rect x="270" y="40" width="4" height="860" fill="#2c2416" opacity=".3"/>
+      <rect x="366" y="40" width="4" height="860" fill="#2c2416" opacity=".3"/>
+
+      <!-- ZONE BANDS -->
+      <rect x="40" y="160" width="230" height="70" fill="#3B8BD4" opacity=".06"/>
+      <rect x="370" y="160" width="270" height="70" fill="#3B8BD4" opacity=".06"/>
+      <text x="56" y="200" font-size="11" fill="#3B8BD4" opacity=".6" font-family="Inter">Freshwater zone</text>
+      <rect x="40" y="280" width="230" height="5" fill="#3B8BD4" opacity=".1"/>
+      <rect x="370" y="280" width="270" height="5" fill="#3B8BD4" opacity=".1"/>
+      <text x="56" y="276" font-size="11" fill="#3B8BD4" opacity=".45" font-family="Inter">Fresh/salt interface</text>
+      <rect x="40" y="640" width="230" height="100" fill="#D4873B" opacity=".06"/>
+      <rect x="370" y="640" width="270" height="100" fill="#D4873B" opacity=".06"/>
+      <text x="56" y="695" font-size="11" fill="#D4873B" opacity=".6" font-family="Inter">Oil / gas zone</text>
+
+      <!-- ===== PLUG 1: SURFACE PLUG ===== -->
+      <rect x="270" y="0" width="100" height="36" fill="#ef4444" opacity=".7" rx="2"/>
+      <rect x="254" y="0" width="16" height="36" fill="#ef4444" opacity=".5" rx="1"/>
+      <rect x="370" y="0" width="16" height="36" fill="#ef4444" opacity=".5" rx="1"/>
+      <text x="320" y="21" text-anchor="middle" font-size="10" fill="#fff" font-weight="700" font-family="JetBrains Mono" dominant-baseline="central">SURFACE PLUG</text>
+      <line x1="262" y1="54" x2="378" y2="54" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <rect x="266" y="50" width="108" height="6" rx="2" fill="#2c2416" opacity=".45"/>
+
+      <!-- ===== PLUG 2: FRESHWATER PLUG ===== -->
+      <rect x="274" y="230" width="92" height="100" fill="#3b82f6" opacity=".55" rx="2"/>
+      <line class="cem-anim" x1="290" y1="235" x2="290" y2="325" stroke="#fff" stroke-width=".5" opacity=".3"/>
+      <line class="cem-anim" x1="310" y1="235" x2="310" y2="325" stroke="#fff" stroke-width=".5" opacity=".3" style="animation-delay:-.3s"/>
+      <line class="cem-anim" x1="330" y1="235" x2="330" y2="325" stroke="#fff" stroke-width=".5" opacity=".3" style="animation-delay:-.6s"/>
+      <line class="cem-anim" x1="350" y1="235" x2="350" y2="325" stroke="#fff" stroke-width=".5" opacity=".3" style="animation-delay:-.9s"/>
+
+      <!-- ===== PLUG 3: CASING SHOE PLUG ===== -->
+      <rect x="274" y="495" width="92" height="55" fill="#8b5cf6" opacity=".5" rx="2"/>
+      <rect x="268" y="522" width="104" height="4" rx="1" fill="#2c2416" opacity=".25"/>
+
+      <!-- Mud fills -->
+      <rect x="278" y="36" width="84" height="194" fill="#A3896B" opacity=".08"/>
+      <text x="320" y="135" text-anchor="middle" font-size="9" fill="#b45309" opacity=".5" font-family="JetBrains Mono" font-weight="500">MUD FILL</text>
+      <rect x="278" y="330" width="84" height="165" fill="#A3896B" opacity=".08"/>
+      <text x="320" y="415" text-anchor="middle" font-size="9" fill="#b45309" opacity=".5" font-family="JetBrains Mono" font-weight="500">MUD FILL</text>
+
+      <!-- ===== PLUG 4: OIL/GAS ZONE PLUG ===== -->
+      <rect x="274" y="590" width="92" height="200" fill="#f59e0b" opacity=".55" rx="2"/>
+      <line class="cem-anim" x1="290" y1="595" x2="290" y2="785" stroke="#fff" stroke-width=".5" opacity=".3"/>
+      <line class="cem-anim" x1="310" y1="595" x2="310" y2="785" stroke="#fff" stroke-width=".5" opacity=".3" style="animation-delay:-.4s"/>
+      <line class="cem-anim" x1="330" y1="595" x2="330" y2="785" stroke="#fff" stroke-width=".5" opacity=".3" style="animation-delay:-.7s"/>
+      <line class="cem-anim" x1="350" y1="595" x2="350" y2="785" stroke="#fff" stroke-width=".5" opacity=".3" style="animation-delay:-1s"/>
+      <!-- Perf marks -->
+      <g opacity=".5">
+        <line x1="270" y1="660" x2="260" y2="660" stroke="#f59e0b" stroke-width="2"/>
+        <line x1="270" y1="672" x2="260" y2="672" stroke="#f59e0b" stroke-width="2"/>
+        <line x1="270" y1="684" x2="260" y2="684" stroke="#f59e0b" stroke-width="2"/>
+        <line x1="370" y1="660" x2="380" y2="660" stroke="#f59e0b" stroke-width="2"/>
+        <line x1="370" y1="672" x2="380" y2="672" stroke="#f59e0b" stroke-width="2"/>
+        <line x1="370" y1="684" x2="380" y2="684" stroke="#f59e0b" stroke-width="2"/>
+      </g>
+
+      <!-- Open hole + TD -->
+      <rect x="290" y="800" width="60" height="100" fill="#2c2416" opacity=".03"/>
+      <text x="320" y="896" text-anchor="middle" font-size="11" fill="#8a7f6e" font-family="JetBrains Mono" font-weight="700">TD ▼</text>
+
+      <!-- ====== RIGHT LABELS ====== -->
+      <line x1="386" y1="18" x2="424" y2="55" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="386" cy="18" r="2" fill="#8a7f6e"/>
+      <text x="430" y="48" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Surface plug</text>
+      <text x="430" y="64" font-size="12" fill="#5c5243" font-family="Inter">≥25 ft cement in hole + all annuli</text>
+      <text x="430" y="78" font-size="12" fill="#5c5243" font-family="Inter">Casing cut 5–10 ft below grade</text>
+      <text x="430" y="92" font-size="12" fill="#5c5243" font-family="Inter">Steel plate welded: last 5 API digits</text>
+      <text x="430" y="106" font-size="10" fill="#b91c1c" font-family="JetBrains Mono" font-weight="700">§1723.5</text>
+
+      <line x1="366" y1="280" x2="424" y2="186" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="366" cy="280" r="2" fill="#8a7f6e"/>
+      <text x="430" y="182" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Freshwater interface plug</text>
+      <text x="430" y="198" font-size="12" fill="#5c5243" font-family="Inter">Open hole: 200 ft across interface</text>
+      <text x="430" y="212" font-size="12" fill="#5c5243" font-family="Inter">Cased hole: 100 ft inside casing</text>
+      <text x="430" y="226" font-size="12" fill="#5c5243" font-family="Inter">Squeeze cement if no cement behind</text>
+      <text x="430" y="240" font-size="12" fill="#5c5243" font-family="Inter">casing at interface</text>
+      <text x="430" y="254" font-size="10" fill="#1d4ed8" font-family="JetBrains Mono" font-weight="700">§1723.2(a)(b)</text>
+
+      <line x1="366" y1="522" x2="424" y2="360" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="366" cy="522" r="2" fill="#8a7f6e"/>
+      <text x="430" y="356" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Casing shoe plug</text>
+      <text x="430" y="372" font-size="12" fill="#5c5243" font-family="Inter">50 ft below to 50 ft above shoe</text>
+      <text x="430" y="386" font-size="12" fill="#5c5243" font-family="Inter">If can't clean out below: 100 ft</text>
+      <text x="430" y="400" font-size="12" fill="#5c5243" font-family="Inter">plug as deep as possible</text>
+      <text x="430" y="414" font-size="10" fill="#6d28d9" font-family="JetBrains Mono" font-weight="700">§1723.3</text>
+
+      <line x1="366" y1="690" x2="424" y2="498" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="366" cy="690" r="2" fill="#8a7f6e"/>
+      <text x="430" y="494" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Oil / gas zone plug</text>
+      <text x="430" y="510" font-size="12" fill="#5c5243" font-family="Inter">Open hole: 100 ft below zone bottom</text>
+      <text x="430" y="524" font-size="12" fill="#5c5243" font-family="Inter">to 100 ft above zone top</text>
+      <text x="430" y="538" font-size="12" fill="#5c5243" font-family="Inter">Cased hole: cement all perfs, plug</text>
+      <text x="430" y="552" font-size="12" fill="#5c5243" font-family="Inter">≥100 ft above top of perfs / liner /</text>
+      <text x="430" y="566" font-size="12" fill="#5c5243" font-family="Inter">cementing point (whichever is highest)</text>
+      <text x="430" y="580" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1723.1(a)(b)</text>
+
+      <!-- ====== LEFT LABELS ====== -->
+      <line x1="274" y1="135" x2="210" y2="100" stroke="#8a7f6e" stroke-width=".5" stroke-dasharray="3 2"/>
+      <circle cx="274" cy="135" r="2" fill="#8a7f6e"/>
+      <text x="56" y="96" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Hole fluid (mud)</text>
+      <text x="56" y="112" font-size="12" fill="#5c5243" font-family="Inter">Proper weight to prevent fluid</text>
+      <text x="56" y="126" font-size="12" fill="#5c5243" font-family="Inter">migration; placed across all</text>
+      <text x="56" y="140" font-size="12" fill="#5c5243" font-family="Inter">intervals not plugged with cement</text>
+      <text x="56" y="154" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1723(b)</text>
+
+      <text x="56" y="336" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Plugging method limits</text>
+      <text x="56" y="352" font-size="12" fill="#5c5243" font-family="Inter">Bailer: not below 3,000 ft;</text>
+      <text x="56" y="366" font-size="12" fill="#5c5243" font-family="Inter">water only as hole fluid</text>
+      <text x="56" y="380" font-size="12" fill="#5c5243" font-family="Inter">Surface pour: hole ≥5 in. dia.</text>
+      <text x="56" y="394" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1723(c)(d)</text>
+
+      <text x="56" y="486" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Special requirements</text>
+      <text x="56" y="502" font-size="12" fill="#5c5243" font-family="Inter">Fractured shale, massive sands,</text>
+      <text x="56" y="516" font-size="12" fill="#5c5243" font-family="Inter">depleted intervals &gt;100 ft thick,</text>
+      <text x="56" y="530" font-size="12" fill="#5c5243" font-family="Inter">or multiple zone completions</text>
+      <text x="56" y="544" font-size="12" fill="#5c5243" font-family="Inter">may require enhanced plugging</text>
+      <text x="56" y="558" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1723.1(c)</text>
+
+      <text x="56" y="656" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Lost radioactive source</text>
+      <text x="56" y="672" font-size="12" fill="#5c5243" font-family="Inter">100 ft red-dyed cement on top</text>
+      <text x="56" y="686" font-size="12" fill="#5c5243" font-family="Inter">Whipstock above plug to prevent</text>
+      <text x="56" y="700" font-size="12" fill="#5c5243" font-family="Inter">mechanical disintegration</text>
+      <text x="56" y="714" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1723(g)</text>
+
+      <text x="56" y="790" font-size="14" font-weight="600" fill="#2c2416" font-family="Inter">Junk in hole</text>
+      <text x="56" y="806" font-size="12" fill="#5c5243" font-family="Inter">Diligent effort to recover; if not:</text>
+      <text x="56" y="820" font-size="12" fill="#5c5243" font-family="Inter">squeeze through or 100 ft plug</text>
+      <text x="56" y="834" font-size="12" fill="#5c5243" font-family="Inter">on top of irrecoverable junk</text>
+      <text x="56" y="848" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="700">§1723(f)</text>
+
+      <!-- DIMENSION BRACKETS -->
+      <line x1="250" y1="230" x2="250" y2="330" stroke="#1d4ed8" stroke-width="1" opacity=".4"/>
+      <line x1="246" y1="230" x2="254" y2="230" stroke="#1d4ed8" stroke-width="1" opacity=".4"/>
+      <line x1="246" y1="330" x2="254" y2="330" stroke="#1d4ed8" stroke-width="1" opacity=".4"/>
+      <text x="243" y="278" text-anchor="end" font-size="10" fill="#1d4ed8" font-family="JetBrains Mono" font-weight="500">200 ft</text>
+      <text x="243" y="290" text-anchor="end" font-size="9" fill="#1d4ed8" font-family="JetBrains Mono">(open)</text>
+
+      <line x1="258" y1="590" x2="258" y2="640" stroke="#b45309" stroke-width="1" opacity=".4"/>
+      <line x1="254" y1="590" x2="262" y2="590" stroke="#b45309" stroke-width="1" opacity=".4"/>
+      <line x1="254" y1="640" x2="262" y2="640" stroke="#b45309" stroke-width="1" opacity=".4"/>
+      <text x="251" y="618" text-anchor="end" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="500">100 ft</text>
+
+      <line x1="258" y1="740" x2="258" y2="790" stroke="#b45309" stroke-width="1" opacity=".4"/>
+      <line x1="254" y1="740" x2="262" y2="740" stroke="#b45309" stroke-width="1" opacity=".4"/>
+      <line x1="254" y1="790" x2="262" y2="790" stroke="#b45309" stroke-width="1" opacity=".4"/>
+      <text x="251" y="768" text-anchor="end" font-size="10" fill="#b45309" font-family="JetBrains Mono" font-weight="500">100 ft</text>
+
+      <!-- LEGEND -->
+      <rect x="40" y="870" width="600" height="1" fill="#2c2416" opacity=".08"/>
+      <rect x="55" y="886" width="14" height="14" rx="2" fill="#ef4444" opacity=".65"/>
+      <text x="75" y="897" font-size="11" fill="#5c5243" font-family="Inter">Surface plug</text>
+      <rect x="165" y="886" width="14" height="14" rx="2" fill="#3b82f6" opacity=".55"/>
+      <text x="185" y="897" font-size="11" fill="#5c5243" font-family="Inter">Freshwater plug</text>
+      <rect x="300" y="886" width="14" height="14" rx="2" fill="#8b5cf6" opacity=".5"/>
+      <text x="320" y="897" font-size="11" fill="#5c5243" font-family="Inter">Shoe plug</text>
+      <rect x="400" y="886" width="14" height="14" rx="2" fill="#f59e0b" opacity=".55"/>
+      <text x="420" y="897" font-size="11" fill="#5c5243" font-family="Inter">O&amp;G zone plug</text>
+      <rect x="530" y="886" width="14" height="14" rx="2" fill="#A3896B" opacity=".2"/>
+      <text x="550" y="897" font-size="11" fill="#5c5243" font-family="Inter">Mud fill</text>
+    </svg>
     </div>
   </div>
 
-  <!-- ===== INJECTION / UIC ===== -->
-  <div class="sec" id="s-injection">
-    <div class="card cyan">
-      <h2><span style="font-size:20px">💧</span> Injection Well / UIC Project Approval <span class="badge cyan">§1724.6–§1724.13</span></h2>
-      <div class="db cy"><strong>Authority:</strong> CalGEM administers the UIC program for Class II wells under delegated primacy from the U.S. EPA through the Safe Drinking Water Act. Affects approximately 55,000 UIC wells in California.</div>
-      <h3>Two Main Types of Injection Wells</h3>
-      <div class="two">
-        <div class="db bl"><strong>Enhanced Recovery:</strong> Water or steam injection for EOR — waterflood, steamflood, cyclic steam, CO₂ EOR</div>
-        <div class="db pu"><strong>Disposal:</strong> Return of produced briny water back into the underground source from which it came</div>
-      </div>
-      <h3>Application Requirements (§1724.7)</h3>
-      <ul class="cl">
-        <li>Complete project application with data per CCR §1724.7 (onshore) or §1748.2 (offshore)</li>
-        <li><strong>Engineering Study:</strong> AoR determination, map of all wells within/adjacent to AoR, casing diagrams, flood-pattern map</li>
-        <li><strong>Geologic Study:</strong> Reservoir characteristics, structural contour maps, isopach maps, cross sections, representative e-log</li>
-        <li><strong>Injection Plan:</strong> Purpose, facilities map, anticipated rates/volumes, monitoring system, injection method, chemical analysis of injection liquid</li>
-        <li>Individual well NOIs for all wells must be submitted and permits received before injection begins</li>
-        <li>Plans must be signed by owner, agent, or officer of the company</li>
-        <li>CalGEM consults with State/Regional Water Quality Control Board during review</li>
-      </ul>
-      <h3>Key Operational Requirements</h3>
-      <ul class="cl">
-        <li><strong>Project Approval Letter (PAL):</strong> Required before any injection. Specifies approved injection zone, conditions. Reviewed at least every 3 years.</li>
-        <li><strong>MIT Part 1 — Casing Integrity (§1724.10.1):</strong> Pressure test every 5 years (every 1 year for gas disposal wells). Min 200 psi above surface pressure. Pass = ≤3% change over 30 min.</li>
-        <li><strong>MIT Part 2 — Fluid Migration (§1724.10.2):</strong> Radioactive tracer survey, temperature survey, or noise log every 2 years. Disposal wells = every 1 year. Low-use cyclic steam = every 5 years.</li>
-        <li><strong>Continuous Pressure Monitoring (§1724.10.4):</strong> Well-specific injection pressure recorded at all times. Monthly reporting of highest instantaneous pressure.</li>
-        <li><strong>MASIP:</strong> Surface injection pressure shall not exceed the maximum allowable, determined by step-rate test and fracture gradient calculation.</li>
-        <li><strong>Injection reports</strong> filed monthly on or before the last day of each month for the preceding month.</li>
-      </ul>
-      <div class="warn"><strong>⚠ Automatic Loss of Injection Approval:</strong> Any injection well not tested as required under §1724.10.1 and §1724.10.2 automatically loses approval. Written Division approval required to reinject. Each day of unauthorized injection = separate violation.</div>
-    </div>
+  <!-- NEW DRILL QUIZ -->
+  <h2 class="section-title">New Drill — Knowledge Quiz</h2>
+  <div class="quiz-container" id="quiz-newdrill"></div>
+</div>
+
+<!-- ========== SIDETRACK TAB ========== -->
+<div class="tab-content" id="tab-sidetrack">
+  <h2 class="section-title">Sidetrack — Cement & Extend New Path</h2>
+
+  <div class="def-box blue-def">
+    <div class="def-label">Definition</div>
+    A sidetrack involves cementing a portion of the original wellbore and drilling a new path (lateral) from the uncemented portion of the original well. Under CalGEM regulations, a sidetrack is classified as a <strong>rework/redrill operation</strong> because it permanently alters the well's casing and function. <span class="reg-badge">CCR §1720(b)</span>
   </div>
 
-  <!-- ===== KEY FORMS ===== -->
-  <div class="sec" id="s-forms">
-    <div class="card amber">
-      <h2><span style="font-size:20px">📝</span> Key CalGEM Forms Reference</h2>
-      <table class="tbl">
-        <tr><th>Form</th><th>Name</th><th>Use</th><th>Replaces</th></tr>
-        <tr><td><strong>OG106</strong></td><td>Notice of Intention</td><td>ALL permit requests: drill, rework, redrill, P&A, supplementary notice</td><td>OG105, OG107, OG108, OG123</td></tr>
-        <tr><td><strong>OG150</strong></td><td>Agent Designation & Org Info Change</td><td>Designate CA-resident agent, report org changes</td><td>OG134A, OG134B, OGD42D</td></tr>
-        <tr><td><strong>OGD7</strong></td><td>Contact Questionnaire</td><td>Technical contact info — submitted with OG150</td><td>—</td></tr>
-        <tr><td><strong>OG160</strong></td><td>Oil and Gas Bond</td><td>Individual or blanket bond, indemnity or cash, onshore or offshore</td><td>All prior bond forms</td></tr>
-        <tr><td><strong>OG30A</strong></td><td>Notification of Well/Facility Disposition</td><td>Report sale, transfer, or exchange of well/lease operations</td><td>—</td></tr>
-      </table>
-      <div class="note">📌 All forms are submitted to the CalGEM district office where the well is located. OG106 is filed in duplicate. An individual to contact regarding technical questions must be identified on all forms.</div>
-    </div>
+  <div class="card">
+    <h3><span class="icon">📋</span> Regulatory Requirements <span class="reg-badge">CCR §1720(b), PRC §3203(b)</span></h3>
+    <ul class="checklist">
+      <li>Classified as a rework/redrill — requires a new NOI (OG106) submitted after initial well completion <span class="reg-badge">PRC §3203(b)</span></li>
+      <li>Must include detailed wellbore schematic showing the cement plug placement, kickoff point, and new wellbore trajectory</li>
+      <li>CEQA document required if the sidetrack changes the well's field, area, or completion zone</li>
+      <li>All casing, cementing, and freshwater protection requirements apply to the new wellbore section <span class="reg-badge">CCR §1722.2–§1722.4</span></li>
+      <li>Adequate BOPE required; ALL operations in urban areas require BOPE <span class="reg-badge">CCR §1722.5, MO7</span></li>
+      <li>P-Report must be posted at well site during operations <span class="reg-badge">CCR §1722(e)</span></li>
+      <li>Operations must not deviate from approved program without prior Division approval, except in emergency <span class="reg-badge">CCR §1722(g)</span></li>
+      <li>Operator must maintain well control at all times, with or without permit <span class="reg-badge">PRC §3219</span></li>
+      <li>Bond on file must be adequate for the new well depth after deepening through sidetrack</li>
+      <li>If sidetrack results in a new field/area, the change must be noted on the NOI</li>
+    </ul>
   </div>
 
-  <!-- ===== COMPLIANCE ===== -->
-  <div class="sec" id="s-compliance">
-    <div class="card green">
-      <h2><span style="font-size:20px">✅</span> Compliance & Regulations</h2>
-      <h3>Key Regulatory Packages (all effective as shown)</h3>
-      <ul class="cl">
-        <li><strong>Idle Well Testing & Management (2019)</strong> — Fluid level tests, casing pressure tests, clean out tags, 15-year engineering analysis, testing compliance work plans</li>
-        <li><strong>Underground Injection Control (2019)</strong> — Project approval letters, MIT Parts 1 & 2, continuous pressure monitoring, surface expression requirements, MASIP</li>
-        <li><strong>Underground Gas Storage (2018)</strong> — Separate from UIC, covers gas storage wells under §1726–1726.10</li>
-        <li><strong>Oil and Gas Pipelines (2018)</strong> — Pipeline integrity, leak detection, secondary containment</li>
-      </ul>
-      <h3>Operator Ongoing Obligations</h3>
-      <ul class="cl">
-        <li><strong>Well Disposition/Transfer (OG30A):</strong> Notify CalGEM no later than the date of sale/transfer becoming final — both seller and buyer must notify</li>
-        <li><strong>Confidential Status:</strong> Written request with justification, submitted to district office. Per PRC §3234 and CCR §1997.1</li>
-        <li><strong>Well Maintenance Reporting:</strong> Operators must report well maintenance activities through WellSTAR</li>
-        <li><strong>Production/Injection Reporting:</strong> Monthly reporting via WellSTAR per PRC §3227</li>
-        <li><strong>Bonding:</strong> Must maintain valid bond (individual per well or blanket). Bond amounts based on well depth.</li>
-      </ul>
-      <h3>MOUs/MOAs</h3>
-      <div class="db bl"><strong>CalGEM + State Water Board (2018 revised):</strong> Coordinates UIC program for Class II wells, produced water discharges to land, enforcement, and incident response. Single-permit approach satisfying both agencies' requirements.</div>
-    </div>
+  <div class="card blue">
+    <h3><span class="icon">📝</span> Forms & Information Required</h3>
+    <table class="info-table">
+      <tr><th>Form</th><th>Purpose</th><th>Key Information Needed</th></tr>
+      <tr>
+        <td><strong class="mono">OG106</strong></td>
+        <td>Notice of Intention (Rework/Redrill)</td>
+        <td>Original well history, proposed kickoff depth, cement plug interval, new hole trajectory (inclination/azimuth), target zone, updated wellbore schematic, casing/cementing program for new section, BOPE plan</td>
+      </tr>
+      <tr>
+        <td><strong class="mono">OG160</strong></td>
+        <td>Bond (if depth increases)</td>
+        <td>Updated bond if new total depth crosses the 10,000 ft threshold ($25k → $40k)</td>
+      </tr>
+      <tr>
+        <td><strong>CEQA Doc</strong></td>
+        <td>If required</td>
+        <td>Required when sidetrack changes completion zone, field, or area</td>
+      </tr>
+      <tr>
+        <td><strong>Directional Survey</strong></td>
+        <td>Post-drill requirement</td>
+        <td>Must demonstrate new wellbore path is within permitted boundaries and spacing requirements</td>
+      </tr>
+    </table>
   </div>
 
-  <!-- ===== ASSESSMENTS ===== -->
-  <div class="sec" id="s-assess">
-    <div class="card amber">
-      <h2><span style="font-size:20px">💰</span> Oil & Gas Assessments</h2>
-      <div class="db"><strong>What it is:</strong> A small statewide assessment on oil and gas produced in California. Supports CalGEM and certain other state entities. Levied per PRC Article 7, Division 3. There is NO statewide severance tax on oil and gas in California.</div>
-      <h3>Recent Assessment Rates (per equiv. BBL or 10 MCF gas)</h3>
-      <table class="tbl">
-        <tr><th>Fiscal Year</th><th>Rate</th></tr>
-        <tr><td><strong>2025/26</strong></td><td style="font-weight:700;color:var(--am)">$1.2796</td></tr>
-        <tr><td>2024/25</td><td>$1.2156</td></tr>
-        <tr><td>2023/24</td><td>$1.0108</td></tr>
-        <tr><td>2022/23</td><td>$0.8738</td></tr>
-        <tr><td>2021/22</td><td>$0.5958</td></tr>
-        <tr><td>2020/21</td><td>$0.6789</td></tr>
-      </table>
-      <h3>How It Works</h3>
-      <ul class="cl">
-        <li>Rate set each June based on CalGEM's estimated budget ÷ prior year total assessable production</li>
-        <li>Imposed on each barrel of oil and each 10,000 cubic feet of natural gas produced</li>
-        <li>Producers report monthly to CalGEM; file annual reconciliation report</li>
-        <li>Assessment Notices sent to each producer before June 15 each year</li>
-        <li>Assessment Roll delivered to State Controller on first Monday in July</li>
-      </ul>
-      <h3>Payment Schedule</h3>
-      <div class="two">
-        <div class="db gn"><strong>Under $500:</strong> Full amount due on or before August 15</div>
-        <div class="db bl"><strong>$500 or more:</strong> Half due by August 15, balance due by February 1</div>
-      </div>
-      <div class="warn"><strong>⚠ Substantial penalties and interest</strong> are levied on delinquent payments.</div>
-    </div>
+  <div class="card purple">
+    <h3><span class="icon">🔍</span> What CalGEM Examines During Review</h3>
+    <ul class="checklist">
+      <li><strong>Cement Plug Integrity:</strong> Proposed cement plug placement sufficient to isolate the abandoned portion of the original wellbore</li>
+      <li><strong>New Trajectory Plan:</strong> Kickoff point, build rate, target azimuth, and landing zone clearly defined and achievable</li>
+      <li><strong>Casing & Cementing:</strong> New hole section has adequate casing and cement to protect hydrocarbon zones and freshwater</li>
+      <li><strong>Well Spacing:</strong> The new bottom-hole location complies with well spacing rules for the target pool</li>
+      <li><strong>BOPE Plan:</strong> Adequate for the new hole section, especially if drilling through different pressure regimes</li>
+      <li><strong>Existing Wellbore Condition:</strong> Evidence that the existing casing above the kickoff point is mechanically sound</li>
+      <li><strong>Field Rule Compliance:</strong> New completion zone consistent with field rules; deviations must be justified</li>
+      <li><strong>Bond Adequacy:</strong> Bond amount correct for the new measured/true vertical depth</li>
+    </ul>
   </div>
 
-  <!-- ===== QUIZ ===== -->
-  <div class="sec" id="s-quiz">
-    <div class="card amber">
-      <h2><span style="font-size:20px">🧠</span> Test Your Knowledge — Permitting & Compliance Flashcards</h2>
-      <p style="margin-bottom:6px">Click a card to reveal the answer. Track your score as you go.</p>
-    </div>
-    <div id="fc-app">
-      <div class="fc-controls">
-        <div class="fc-progress">Card <span class="cur" id="fc-cur">1</span> of <span id="fc-tot">25</span></div>
-        <div class="fc-score"><span class="right" id="fc-right">✓ 0</span><span class="wrong" id="fc-wrong">✗ 0</span></div>
-      </div>
-      <div class="fc-dots" id="fc-dots"></div>
-      <div class="fc-wrap" id="fc-wrap">
-        <div class="fc-card" id="fc-card" onclick="flipCard()">
-          <div class="fc-face fc-front">
-            <div class="fc-label">Question</div>
-            <div class="fc-q" id="fc-q"></div>
-            <div class="fc-hint" id="fc-hint">Click to reveal answer ▼</div>
-          </div>
-          <div class="fc-face fc-back" id="fc-back">
-            <div class="fc-label">Answer</div>
-            <div class="fc-a" id="fc-a"></div>
-            <div class="fc-ref" id="fc-ref"></div>
-          </div>
+  <div class="note-box">
+    <strong>💡 Note:</strong> A sidetrack that results in a significant change in well trajectory may effectively create a "new well" from a regulatory perspective. CalGEM may require additional data comparable to a new drill permit if the departure from the original wellbore is substantial.
+  </div>
+
+  <h2 class="section-title">Sidetrack — Knowledge Quiz</h2>
+  <div class="quiz-container" id="quiz-sidetrack"></div>
+</div>
+
+<!-- ========== REWORK TAB ========== -->
+<div class="tab-content" id="tab-rework">
+  <h2 class="section-title">Rework — Re-enter for Secondary Activities</h2>
+
+  <div class="def-box">
+    <div class="def-label">Definition — CCR §1720(b)</div>
+    <strong>"Rework"</strong> means any operation subsequent to drilling that involves deepening, redrilling, plugging, or permanently altering in any manner the casing of a well or its function. This includes recompletions, zone changes, stimulation requiring casing modification, squeeze cementing, casing repair, and perforation changes.
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📋</span> Regulatory Requirements <span class="reg-badge">PRC §3203(b)</span></h3>
+    <ul class="checklist">
+      <li>Requires a new NOI (OG106) filed in duplicate before commencing any rework <span class="reg-badge">PRC §3203(b)</span></li>
+      <li>NOI valid for 24 months from receipt; operations once commenced must be completed in a timely and orderly manner <span class="reg-badge">CCR §1722(d)</span></li>
+      <li>Wellbore schematic diagram must be included showing current well state and proposed changes</li>
+      <li>CEQA document required if the rework changes the well's completion zone, field, or area</li>
+      <li>BOPE required; ALL operations in urban areas require BOPE regardless of well type <span class="reg-badge">CCR §1722.5</span></li>
+      <li>P-Report must be posted at well site during all operations <span class="reg-badge">CCR §1722(e)</span></li>
+      <li>Give district office sufficient advance notice for required inspections and tests <span class="reg-badge">CCR §1722(f)</span></li>
+      <li>Operations shall not deviate from approved program without prior Division approval except in emergency <span class="reg-badge">CCR §1722(g)</span></li>
+      <li>Operator must maintain well control during ANY operation, with or without permit <span class="reg-badge">PRC §3219</span></li>
+      <li>Blowouts, fires, serious accidents, significant gas/water leaks must be promptly reported to district office <span class="reg-badge">CCR §1722(i)</span></li>
+      <li>Changes in well number or designation require written supervisor consent <span class="reg-badge">PRC §3203(b)</span></li>
+    </ul>
+  </div>
+
+  <div class="card blue">
+    <h3><span class="icon">📝</span> Forms & Information Required</h3>
+    <table class="info-table">
+      <tr><th>Form</th><th>Purpose</th><th>Key Information Needed</th></tr>
+      <tr>
+        <td><strong class="mono">OG106</strong></td>
+        <td>Notice of Intention (Rework)</td>
+        <td>Current well configuration, proposed rework operations (recompletion zone, new perforations, squeeze cement, casing repair, etc.), updated wellbore schematic, BOPE plan, anticipated timeline</td>
+      </tr>
+      <tr>
+        <td><strong>CEQA Doc</strong></td>
+        <td>If required</td>
+        <td>Needed when changing completion zone, field, or area</td>
+      </tr>
+      <tr>
+        <td><strong>Wellbore Schematic</strong></td>
+        <td>Mandatory attachment</td>
+        <td>Current casing intervals/sizes, perforation locations, cement status, proposed changes highlighted</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card purple">
+    <h3><span class="icon">🔍</span> What CalGEM Examines During Review</h3>
+    <ul class="checklist">
+      <li><strong>Scope of Work:</strong> What exactly is being changed — perforations, casing, completion zone, function?</li>
+      <li><strong>Wellbore Integrity:</strong> Current casing and cement condition adequate to support the proposed rework</li>
+      <li><strong>Zone Isolation:</strong> Will the rework maintain proper isolation between productive zones and freshwater?</li>
+      <li><strong>BOPE Adequacy:</strong> Equipment rated for the well's pressure regime, especially for wells with H₂S or high pressure</li>
+      <li><strong>Field Rule Compliance:</strong> Proposed new completion zone consistent with field rules</li>
+      <li><strong>Well Control Plan:</strong> Especially for critical or high-pressure wells requiring a BOP and control plan</li>
+      <li><strong>Environmental Compliance:</strong> CEQA and spill contingency plan current</li>
+      <li><strong>Operator Standing:</strong> No outstanding violations or unpaid penalties</li>
+    </ul>
+  </div>
+
+  <div class="success-box">
+    <strong>✅ Key Distinction:</strong> Routine maintenance (e.g., rod/pump changes, wireline logging) that does NOT permanently alter the casing or well function does NOT require an NOI. However, any operation that deepens, redrills, plugs, or permanently alters the casing or its function requires an OG106.
+  </div>
+
+  <h2 class="section-title">Rework — Knowledge Quiz</h2>
+  <div class="quiz-container" id="quiz-rework"></div>
+</div>
+
+<!-- ========== DEEPEN TAB ========== -->
+<div class="tab-content" id="tab-deepen">
+  <h2 class="section-title">Deepen — Extend Well Depth</h2>
+
+  <div class="def-box">
+    <div class="def-label">Definition</div>
+    Deepening is the operation of drilling below the current total depth of an existing well to access a deeper formation or zone. Under CalGEM, deepening is explicitly listed as a type of rework operation under CCR §1720(b) and requires an NOI per PRC §3203(b).
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📋</span> Regulatory Requirements <span class="reg-badge">PRC §3203(b), CCR §1720(b)</span></h3>
+    <ul class="checklist">
+      <li>Requires a new NOI (OG106) before commencing — deepening is explicitly covered by PRC §3203(b) <span class="reg-badge">PRC §3203(b)</span></li>
+      <li>Full drilling program for the deeper section required, including anticipated formations, pressures, and hazards</li>
+      <li>Casing and cementing program must protect all newly penetrated hydrocarbon zones and freshwater <span class="reg-badge">CCR §1722.2–§1722.4</span></li>
+      <li>Drilling fluid program must be adequate for deeper pressure regime <span class="reg-badge">CCR §1722.6</span></li>
+      <li>BOPE must be adequate for the deeper anticipated pressures <span class="reg-badge">CCR §1722.5</span></li>
+      <li>If new total depth crosses 10,000 ft, an updated bond is required ($25k → $40k individual) <span class="reg-badge">PRC §3204</span></li>
+      <li>Directional survey required for the deepened section <span class="reg-badge">CCR §1722.7</span></li>
+      <li>Well spacing compliance for the new target zone <span class="reg-badge">CCR §1721</span></li>
+      <li>CEQA required if targeting a new field or area</li>
+      <li>P-Report posted at well site during all operations <span class="reg-badge">CCR §1722(e)</span></li>
+      <li>Operations conducted in accordance with good oilfield practice <span class="reg-badge">CCR §1722(a)</span></li>
+    </ul>
+  </div>
+
+  <div class="card blue">
+    <h3><span class="icon">📝</span> Forms & Information Required</h3>
+    <table class="info-table">
+      <tr><th>Form</th><th>Purpose</th><th>Key Information Needed</th></tr>
+      <tr>
+        <td><strong class="mono">OG106</strong></td>
+        <td>Notice of Intention (Deepen)</td>
+        <td>Current total depth, proposed new total depth, target zone/formation, drilling program for deeper section, updated casing/cementing plan, updated wellbore schematic, BOPE plan, drilling fluid program, directional survey plan</td>
+      </tr>
+      <tr>
+        <td><strong class="mono">OG160</strong></td>
+        <td>Updated Bond (if needed)</td>
+        <td>New bond required if depth crosses 10,000 ft threshold. Bond amount: $40,000 individual for wells ≥10,000 ft</td>
+      </tr>
+      <tr>
+        <td><strong>CEQA Doc</strong></td>
+        <td>If required</td>
+        <td>Needed when deepening targets a new field/area or changes the well's environmental footprint</td>
+      </tr>
+      <tr>
+        <td><strong>Wellbore Schematic</strong></td>
+        <td>Updated diagram</td>
+        <td>Showing existing casing, proposed deeper hole section, new casing strings, cementing plan, target perforations</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card purple">
+    <h3><span class="icon">🔍</span> What CalGEM Examines During Review</h3>
+    <ul class="checklist">
+      <li><strong>Target Formation:</strong> What zone is being targeted? Is it within an established field, or does it represent a wildcat target?</li>
+      <li><strong>Existing Wellbore Condition:</strong> Is the current casing mechanically sound enough to support deepening operations?</li>
+      <li><strong>Casing & Cementing Plan:</strong> Adequate to protect all zones penetrated between old TD and new TD, including freshwater</li>
+      <li><strong>Pressure Management:</strong> Drilling fluid weight and BOPE adequate for deeper pressure regimes</li>
+      <li><strong>Well Spacing:</strong> Bottom-hole location at new depth complies with spacing rules for the target pool</li>
+      <li><strong>Bond Adequacy:</strong> Must be updated if the new depth crosses the 10,000 ft threshold</li>
+      <li><strong>Directional Survey Plan:</strong> Adequate to confirm the wellbore stays within permitted boundaries at the new depth</li>
+      <li><strong>Field Rules:</strong> Proposed deeper completion consistent with field rules for that formation</li>
+      <li><strong>Hazard Assessment:</strong> Anticipated H₂S, abnormal pressures, lost circulation zones in the deeper section</li>
+    </ul>
+  </div>
+
+  <div class="warning-box">
+    <strong>⚠️ Bond Alert</strong>
+    If deepening takes the well past 10,000 ft measured depth, the individual bond amount increases from $25,000 to $40,000 (PRC §3204). The updated bond must be filed with the NOI. Failure to file an adequate bond can result in permit denial.
+  </div>
+
+  <h2 class="section-title">Deepen — Knowledge Quiz</h2>
+  <div class="quiz-container" id="quiz-deepen"></div>
+</div>
+
+<!-- ========== ABANDON TAB ========== -->
+<div class="tab-content" id="tab-abandon">
+  <h2 class="section-title">Abandon — Permanently Plug & Seal</h2>
+
+  <div class="def-box red-def">
+    <div class="def-label">Definition</div>
+    Plugging and abandonment (P&A) is the permanent plugging and sealing of a well so that it will not produce fluids, endanger freshwater, or create a surface hazard. It involves placing cement plugs across specific intervals, mudding the hole, and cutting casing below the surface. <span class="reg-badge">CCR §1723–§1723.9</span>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📋</span> Regulatory Requirements <span class="reg-badge">CCR §1723–§1723.8</span></h3>
+    <ul class="checklist">
+      <li>Requires a new NOI (OG106) before commencing any plugging operations <span class="reg-badge">PRC §3203(b)</span></li>
+      <li><strong>Oil/Gas Zone Plugs (§1723.1):</strong> Cement plug from 100 ft below to 100 ft above each oil/gas zone (open hole), or 100 ft above top perforations/liner/cementing point (cased hole)</li>
+      <li><strong>Freshwater Protection (§1723.2):</strong> 200-ft cement plug across all fresh-saltwater interfaces (open hole); 100-ft plug inside casing across interface (cased hole); squeeze cement if needed</li>
+      <li><strong>Casing Shoe Plug (§1723.3):</strong> Cement plug from 50 ft below to 50 ft above any casing shoe where hole is open below</li>
+      <li><strong>Surface Plug (§1723.5):</strong> 25-ft minimum cement plug at surface in all annuli; casing cut off 5–10 ft below surface; steel plate welded on top showing API number</li>
+      <li><strong>Hole Fluid (§1723(b)):</strong> Mud of proper weight placed across all intervals not plugged with cement; surface poured into all open annuli</li>
+      <li>BOPE may be required during P&A; requirements set by district deputy on P-Report <span class="reg-badge">CCR §1723(e)</span></li>
+      <li>Diligent effort required to recover junk before plugging; 100-ft plug on top of irrecoverable junk <span class="reg-badge">CCR §1723(f)</span></li>
+      <li>Division must witness and approve key plugging operations <span class="reg-badge">CCR §1723.7</span></li>
+      <li>Environmental inspection required after completion of plugging <span class="reg-badge">CCR §1723.7(h)</span></li>
+    </ul>
+  </div>
+
+  <div class="card blue">
+    <h3><span class="icon">📝</span> Forms & Information Required</h3>
+    <table class="info-table">
+      <tr><th>Form</th><th>Purpose</th><th>Key Information Needed</th></tr>
+      <tr>
+        <td><strong class="mono">OG106</strong></td>
+        <td>Notice of Intention (P&A)</td>
+        <td>Detailed wellbore schematic showing: all casing intervals/sizes, perforation locations, proposed cement plug depths inside casing, cement locations outside casing, fresh-saltwater interfaces, proposed plug placement sequence</td>
+      </tr>
+      <tr>
+        <td><strong>Wellbore Schematic</strong></td>
+        <td>Critical attachment</td>
+        <td>Must show complete current well configuration including all casing strings, perforations, liners, cement behind casing, proposed plug depths, and surface plug detail</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card purple">
+    <h3><span class="icon">🔍</span> What CalGEM Examines During Review</h3>
+    <ul class="checklist">
+      <li><strong>Oil/Gas Zone Isolation:</strong> Proposed plugs cover all producing/penetrated oil and gas zones per §1723.1</li>
+      <li><strong>Freshwater Protection:</strong> Plugs across all fresh-saltwater interfaces; squeeze cementing where cement behind casing is absent or inadequate</li>
+      <li><strong>Casing Shoe Plugs:</strong> All casing shoes with open hole below are properly plugged</li>
+      <li><strong>Surface Plug Plan:</strong> Adequate surface plugging with proper casing cutoff depth and steel plate identification</li>
+      <li><strong>Hole Fluid Plan:</strong> Proper weight mud in all unplugged intervals</li>
+      <li><strong>Junk in Hole:</strong> Any junk identified and plan to recover or plug around it</li>
+      <li><strong>Radioactive Materials:</strong> If lost radioactive sources, special plugging per §1723(g) with red-dyed cement and whipstock</li>
+      <li><strong>Division Witnessing Schedule:</strong> Key operations (zone plugs, freshwater protection, surface plug) require Division witnessing</li>
+      <li><strong>Plugging Method:</strong> Bailer not permitted below 3,000 ft; surface pours only in holes ≥5 in. diameter (§1723(c)–(d))</li>
+      <li><strong>Environmental Compliance:</strong> Post-P&A environmental inspection to ensure site remediation per Subchapter 2</li>
+    </ul>
+  </div>
+
+  <!-- P&A Plugging Diagram -->
+  <div class="diagram-container">
+    <h4 style="margin-bottom:14px; font-weight:700; color:var(--header-bg);">Typical P&A Plug Placement Sequence</h4>
+    <svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:600px;">
+      <!-- Wellbore -->
+      <rect x="260" y="10" width="80" height="400" fill="#e8e4dc" stroke="#8a7f6e" stroke-width="2" rx="4"/>
+      <!-- Casing lines -->
+      <rect x="268" y="10" width="4" height="400" fill="#5c5243"/>
+      <rect x="328" y="10" width="4" height="400" fill="#5c5243"/>
+      <!-- Surface plug -->
+      <rect x="260" y="10" width="80" height="30" fill="#ef4444" rx="3" opacity="0.85"/>
+      <text x="300" y="29" text-anchor="middle" font-size="10" fill="#fff" font-weight="700" font-family="JetBrains Mono">SURFACE PLUG</text>
+      <!-- Freshwater plug -->
+      <rect x="260" y="90" width="80" height="50" fill="#3b82f6" rx="3" opacity="0.8"/>
+      <text x="300" y="115" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" font-family="JetBrains Mono">FRESHWATER</text>
+      <text x="300" y="128" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" font-family="JetBrains Mono">PLUG (200 ft)</text>
+      <!-- Casing shoe plug -->
+      <rect x="260" y="190" width="80" height="35" fill="#8b5cf6" rx="3" opacity="0.8"/>
+      <text x="300" y="212" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" font-family="JetBrains Mono">SHOE PLUG</text>
+      <!-- Mud fill -->
+      <rect x="268" y="40" width="64" height="50" fill="#b45309" opacity="0.25"/>
+      <text x="300" y="68" text-anchor="middle" font-size="8" fill="#b45309" font-weight="700" font-family="JetBrains Mono">MUD FILL</text>
+      <!-- Zone plug -->
+      <rect x="260" y="280" width="80" height="55" fill="#f59e0b" rx="3" opacity="0.85"/>
+      <text x="300" y="305" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" font-family="JetBrains Mono">OIL/GAS ZONE</text>
+      <text x="300" y="318" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" font-family="JetBrains Mono">PLUG (100 ft+)</text>
+      <!-- Labels on right -->
+      <line x1="345" y1="25" x2="380" y2="25" stroke="#5c5243" stroke-width="1"/>
+      <text x="385" y="22" font-size="10" fill="#5c5243" font-family="Inter">≥25 ft cement, casing cut 5–10 ft below grade</text>
+      <text x="385" y="34" font-size="10" fill="#5c5243" font-family="Inter">Steel plate welded, shows API number</text>
+      <line x1="345" y1="115" x2="380" y2="115" stroke="#5c5243" stroke-width="1"/>
+      <text x="385" y="112" font-size="10" fill="#5c5243" font-family="Inter">200 ft across fresh-salt interface (open hole)</text>
+      <text x="385" y="124" font-size="10" fill="#5c5243" font-family="Inter">100 ft in cased hole; squeeze if needed</text>
+      <line x1="345" y1="207" x2="380" y2="207" stroke="#5c5243" stroke-width="1"/>
+      <text x="385" y="210" font-size="10" fill="#5c5243" font-family="Inter">50 ft below to 50 ft above shoe §1723.3</text>
+      <line x1="345" y1="307" x2="380" y2="307" stroke="#5c5243" stroke-width="1"/>
+      <text x="385" y="304" font-size="10" fill="#5c5243" font-family="Inter">100 ft below to 100 ft above zone (open hole)</text>
+      <text x="385" y="316" font-size="10" fill="#5c5243" font-family="Inter">100 ft above top perfs/liner/cementing pt (cased)</text>
+      <!-- TD label -->
+      <text x="300" y="400" text-anchor="middle" font-size="10" fill="#8a7f6e" font-weight="700" font-family="JetBrains Mono">TD ▼</text>
+      <!-- Perforations -->
+      <rect x="256" y="290" width="4" height="35" fill="#f59e0b"/>
+      <rect x="340" y="290" width="4" height="35" fill="#f59e0b"/>
+      <text x="245" y="310" text-anchor="end" font-size="9" fill="#b45309" font-family="Inter">Perfs</text>
+    </svg>
+  </div>
+
+  <div class="quick-ref">
+    <h4>P&A Plug Requirements Summary</h4>
+    <table>
+      <tr><th>Plug Type</th><th>Requirement</th><th>Regulation</th></tr>
+      <tr><td>Oil/Gas Zone (open hole)</td><td>100 ft below to 100 ft above each zone</td><td class="mono">§1723.1(a)</td></tr>
+      <tr><td>Oil/Gas Zone (cased hole)</td><td>100 ft above top perfs/liner/cementing point</td><td class="mono">§1723.1(b)</td></tr>
+      <tr><td>Freshwater (open hole)</td><td>200 ft across fresh-salt interface</td><td class="mono">§1723.2(a)</td></tr>
+      <tr><td>Freshwater (cased hole)</td><td>100 ft inside casing across interface</td><td class="mono">§1723.2(b)</td></tr>
+      <tr><td>Casing Shoe</td><td>50 ft below to 50 ft above shoe</td><td class="mono">§1723.3</td></tr>
+      <tr><td>Surface Plug</td><td>≥25 ft in hole + all annuli</td><td class="mono">§1723.5</td></tr>
+      <tr><td>Casing Cut</td><td>5–10 ft below ground surface</td><td class="mono">§1723.5</td></tr>
+      <tr><td>Bailer Limit</td><td>Not permitted below 3,000 ft</td><td class="mono">§1723(c)</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section-title">Abandon — Knowledge Quiz</h2>
+  <div class="quiz-container" id="quiz-abandon"></div>
+</div>
+
+<!-- ========== RE-ABANDON TAB ========== -->
+<div class="tab-content" id="tab-reabandon">
+  <h2 class="section-title">Re-Abandon — Re-Plug & Re-Seal</h2>
+
+  <div class="def-box red-def">
+    <div class="def-label">Definition</div>
+    Re-abandonment is the operation of re-entering a previously plugged and abandoned well to replace, supplement, or correct cement plugs and re-seal the well. This is typically required when an existing P&A is found to be leaking, inadequate, or does not meet current regulatory standards. Re-abandonment follows the same NOI and P&A requirements as an original abandonment. <span class="reg-badge">PRC §3203(b), CCR §1723</span>
+  </div>
+
+  <div class="card">
+    <h3><span class="icon">📋</span> Regulatory Requirements</h3>
+    <ul class="checklist">
+      <li>Requires a new NOI (OG106) — same form used for re-entering to replace cement plugs and re-abandon <span class="reg-badge">PRC §3203(b)</span></li>
+      <li>All original P&A requirements under §1723–§1723.8 apply to the re-abandonment</li>
+      <li>Wellbore schematic must show: existing plugs (as found), proposed new/replacement plugs, any removal or drill-out of old plugs</li>
+      <li>BOPE may be required for re-entry operations; determined by district deputy</li>
+      <li>If old plugs are found inadequate, CalGEM may require additional plugging beyond original requirements</li>
+      <li>Division witnessing required for key plugging operations per §1723.7</li>
+      <li>Environmental inspection required after completion</li>
+      <li>Surface completion must meet current standards: casing cut 5–10 ft below grade, steel plate with API number welded on</li>
+      <li>Re-abandonment may be ordered by CalGEM if a previously abandoned well is found to be leaking or posing a hazard</li>
+      <li>Wells in the AoR of injection projects may require re-abandonment if they lack 100/150 ft of verified cement above the injection zone <span class="reg-badge">CCR §1724.8</span></li>
+    </ul>
+  </div>
+
+  <div class="card blue">
+    <h3><span class="icon">📝</span> Forms & Information Required</h3>
+    <table class="info-table">
+      <tr><th>Form</th><th>Purpose</th><th>Key Information Needed</th></tr>
+      <tr>
+        <td><strong class="mono">OG106</strong></td>
+        <td>Notice of Intention (Re-Abandon)</td>
+        <td>Original P&A history, reason for re-abandonment, current well condition (if known), proposed re-entry method, updated wellbore schematic showing existing and proposed plugs, drill-out plan for old plugs (if needed), new plugging sequence</td>
+      </tr>
+      <tr>
+        <td><strong>Original P&A Records</strong></td>
+        <td>Reference documentation</td>
+        <td>Original abandonment report, plug depths, cement volumes, any known deficiencies</td>
+      </tr>
+      <tr>
+        <td><strong>Wellbore Schematic</strong></td>
+        <td>Updated diagram</td>
+        <td>Must clearly distinguish between existing plugs and proposed new/replacement plugs</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card purple">
+    <h3><span class="icon">🔍</span> What CalGEM Examines During Review</h3>
+    <ul class="checklist">
+      <li><strong>Reason for Re-Abandonment:</strong> Is this operator-initiated or CalGEM-ordered? What deficiency is being corrected?</li>
+      <li><strong>Original P&A Assessment:</strong> What plugs are in place, and which are deficient or missing?</li>
+      <li><strong>Re-Entry Plan:</strong> How will the old plugs be drilled out or bypassed? Is the approach safe given the well's age and condition?</li>
+      <li><strong>Updated Plugging Plan:</strong> New plug placement must meet current standards under §1723–§1723.8</li>
+      <li><strong>Freshwater Protection:</strong> Particular focus on freshwater interface plugging if original P&A predates current regulations</li>
+      <li><strong>UIC AoR Compliance:</strong> If re-abandonment is triggered by injection project review, verified cement above injection zone</li>
+      <li><strong>BOPE Requirements:</strong> Based on well's pressure history and current condition</li>
+      <li><strong>Surface Completion:</strong> Must bring surface conditions up to current standards</li>
+    </ul>
+  </div>
+
+  <div class="warning-box">
+    <strong>⚠️ Important</strong>
+    CalGEM may ORDER a re-abandonment at the operator's expense if a previously abandoned well is found to be leaking, contaminating groundwater, or creating a surface hazard. Wells abandoned under older, less stringent standards are particularly subject to re-abandonment orders when they fall within the Area of Review (AoR) of active injection projects.
+  </div>
+
+  <h2 class="section-title">Re-Abandon — Knowledge Quiz</h2>
+  <div class="quiz-container" id="quiz-reabandon"></div>
+</div>
+
+<!-- ============ JAVASCRIPT ============ -->
+<script>
+// TAB LOGIC
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// CEMENT DIAGRAM MODE TOGGLE
+function setCementMode(mode) {
+  var btnActive = document.getElementById('cmt-btn-active');
+  var btnPa = document.getElementById('cmt-btn-pa');
+  var diagActive = document.getElementById('cement-active');
+  var diagPa = document.getElementById('cement-pa');
+  if (mode === 'active') {
+    btnActive.style.background = 'var(--header-bg)';
+    btnActive.style.color = 'var(--header-gold)';
+    btnPa.style.background = 'transparent';
+    btnPa.style.color = 'var(--header-bg)';
+    diagActive.style.display = '';
+    diagPa.style.display = 'none';
+  } else {
+    btnPa.style.background = 'var(--header-bg)';
+    btnPa.style.color = 'var(--header-gold)';
+    btnActive.style.background = 'transparent';
+    btnActive.style.color = 'var(--header-bg)';
+    diagActive.style.display = 'none';
+    diagPa.style.display = '';
+  }
+}
+
+// QUIZ DATA
+const quizData = {
+  newdrill: [
+    {q:"What form is used to file a Notice of Intention (NOI) for a new drill?", a:"OG106 — the universal permit form for ALL CalGEM permit requests (drill, rework, P&A).\nIt replaces the old OG105, OG107, OG108, and OG123 forms.", c:"PRC §3203"},
+    {q:"How long is an NOI valid after CalGEM receives it?", a:"24 months from the date of receipt.\nIf operations have not commenced within 24 months, the NOI is deemed cancelled and CANNOT be extended.", c:"PRC §3203(a)"},
+    {q:"How many working days does CalGEM have to respond to an NOI?", a:"10 working days from the date of receipt.\nIf CalGEM fails to respond within 10 working days, the silence is considered an approval of the notice.", c:"PRC §3203(a)"},
+    {q:"What is the individual bond amount for a well less than 10,000 feet deep?", a:"$25,000 per well.\nFiled as an individual indemnity bond (OG160) or covered under a blanket bond.", c:"PRC §3204(a)(1)"},
+    {q:"What is the individual bond amount for a well 10,000 feet or deeper?", a:"$40,000 per well.\nFiled as an individual indemnity bond (OG160) or covered under a blanket bond.", c:"PRC §3204(a)(2)"},
+    {q:"What blanket bond amount is required for an operator with 50 or fewer wells?", a:"$200,000 blanket indemnity bond.\nCovers all operations in any wells in the state in lieu of individual bonds.", c:"PRC §3205(a)(1)"},
+    {q:"What blanket bond amount is required for an operator with more than 10,000 wells?", a:"$3,000,000 blanket indemnity bond.\nThe highest tier under PRC §3205.", c:"PRC §3205(a)(4)"},
+    {q:"What form is used to designate a California-resident agent?", a:"OG150 (Agent Designation & Org Info Change).\nMust designate an individual (not a company) residing in California.\nSubmit with OGD7 (Contact Questionnaire) to the district office.", c:"OG150"},
+    {q:"Must CEQA compliance be completed before or after submitting the NOI?", a:"BEFORE submitting the NOI.\nA copy of the local jurisdiction's Notice of Determination or Notice of Exemption must be attached to the OG106.", c:"PRC §3203.5"},
+    {q:"What is a P-Report and where must it be displayed?", a:"A P-Report is CalGEM's Permit to Conduct Well Operations.\nIt must be posted at the drill site at all times during operations.\nIt lists all mandatory tests and inspections.", c:"CCR §1722(e)"},
+    {q:"What regulation governs well spacing for new drills?", a:"CCR §1721 through §1721.9 govern well spacing patterns.\nNew pool spacing patterns are established under §1721 for pools discovered after January 1, 1974.", c:"CCR §1721–§1721.9"},
+    {q:"What equipment is required for blowout prevention on new drills?", a:"Adequate blowout prevention equipment (BOPE) per MO7.\nFor critical or high-pressure wells, a full BOP and control plan may be required.\nAll urban area operations require BOPE.", c:"CCR §1722.5"},
+    {q:"What happens if CalGEM finds the operator has outstanding violations when they submit an NOI?", a:"CalGEM may deny approval of proposed well operations.\nThe supervisor can deny approval until the operator: pays civil penalties, remedies violations, or pays assessed charges under Article 7.", c:"PRC §3203(c)"},
+    {q:"Under what section of the CCR is 'rework' defined?", a:"CCR §1720(b).\n'Rework' means any operation subsequent to drilling that involves deepening, redrilling, plugging, or permanently altering in any manner the casing of a well or its function.", c:"CCR §1720(b)"},
+    {q:"What document must a new drill operator file regarding spill prevention?", a:"A spill contingency plan per CCR §1722(b).\nMust be filed within six months of the effective date or within three months after initial production.\nFederal SPCC Plans may fulfill this if adequate.", c:"CCR §1722(b)"},
+    {q:"How many copies of the OG106 must be filed?", a:"Two copies (filed in duplicate) with the appropriate CalGEM district office.", c:"CCR §1722(d)"},
+    {q:"What is the OGD7 form and when is it submitted?", a:"OGD7 is the Contact Questionnaire.\nIt provides technical contact name, email, and phone information.\nIt is submitted together with the OG150 (Agent Designation).", c:"OGD7"},
+    {q:"Can an NOI be extended if operations haven't started?", a:"No — the NOI CANNOT be extended once the 24-month period expires.\nHowever, a Well Status Inquiry letter may be used to request a 1-year extension for an approval (not the NOI itself) prior to expiration.", c:"PRC §3203(a)"},
+    {q:"What local authorization must be included with the NOI per SB 406?", a:"A copy of the local land use authorization that supports installation of the well.\nCalGEM must also check the expiration dates of these local authorizations.", c:"PRC §3203.5"},
+    {q:"What must operators report promptly to the district office?", a:"Blowouts, fires, serious accidents, and significant gas or water leaks resulting from or associated with oil or gas drilling/producing operations or related facilities.", c:"CCR §1722(i)"},
+    {q:"What must the NOI for a new drill include as attachments?", a:"Complete drilling program, lease map/plat, lease description, proposed wellbore schematic, casing program, cementing plan, drilling fluid program, BOPE plan, CEQA document, and bond.", c:"CCR §1722(d)"},
+    {q:"What is a 'critical well' under CCR §1720(a)?", a:"A well within 300 ft of a building intended for human occupancy or airport runway, OR within 100 ft of a public street/highway, navigable water, public recreational facility, or wildlife preserve.", c:"CCR §1720(a)"},
+    {q:"What happens if operations deviate from the approved program?", a:"Deviation is NOT permitted without prior Division approval, except in an emergency.\nOperations approved by the Division must follow the approved program exactly.", c:"CCR §1722(g)"},
+    {q:"When can a well number or designation be changed?", a:"The number or designation of any well shall NOT be changed without first obtaining written consent of the Supervisor.", c:"PRC §3203(b)"},
+    {q:"What are the drilling fluid requirements for a new drill?", a:"The operator must have an adequate drilling fluid program with proper weight, type, and properties for anticipated downhole conditions.\nDrilling fluid requirements are governed by CCR §1722.6.", c:"CCR §1722.6"},
+  ],
+  sidetrack: [
+    {q:"How does CalGEM classify a sidetrack operation?", a:"As a rework/redrill operation under CCR §1720(b).\nBecause it permanently alters the well's casing and function, it triggers the same NOI requirements as any rework.", c:"CCR §1720(b)"},
+    {q:"What form is needed to permit a sidetrack?", a:"OG106 (Notice of Intention) filed in duplicate as a rework/redrill.\nMust include the kickoff point, cement plug interval, new trajectory, and updated wellbore schematic.", c:"PRC §3203(b)"},
+    {q:"When is CEQA required for a sidetrack?", a:"When the sidetrack changes the well's field, area, or completion zone.\nA copy of the Notice of Determination or Exemption must be attached to the OG106.", c:"PRC §3203.5"},
+    {q:"What must the wellbore schematic show for a sidetrack?", a:"The cement plug placement in the original wellbore, the kickoff point, the new wellbore trajectory (inclination and azimuth), and the target zone.", c:"CCR §1722(d)"},
+    {q:"When would the bond need to be updated for a sidetrack?", a:"If the new total measured depth crosses the 10,000 ft threshold.\nThe bond increases from $25,000 to $40,000 per well.", c:"PRC §3204"},
+    {q:"What does CalGEM examine regarding the cement plug in the original bore?", a:"Whether the cement plug placement is sufficient to isolate the abandoned portion of the original wellbore from the new sidetrack path.", c:"CCR §1722"},
+    {q:"What spacing requirements apply to a sidetrack?", a:"The new bottom-hole location must comply with well spacing rules (CCR §1721–§1721.9) for the target pool, not just the surface location.", c:"CCR §1721"},
+    {q:"What BOPE requirements apply to a sidetrack?", a:"Adequate BOPE is required, especially if drilling through different pressure regimes.\nAll operations in urban areas require BOPE regardless.", c:"CCR §1722.5"},
+    {q:"What PRC section requires operators to maintain well control during ALL operations?", a:"PRC §3219.\nOperators must maintain well control during ANY operation, with or without a permit.", c:"PRC §3219"},
+    {q:"What must be posted at the well site during sidetrack operations?", a:"The P-Report (CalGEM's Permit to Conduct Well Operations) must be posted at the well site throughout operations.", c:"CCR §1722(e)"},
+    {q:"Can operations deviate from the approved sidetrack program?", a:"No — deviation from the approved program is NOT permitted without prior Division approval, except in an emergency.", c:"CCR §1722(g)"},
+    {q:"If a sidetrack targets a new field, what must be noted on the NOI?", a:"The change in field/area must be noted on the NOI.\nCEQA may also be required for the new field.", c:"PRC §3203(b)"},
+    {q:"What is the regulatory basis for classifying a sidetrack as a rework?", a:"CCR §1720(b) defines 'rework' as any operation subsequent to drilling that involves redrilling or permanently altering in any manner the casing of a well or its function.\nA sidetrack permanently alters the wellbore path and function.", c:"CCR §1720(b)"},
+    {q:"What does CalGEM check regarding the existing casing above the kickoff point?", a:"CalGEM wants evidence that the existing casing above the kickoff point is mechanically sound and can support the sidetrack operations.", c:"CCR §1722.3"},
+    {q:"What directional survey is required after a sidetrack?", a:"A directional survey must demonstrate the new wellbore path is within permitted boundaries and meets spacing requirements.", c:"CCR §1722.7"},
+    {q:"How long is a sidetrack NOI valid?", a:"24 months from the date CalGEM received it.\nIf operations have not commenced, the NOI is deemed cancelled and cannot be extended.", c:"PRC §3203(a)"},
+    {q:"What regulations govern casing and cementing for the new sidetrack section?", a:"CCR §1722.2 (casing program), §1722.3 (casing requirements), and §1722.4 (cementing casing).\nAll zones and freshwater must be protected.", c:"CCR §1722.2–§1722.4"},
+    {q:"When might CalGEM treat a sidetrack like a new drill permit?", a:"When the departure from the original wellbore is substantial enough that it effectively creates a 'new well.' CalGEM may require additional data comparable to a new drill permit.", c:"CCR §1722"},
+    {q:"What must be reported promptly during sidetrack operations?", a:"Blowouts, fires, serious accidents, and significant gas or water leaks must be promptly reported to the appropriate Division district office.", c:"CCR §1722(i)"},
+    {q:"What is the OG106 form number and what does it replace?", a:"OG106 is the Notice of Intention.\nIt replaces the old OG105 (drill), OG107 (rework), OG108 (P&A), and OG123 (supplementary notice).", c:"OG106"},
+    {q:"What happens to the original wellbore section below the cement plug in a sidetrack?", a:"The original wellbore below the cement plug is effectively abandoned in place.\nThe cement plug must isolate it from the new sidetrack path to prevent cross-flow.", c:"CCR §1723"},
+    {q:"Does the operator need a blanket bond or individual bond for a sidetrack?", a:"Either is acceptable. An individual bond ($25k or $40k depending on depth) filed with the OG106, OR a blanket bond already on file covering all the operator's wells.", c:"PRC §3204–§3205"},
+    {q:"Who determines BOPE requirements that appear on the P-Report?", a:"The district deputy determines the BOPE requirements based on well conditions, pressure, and location.\nThese are listed on the P-Report approval.", c:"CCR §1722(c)"},
+    {q:"What advance notice must operators give for inspections?", a:"Operators must give the appropriate Division district office sufficient advance notice of the time for inspections and tests requiring the presence of Division personnel.", c:"CCR §1722(f)"},
+    {q:"What general operational standard applies to all sidetrack work?", a:"All operations shall be conducted in accordance with good oilfield practice.\nThis is the overarching standard under CCR §1722(a).", c:"CCR §1722(a)"},
+  ],
+  rework: [
+    {q:"What is the regulatory definition of 'rework' under CalGEM?", a:"Any operation subsequent to drilling that involves deepening, redrilling, plugging, or permanently altering in any manner the casing of a well or its function.\nDefined in CCR §1720(b).", c:"CCR §1720(b)"},
+    {q:"What form is needed for a rework permit?", a:"OG106 (Notice of Intention) filed in duplicate with the appropriate district office.", c:"PRC §3203(b)"},
+    {q:"Does routine maintenance (rod/pump changes) require an NOI?", a:"No — routine maintenance that does NOT permanently alter the casing or well function does NOT require an NOI.\nOnly operations that deepen, redrill, plug, or permanently alter the casing require an OG106.", c:"CCR §1720(b)"},
+    {q:"What attachment is mandatory on a rework NOI?", a:"A wellbore schematic diagram showing the current well configuration and proposed changes.\nMust include casing intervals, perforations, cement status, and what will be modified.", c:"CCR §1722(d)"},
+    {q:"When is CEQA required for a rework?", a:"When the rework changes the well's completion zone, field, or area.\nA copy of the Notice of Determination or Exemption must be attached to the OG106.", c:"PRC §3203.5"},
+    {q:"What BOPE rules apply to rework operations in urban areas?", a:"ALL operations in urban areas require BOPE regardless of well type or pressure regime.", c:"CCR §1722.5"},
+    {q:"What must be posted at the well site during a rework?", a:"The P-Report (Permit to Conduct Well Operations) must be posted at the well site throughout all operations.", c:"CCR §1722(e)"},
+    {q:"What advance notice is required for CalGEM inspections during a rework?", a:"Operators must give the appropriate Division district office sufficient advance notice of the time for inspections and tests requiring Division personnel.", c:"CCR §1722(f)"},
+    {q:"Can a rework deviate from the approved program?", a:"No — operations shall not deviate from the approved program without prior Division approval, except in an emergency.", c:"CCR §1722(g)"},
+    {q:"What PRC section requires well control during ALL operations?", a:"PRC §3219 — operators must maintain well control during ANY operation, with or without a permit.", c:"PRC §3219"},
+    {q:"What must be reported promptly during a rework?", a:"Blowouts, fires, serious accidents, and significant gas or water leaks must be promptly reported to the appropriate Division district office.", c:"CCR §1722(i)"},
+    {q:"How long is a rework NOI valid?", a:"24 months from the date CalGEM received it.\nOperations, when commenced, must be completed in a timely and orderly manner.", c:"CCR §1722(d)"},
+    {q:"Can an approval for rework operations be extended?", a:"Yes — the approval may be extended for ONE additional year if the operator submits a supplementary notice PRIOR to expiration and shows good cause for the extension.", c:"CCR §1722(d)"},
+    {q:"What does CalGEM examine regarding zone isolation in a rework?", a:"Whether the rework will maintain proper isolation between productive zones and freshwater aquifers.\nZone isolation is a primary safety concern.", c:"CCR §1722.2–§1722.4"},
+    {q:"What is CalGEM's scope of examination for wellbore integrity?", a:"CalGEM checks whether the current casing and cement condition is adequate to support the proposed rework operations.", c:"CCR §1722.3"},
+    {q:"What general operational standard applies to all reworks?", a:"All operations shall be conducted in accordance with good oilfield practice.\nThis is the overarching standard under CCR §1722(a).", c:"CCR §1722(a)"},
+    {q:"Give an example of a rework that does NOT require CEQA.", a:"A squeeze cement job to repair casing in the same completion zone, or a perforation change within the same zone and field.\nCEQA is only triggered when the field, area, or zone changes.", c:"CCR §1720(b)"},
+    {q:"What does 'permanently altering the casing' include?", a:"Perforating new intervals, squeeze cementing, cutting casing, milling, setting or removing liners, changing the well's function (e.g., producer to injector), or any modification that permanently changes casing configuration or well use.", c:"CCR §1720(b)"},
+    {q:"What information should the rework NOI include about proposed operations?", a:"Current well configuration, type of rework (recompletion, squeeze, casing repair, etc.), proposed changes to perforations or zones, updated wellbore schematic, BOPE plan, and anticipated timeline.", c:"CCR §1722(d)"},
+    {q:"Who has the authority to require a BOP and control plan for rework operations?", a:"The Supervisor, for critical or high-pressure wells.\nThe plan must include duties, training, supervision, and schedules for testing equipment and drills.", c:"CCR §1722(c)"},
+    {q:"What regulation requires the operator to have a spill contingency plan?", a:"CCR §1722(b).\nMust be filed within six months of the effective date or within three months after initial production or acquisition.", c:"CCR §1722(b)"},
+    {q:"Can the well number/designation be changed during a rework?", a:"Not without first obtaining written consent of the Supervisor.\nThe well number specified in the NOI shall not be changed unilaterally.", c:"PRC §3203(b)"},
+    {q:"What is the difference between a rework and a deepen?", a:"A deepen specifically involves drilling below the current total depth. A rework is the broader category that includes deepening, redrilling, plugging, or any permanent alteration of casing or function.\nDeepening is a subset of rework.", c:"CCR §1720(b)"},
+    {q:"What CalGEM concerns are specific to reworks involving zone changes?", a:"CalGEM checks field rule compliance for the new zone, proper isolation from old perforations, freshwater protection, and whether CEQA is required due to the field/area change.", c:"CCR §1722(k)"},
+    {q:"What happens if rework operations are not commenced within the NOI validity period?", a:"The NOI and approval are cancelled.\nUnder CCR §1722(d), notices will be cancelled if proposed operations have not commenced within one year of receipt (though PRC §3203(a) gives 24 months).", c:"CCR §1722(d), PRC §3203(a)"},
+  ],
+  deepen: [
+    {q:"What is the regulatory basis for requiring an NOI to deepen a well?", a:"PRC §3203(b) — after completion of any well, this section applies to the deepening or redrilling of the well.\nDeepening is also explicitly listed as a type of 'rework' under CCR §1720(b).", c:"PRC §3203(b), CCR §1720(b)"},
+    {q:"What form is filed to deepen a well?", a:"OG106 (Notice of Intention) filed in duplicate with the appropriate district office.\nThis is the universal NOI form for all CalGEM permits.", c:"PRC §3203(b)"},
+    {q:"At what depth threshold does the individual bond amount increase?", a:"10,000 feet.\nBelow 10,000 ft: $25,000 individual bond.\nAt or above 10,000 ft: $40,000 individual bond.", c:"PRC §3204(a)"},
+    {q:"What must the deepening NOI include regarding the drilling program?", a:"Current total depth, proposed new total depth, target zone/formation, drilling program for the deeper section, updated casing/cementing plan, drilling fluid program, BOPE plan, and directional survey plan.", c:"CCR §1722(d)"},
+    {q:"What casing and cementing requirements apply to the deepened section?", a:"All hydrocarbon zones and freshwater aquifers penetrated between old TD and new TD must be protected with adequate casing and cement.\nGoverned by CCR §1722.2 through §1722.4.", c:"CCR §1722.2–§1722.4"},
+    {q:"Why must the drilling fluid program be updated for a deepening?", a:"Deeper formations may have higher pressures, different fluid types, or H₂S.\nThe drilling fluid weight and properties must be adequate for the deeper pressure regime.", c:"CCR §1722.6"},
+    {q:"What BOPE consideration is specific to deepening operations?", a:"BOPE must be adequate for the deeper anticipated pressures, which may be significantly higher than the original completion depth.\nMay require higher-rated equipment.", c:"CCR §1722.5"},
+    {q:"What directional survey requirement applies when deepening?", a:"A directional survey (CCR §1722.7) must be conducted for the deepened section to confirm the wellbore stays within permitted boundaries at the new depth.", c:"CCR §1722.7"},
+    {q:"What well spacing concern is unique to deepening?", a:"The bottom-hole location at the new depth must comply with well spacing rules for the TARGET pool, which may have different spacing requirements than the original completion zone.", c:"CCR §1721"},
+    {q:"When is CEQA required for a deepening operation?", a:"When deepening targets a new field or area, or when it changes the well's environmental footprint beyond what was originally approved.", c:"PRC §3203.5"},
+    {q:"What must be posted at the well site during deepening?", a:"The P-Report must be posted at the well site at all times during operations.", c:"CCR §1722(e)"},
+    {q:"Can the operator deviate from the approved deepening program?", a:"No — deviation is not permitted without prior Division approval, except in an emergency.", c:"CCR §1722(g)"},
+    {q:"What CalGEM review concern addresses the existing wellbore?", a:"CalGEM checks whether the existing casing is mechanically sound enough to support deepening operations, including the weight of new casing strings and the drilling loads.", c:"CCR §1722.3"},
+    {q:"How long is a deepening NOI valid?", a:"24 months from the date CalGEM received it.\nCannot be extended; deemed cancelled if not commenced.", c:"PRC §3203(a)"},
+    {q:"What hazard assessment does CalGEM look for in a deepening NOI?", a:"Anticipated H₂S presence, abnormal pressures, lost circulation zones, and other hazards in the deeper section.\nThe operator must demonstrate preparedness for these conditions.", c:"CCR §1722"},
+    {q:"What is the general operational standard that applies to all deepening work?", a:"All operations shall be conducted in accordance with good oilfield practice.\nCCR §1722(a).", c:"CCR §1722(a)"},
+    {q:"What happens if deepening crosses into a new pool with different field rules?", a:"The proposed deeper completion must be consistent with field rules for that formation.\nDeviations must be justified and approved by CalGEM.", c:"CCR §1722(k)"},
+    {q:"What reporting is required during deepening operations?", a:"Blowouts, fires, serious accidents, and significant gas or water leaks must be promptly reported to the district office.", c:"CCR §1722(i)"},
+    {q:"What advance notice must be given for CalGEM inspections during deepening?", a:"Sufficient advance notice to the district office for inspections and tests requiring Division personnel.", c:"CCR §1722(f)"},
+    {q:"What OG160 requirement may be triggered by deepening?", a:"If the new total depth crosses 10,000 ft, an updated OG160 (Oil and Gas Bond) must be filed.\nThe bond increases from $25,000 to $40,000 per well.", c:"PRC §3204"},
+    {q:"What is the difference between deepening and a sidetrack?", a:"Deepening extends the existing wellbore straight down from current TD.\nA sidetrack cements part of the original wellbore and drills a new lateral path.\nBoth are classified as reworks under CCR §1720(b).", c:"CCR §1720(b)"},
+    {q:"Who maintains authority over well control during deepening?", a:"The operator must maintain well control during ANY operation, with or without a permit, under PRC §3219.", c:"PRC §3219"},
+    {q:"What is the review period for CalGEM to respond to a deepening NOI?", a:"10 working days from the date of receipt.\nSilence is deemed approval.", c:"PRC §3203(a)"},
+    {q:"Can a blanket bond be used instead of an individual bond for deepening?", a:"Yes — operators with 20+ wells may file a blanket bond in lieu of individual bonds.\nBlanket bond tiers: $200k (≤50 wells), $400k (51–500), $2M (501–10k), $3M (>10k).", c:"PRC §3205"},
+    {q:"What must the updated wellbore schematic show for a deepening?", a:"Existing casing strings, proposed deeper hole section, new casing strings to be run, cementing plan for the new section, and target perforation intervals.", c:"CCR §1722(d)"},
+  ],
+  abandon: [
+    {q:"What form is filed to initiate plugging and abandonment?", a:"OG106 (Notice of Intention) filed in duplicate.\nThe same universal form is used for all permit types including P&A.", c:"PRC §3203(b)"},
+    {q:"What is the minimum cement plug requirement for an oil/gas zone in open hole?", a:"A cement plug from at least 100 feet below the bottom of each oil or gas zone to at least 100 feet above the top of each zone.\nCCR §1723.1(a).", c:"CCR §1723.1(a)"},
+    {q:"What is the minimum cement plug requirement for an oil/gas zone in cased hole?", a:"All perforations must be plugged with cement. The plug must extend at least 100 feet above the top of the highest of: landed liner, uppermost perforations, casing cementing point, water shut-off holes, or the zone.", c:"CCR §1723.1(b)"},
+    {q:"What is the freshwater protection plug requirement in open hole?", a:"A minimum 200-foot cement plug across ALL fresh-saltwater interfaces.\nThe plug may be placed wholly within a thick shale separating freshwater from saltwater sands.", c:"CCR §1723.2(a)"},
+    {q:"What is the freshwater protection plug requirement in cased hole?", a:"If cement exists behind casing across the interface: 100-ft cement plug inside casing.\nIf cement behind casing is below the top of the saltwater sands: squeeze cementing through perforations is required plus a 100-ft plug.", c:"CCR §1723.2(b)"},
+    {q:"What is the casing shoe plug requirement?", a:"If the hole is open below a casing shoe, a cement plug must extend from at least 50 feet below to at least 50 feet above the shoe.\nIf cleanup below is impossible, 100-ft plug placed as deep as possible.", c:"CCR §1723.3"},
+    {q:"What is the surface plug requirement?", a:"At least a 25-foot cement plug at the surface in the hole and all annuli.\nCasing cut off 5–10 ft below the surface of the ground.\nSteel plate welded on top showing the last 5 digits of the API well number.", c:"CCR §1723.5"},
+    {q:"What is the depth limit for placing cement plugs by bailer?", a:"Placing a cement plug by bailer is NOT permitted at a depth greater than 3,000 feet.\nWater is the only permissible hole fluid when placing a plug by bailer.", c:"CCR §1723(c)"},
+    {q:"What are the surface pour limitations?", a:"A surface cement pour is permitted in an empty hole with a diameter of not less than 5 inches.\nDepth limitations are determined on an individual well basis by the district deputy.", c:"CCR §1723(d)"},
+    {q:"What must be done about junk left in the hole during P&A?", a:"Diligent effort must be made to recover junk.\nIf unrecoverable: cement must be downsqueezed through or past the junk, and a 100-foot cement plug placed on top.\nIf squeeze is impossible: 100-ft plug on top of junk.", c:"CCR §1723(f)"},
+    {q:"What special procedure applies if a radioactive tool is lost in the hole?", a:"A 100-ft standard color dyed (red iron oxide) cement plug placed on top, plus a whipstock or deflection device on top to prevent accidental disintegration.\nMust also comply with Dept. of Health Services regulations.", c:"CCR §1723(g)"},
+    {q:"Which P&A operations must be witnessed by Division personnel?", a:"Oil/gas zone plug location and hardness (shall witness)\nFreshwater plug location and hardness (shall witness)\nCementing through perforations (shall witness)\nCasing shoe plug (shall witness)\nSurface plug (shall witness/verify)\nEnvironmental inspection (shall verify)", c:"CCR §1723.7"},
+    {q:"What is required in the hole fluid between cement plugs?", a:"Mud fluid of proper weight and consistency to prevent movement of other fluids into the wellbore.\nMud must be placed across all intervals not plugged with cement.\nSurface poured into all open annuli.", c:"CCR §1723(b)"},
+    {q:"Can BOPE be required during P&A operations?", a:"Yes — BOPE may be required during P&A. Any BOPE requirements determined necessary by the district deputy will appear on the approval to plug and abandon issued by the Division.", c:"CCR §1723(e)"},
+    {q:"What environmental inspection is required after P&A?", a:"The Division shall determine that CalGEM environmental regulations (CCR Title 14, Subchapter 2) have been adhered to.\nThis is the final step in the P&A witnessing process.", c:"CCR §1723.7(h)"},
+    {q:"Can bridge plugs be used in lieu of cement during P&A?", a:"A single bridge plug may be allowed above the lowermost zone in a multiple-zone completion IF that zone is isolated by cement behind casing.\nSubsequent bridge plugs are not allowed unless separated by cement plugs meeting §1723.1(b).", c:"CCR §1723.1(d)"},
+    {q:"What must temporary bridge plugs be replaced with before final abandonment?", a:"Temporary bridge plugs must be removed and replaced with cement plugs prior to shallower zone completions or well abandonment.", c:"CCR §1723.1(d)"},
+    {q:"What special plugging may be required for thick depleted intervals?", a:"Fractured shale/schist, massive sand intervals with good vertical permeability, depleted intervals >100 ft thick, or multiple zone completions may require special plugging.\nMinimum: open hole plug from 100 ft below to 100 ft above the zone top.", c:"CCR §1723.1(c)"},
+    {q:"How deep must casing be cut below the surface?", a:"At least 5 feet but no more than 10 feet below the surface of the ground.\nThe district deputy may approve a different cut-off depth based on conditions such as construction grading.", c:"CCR §1723.5"},
+    {q:"What identification must the steel plate show after abandonment?", a:"The steel plate must show the well's identification, indicated by the last five digits of the API well number.\nThe plate must be at least as thick as the outer well casing and welded around the circumference.", c:"CCR §1723.5"},
+    {q:"Can casing be recovered during P&A?", a:"Yes — approval to recover all casing possible may be given where subsurface plugging can be done to the satisfaction of the district deputy.", c:"CCR §1723.6(a)"},
+    {q:"What safety requirement applies to using explosives during casing recovery?", a:"The hole must be full of fluid prior to detonation of any explosives.\nExplosives may only be utilized by a licensed handler with required permits.", c:"CCR §1723.6(b)"},
+    {q:"What must the wellbore schematic show on a P&A NOI?", a:"All casing intervals and sizes, perforation locations, proposed cement plug depths inside casing, cement location outside casing, fresh-saltwater interfaces, and the complete proposed plug placement sequence.", c:"CCR §1722(d)"},
+    {q:"What special plugging may be needed where groundwater conditions dictate?", a:"Special procedures may be specified to: prevent contamination by downward percolation of poor quality surface waters, separate water zones of varying quality, and isolate dry sands in hydraulic continuity with groundwater.", c:"CCR §1723.2(c)"},
+    {q:"How soon must radioactive material losses be reported?", a:"Promptly — to the Dept. of Health Services (per Title 17 regulations), to OES 24-hour Emergency (1-800-852-7550), and to the appropriate CalGEM district office.", c:"CCR §1722(j)"},
+  ],
+  reabandon: [
+    {q:"What form is filed for a re-abandonment operation?", a:"OG106 (Notice of Intention) — the same form used for the original abandonment.\nRe-entry to replace cement plugs and re-abandon uses the standard NOI process.", c:"PRC §3203(b)"},
+    {q:"What are common reasons CalGEM may order a re-abandonment?", a:"A previously abandoned well is found to be leaking fluids to the surface, contaminating groundwater, or creating a surface hazard.\nWells abandoned under older standards that don't meet current requirements.\nWells within an injection project AoR lacking adequate cement.", c:"CCR §1723, §1724.8"},
+    {q:"What UIC regulation may trigger a re-abandonment?", a:"CCR §1724.8 — AoR Evaluation.\nP&A wells in the Area of Review must have cement per §1723.1.\nA safe assumption is 100 linear ft verified or 150 linear ft calculated cement above the injection zone.\nIf inadequate, CalGEM may require re-entry and re-plugging.", c:"CCR §1724.8"},
+    {q:"What must the re-abandonment wellbore schematic show?", a:"Must clearly distinguish between existing plugs (as found) and proposed new/replacement plugs.\nShould show any plugs to be drilled out, new plug placements, and the complete re-abandonment sequence.", c:"CCR §1722(d)"},
+    {q:"Do the original P&A requirements apply to a re-abandonment?", a:"Yes — all requirements under CCR §1723 through §1723.8 apply fully to re-abandonment operations.\nCalGEM may also impose additional requirements beyond the original standards.", c:"CCR §1723"},
+    {q:"What is a key concern when re-entering old abandoned wells?", a:"Well age and condition — the casing may be deteriorated, cement may have degraded, and downhole conditions may be uncertain.\nThe re-entry plan must address these risks.", c:"CCR §1722"},
+    {q:"Must the surface completion meet current standards after re-abandonment?", a:"Yes — the surface must be brought to current standards:\nCasing cut 5–10 ft below grade, steel plate with API number welded on, 25-ft minimum surface plug.", c:"CCR §1723.5"},
+    {q:"Is Division witnessing required during re-abandonment?", a:"Yes — all the witnessing requirements of CCR §1723.7 apply to re-abandonment, including oil/gas zone plugs, freshwater protection, casing shoe plugs, and surface plug verification.", c:"CCR §1723.7"},
+    {q:"Is an environmental inspection required after re-abandonment?", a:"Yes — the Division shall determine that environmental regulations (CCR Title 14, Subchapter 2) have been adhered to, just as with an original abandonment.", c:"CCR §1723.7(h)"},
+    {q:"Can CalGEM order a re-abandonment at the operator's expense?", a:"Yes — CalGEM has authority to order operators to re-plug wells that are found to be deficient, leaking, or posing hazards.\nThe cost falls on the operator (or potentially the state for orphan wells).", c:"PRC §3106"},
+    {q:"What freshwater protection concern is heightened during re-abandonment?", a:"Wells abandoned under older regulations may lack adequate freshwater interface plugging.\nCalGEM pays particular attention to ensuring fresh-saltwater interface plugs meet current §1723.2 standards.", c:"CCR §1723.2"},
+    {q:"What BOPE consideration applies to re-entry of an abandoned well?", a:"BOPE may be required based on the well's pressure history and current condition.\nThe district deputy determines the requirements, which appear on the P-Report.", c:"CCR §1723(e)"},
+    {q:"What historical records should accompany a re-abandonment NOI?", a:"Original P&A report, original plug depths, cement volumes used, known deficiencies or leakage history, and any post-abandonment monitoring data.", c:"CCR §1722(d)"},
+    {q:"How many linear feet of verified cement above an injection zone is considered safe for AoR purposes?", a:"100 linear feet of verified cement (by cement evaluation log or records), OR 150 linear feet of calculated cement above the injection zone.\nIf less, CalGEM may require re-entry and remediation.", c:"CCR §1724.8"},
+    {q:"What is the minimum freshwater interface plug in open hole?", a:"200-foot cement plug across all fresh-saltwater interfaces.\nSame requirement as original P&A under §1723.2(a).", c:"CCR §1723.2(a)"},
+    {q:"What is the minimum freshwater interface plug in cased hole?", a:"100-foot cement plug inside the casing across the interface.\nIf cement behind casing doesn't reach above the saltwater sands, squeeze cementing through perforations is also required.", c:"CCR §1723.2(b)"},
+    {q:"What is the casing shoe plug requirement during re-abandonment?", a:"Same as original: cement plug from 50 ft below to 50 ft above any casing shoe with open hole below.\nIf cleanup below the shoe is impossible, 100-ft plug as deep as possible.", c:"CCR §1723.3"},
+    {q:"What surface plug requirements must a re-abandonment meet?", a:"25-ft minimum cement plug at surface in hole and all annuli.\nCasing cut 5–10 ft below ground surface.\nSteel plate welded on top showing last 5 digits of API number.", c:"CCR §1723.5"},
+    {q:"Can old plugs be drilled out during re-abandonment?", a:"Yes — old, deficient cement plugs may need to be drilled out and replaced with new plugs meeting current standards.\nThe drill-out plan must be included in the NOI.", c:"CCR §1723"},
+    {q:"What wells are most commonly subject to re-abandonment orders?", a:"Wells abandoned under older, less stringent standards.\nWells within the Area of Review (AoR) of active injection projects.\nWells found to be leaking or contaminating groundwater.\nOrphan wells being addressed by state remediation programs.", c:"CCR §1724.8, PRC §3106"},
+    {q:"What reporting requirements apply during re-abandonment operations?", a:"Same as all operations: blowouts, fires, serious accidents, and significant gas/water leaks must be promptly reported to the district office.", c:"CCR §1722(i)"},
+    {q:"What additional plugging may CalGEM require beyond original standards?", a:"CalGEM may require additional plugging beyond the original requirements if the well's current condition, new regulatory standards, or proximity to injection projects warrant enhanced protection.", c:"CCR §1723"},
+    {q:"What is the depth limit for bailer-placed cement plugs during re-abandonment?", a:"Same as original P&A: placing a cement plug by bailer is NOT permitted at a depth greater than 3,000 feet.", c:"CCR §1723(c)"},
+    {q:"What general standard governs all re-abandonment operations?", a:"All operations shall be conducted in accordance with good oilfield practice.\nCCR §1722(a) — the overarching operational standard.", c:"CCR §1722(a)"},
+    {q:"How long is a re-abandonment NOI valid?", a:"24 months from the date CalGEM received it.\nIf operations are not commenced within 24 months, the NOI is deemed cancelled and cannot be extended.", c:"PRC §3203(a)"},
+  ]
+};
+
+// QUIZ ENGINE
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initQuiz(containerId, cards) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let shuffled = shuffle(cards);
+  let idx = 0;
+  let scores = new Array(shuffled.length).fill(null);
+
+  function render() {
+    if (idx >= shuffled.length) {
+      renderScore();
+      return;
+    }
+    const card = shuffled[idx];
+    let dotsHtml = '<div class="quiz-progress">';
+    for (let i = 0; i < shuffled.length; i++) {
+      let cls = 'quiz-dot';
+      if (i === idx) cls += ' current';
+      else if (scores[i] === true) cls += ' correct';
+      else if (scores[i] === false) cls += ' incorrect';
+      dotsHtml += `<div class="${cls}" data-idx="${i}"></div>`;
+    }
+    dotsHtml += '</div>';
+
+    container.innerHTML = `
+      ${dotsHtml}
+      <div class="quiz-card">
+        <div class="quiz-question" id="qq">
+          <span style="color:var(--text-muted);font-family:'JetBrains Mono';font-size:10px;display:block;margin-bottom:6px;">QUESTION ${idx+1} OF ${shuffled.length}</span>
+          ${card.q}
+        </div>
+        <div class="quiz-answer" id="qa">
+          ${card.a}
+          <span class="answer-cite">${card.c}</span>
         </div>
       </div>
-      <div class="fc-nav" id="fc-nav">
-        <button class="fc-btn didnt" onclick="markCard(false)">✗ Didn't Know</button>
-        <button class="fc-btn knew" onclick="markCard(true)">✓ Knew It</button>
+      <div class="quiz-buttons" id="qbtns" style="display:none;">
+        <button class="quiz-btn knew" id="btn-knew">✓ Knew It</button>
+        <button class="quiz-btn didnt" id="btn-didnt">✗ Didn't Know</button>
       </div>
-      <div class="fc-nav" id="fc-nav2">
-        <button class="fc-btn prev" id="fc-prev" onclick="prevCard()">← Previous</button>
-        <button class="fc-btn restart" onclick="restartQuiz()">↻ Restart</button>
-        <button class="fc-btn next" id="fc-next" onclick="nextCard()">Next →</button>
-      </div>
-      <div class="fc-result" id="fc-result" style="display:none">
-        <div class="big" id="fc-pct"></div>
-        <div class="msg" id="fc-msg"></div>
-        <div class="detail" id="fc-detail"></div>
-        <br><button class="fc-btn restart" onclick="restartQuiz()">↻ Try Again</button>
-      </div>
-    </div>
-  </div>
-</div>
+    `;
 
-<script>
-document.getElementById('tabs').addEventListener('click',e=>{
-  if(!e.target.classList.contains('tab'))return;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  e.target.classList.add('active');
-  document.getElementById('s-'+e.target.dataset.t).classList.add('active');
-});
-</script>
-<script>
-const cards=[
-  {q:"What is the universal permit form for all well operations (drill, rework, P&A)?",
-   a:"OG106 — Notice of Intention. It replaced four previous forms: OG105, OG107, OG108, and OG123. Filed in duplicate with the appropriate CalGEM district office.",
-   ref:"CalGEM Permitting"},
-  {q:"What form is used to designate a California agent, and what are the requirements?",
-   a:"OG150 — Oil and Gas Agent Designation and Organization Information Change.\n\nThe agent must be an individual (not a company) who resides in California. They serve as the company contact for all correspondence, permits, and legal process. A separate form is required for each designated area of the state.",
-   ref:"CalGEM Permitting"},
-  {q:"What must accompany an OG150 agent designation?",
-   a:"Form OGD7 — Contact Questionnaire. It must include the name of a company representative who can answer technical questions related to proposed operations.",
-   ref:"CalGEM Permitting"},
-  {q:"What bonding form is required and when?",
-   a:"OG160 — Oil and Gas Bond. An individual indemnity or cash bond must accompany every Notice of Intention to Drill, unless a blanket bond has already been filed. Bond amounts are based on well depth. OG160 replaced all previous bond forms (blanket, individual, onshore, offshore, etc.).",
-   ref:"CalGEM Permitting"},
-  {q:"How long is a Notice of Intention (OG106) valid?",
-   a:"24 months from the date CalGEM received it. If operations have not commenced within 24 months, the notice is deemed canceled and cannot be extended.\n\nHowever, a Well Status Inquiry letter from CalGEM may be used to request a one-year extension prior to expiration.",
-   ref:"PRC §3203(a)"},
-  {q:"What CEQA requirements must be met before submitting an NOI to drill?",
-   a:"CEQA compliance must be completed PRIOR to submitting the Notice of Intention. This usually involves obtaining permits from a local land-use agency. A copy of the local jurisdiction's Notice of Determination or Notice of Exemption must be attached to and submitted with the OG106.",
-   ref:"CEQA / CalGEM Permitting"},
-  {q:"What is a P-Report and what must be done with it?",
-   a:"A P-Report is CalGEM's Permit to Conduct Well Operations, issued after approving an NOI. It must be posted at the well/drill site at all times during operations. It lists all mandatory tests and inspections that CalGEM inspectors must witness and approve.",
-   ref:"CalGEM Permitting"},
-  {q:"What is the definition of 'rework' under CalGEM regulations?",
-   a:"Per §1720(b), 'rework' means any operation subsequent to drilling that involves deepening, redrilling, plugging, or permanently altering in any manner the casing of a well or its function. All operations other than drilling new wells and abandoning existing wells fall under the general classification of 'Rework'.",
-   ref:"CCR §1720(b)"},
-  {q:"What are the three protections required for all new wells?",
-   a:"1. Protection of all hydrocarbon zones and all surface/subsurface fresh waters through adequate casing and cementing practices and proper drilling procedures\n2. Adequate blowout prevention equipment (BOPE) per MO7\n3. Proper well spacing per CCR §1721–1721.9",
-   ref:"CalGEM Permitting"},
-  {q:"When must CalGEM be notified of a well or facility disposition/transfer?",
-   a:"No later than the date the sale, transfer, conveyance, exchange, or other disposition becomes final. Both the selling operator AND the acquiring operator must notify CalGEM using form OG30A.",
-   ref:"CalGEM Permitting"},
-  {q:"What must a P&A wellbore schematic include?",
-   a:"Casing intervals and sizes, perforation locations, cement plug depths inside casing, and the location of cement outside casing. The schematic is attached to the OG106 Notice of Intention.",
-   ref:"CalGEM Permitting"},
-  {q:"What happens if radioactive materials are lost in a well?",
-   a:"Per CCR §1722(j), the loss must be promptly reported to:\n• Department of Health Services: (916) 327-5106\n• OES 24-hour Emergency: 1-800-852-7550\n• Appropriate CalGEM district office\n\nCalGEM will provide special plugging instructions per §1723(g). Exception: radioactive tracers used in injection surveys.",
-   ref:"CCR §1722(j), §1723(g)"},
-  {q:"What is required to obtain approval for an underground injection project?",
-   a:"A complete project application per CCR §1724.7 including:\n• Engineering study (AoR determination, well maps, casing diagrams)\n• Geologic study (reservoir characteristics, structural/isopach maps, cross sections, e-log)\n• Injection plan (purpose, facilities, rates/volumes, monitoring, chemical analysis)\n• Individual well NOIs for all wells in the project\n\nCalGEM consults with the State/Regional Water Quality Control Board during review.",
-   ref:"CCR §1724.6, §1724.7"},
-  {q:"What is a Project Approval Letter (PAL)?",
-   a:"The written document by which CalGEM approves an underground injection project. It specifies the location and nature of the project, the approved injection zone (which cannot include a USDW), and all conditions of approval. The Division reviews PALs at least once every 3 years. PALs can be suspended, modified, or rescinded.",
-   ref:"CCR §1724.6(b), (d)"},
-  {q:"How often must MIT Part 1 (casing integrity) be performed on injection wells?",
-   a:"At least once every 5 years, or:\n• Every 1 year for gas disposal wells\n• After repositioning or replacement of downhole equipment\n• Whenever requested by the Division\n\nThe test requires at least 200 psi above surface pressure, and passes if ≤3% pressure change over 30 minutes. Cyclic steam wells: up to 10% increase is acceptable.",
-   ref:"CCR §1724.10.1(a)"},
-  {q:"How often must MIT Part 2 (fluid migration) be performed?",
-   a:"At least once every 2 years, with these exceptions:\n• Disposal wells: every 1 year\n• Low-use cyclic steam wells: every 5 years\n• Steamflood wells with tubing & packer: every 5 years\n\nMethods: radioactive tracer survey, temperature survey, or noise log. Also required after any unplanned injection pressure variance >25% within 48 hours.",
-   ref:"CCR §1724.10.2(b)"},
-  {q:"What happens if an injection well fails MIT or is not tested as required?",
-   a:"The well automatically loses approval to inject. Written CalGEM approval is required to reinitiate injection. The operator must complete remedial work or further testing within 180 days (unless a longer timeframe is approved). Each day of unauthorized injection is a separate violation.",
-   ref:"CCR §1724.10(i)(4), (i)(5)"},
-  {q:"What are the continuous pressure monitoring requirements for injection wells?",
-   a:"Per §1724.10.4:\n• Well-specific injection pressure must be continuously recorded at all times the well is approved for injection\n• Pressure records maintained as long as well is approved + 3 years after\n• Monthly reporting of highest instantaneous pressure for each well\n• SCADA systems are preferred but not required\n• Devices must be calibrated per manufacturer specs",
-   ref:"CCR §1724.10.4"},
-  {q:"What is the oil and gas assessment rate for fiscal year 2025/26?",
-   a:"$1.279550900 per equivalent barrel of oil or 10,000 cubic feet of natural gas.\n\nCalculated as: Assessment amount ($142,391,556.40) ÷ Total production (104,695,509 equiv. barrels).\n\nThe rate has risen substantially from $0.5958 in 2021/22.",
-   ref:"CalGEM Assessment Process"},
-  {q:"When are oil and gas assessment payments due?",
-   a:"Assessment Notices are sent before June 15 each year.\n• If total assessment is under $500: full amount due on or before August 15\n• If assessment is $500 or more: half due by August 15, balance due by February 1\n\nSubstantial penalties and interest apply to delinquent payments.",
-   ref:"PRC Article 7, Division 3"},
-  {q:"What triggers the requirement to report injection liquid chemical analysis?",
-   a:"Per §1724.10(d), a representative chemical analysis (per §1724.7.2) must be filed whenever the source of injection liquid is changed — meaning a contributing source is added, removed, or significantly changed in relative proportion such that the last analysis is no longer representative.",
-   ref:"CCR §1724.10(d)"},
-  {q:"What is the default Area of Review (AoR) for an injection well?",
-   a:"A minimum fixed radius of ¼ mile from the wellbore (projected on a horizontal plane), unless an approved mathematical model is used to determine the zone of endangering influence.\n\nThe AoR may be reduced or expanded based on well completion, local geology, and injection parameters. CalGEM references the federal SDWA regulations (40 CFR §146.6).",
-   ref:"CCR §1720.1(a) / 40 CFR §146.6"},
-  {q:"What must an operator do within 60 days of transferring a UIC project?",
-   a:"The new operator must meet with Division staff to ensure a complete understanding of the applicable requirements and terms and conditions of the Project Approval Letter.",
-   ref:"CCR §1724.6(f)"},
-  {q:"What are the surface expression response radius requirements?",
-   a:"If a surface expression occurs near an injection well:\n• Within 150 ft: cease injection immediately\n• Still flowing after 24 hrs + within 300 ft: cease injection\n• Still flowing after 5 days + within 600 ft: cease injection\n• Still flowing after 10 days: Division determines expanded radius\n\nWells that cease injection may not resume without written Division approval.",
-   ref:"CCR §1724.11(d)"},
-  {q:"What advance notice is required before conducting MIT on injection wells?",
-   a:"At least 48 hours' notice to the appropriate Division district office (unless the Division approves shorter notice). This also applies to subsequent schedule changes for a previously noticed test. Digital copies of surveys and test results must be submitted within 60 days.",
-   ref:"CCR §1724.10(i)(1), (i)(2)"}
-];
-let idx=0,score={y:0,n:0},answers=new Array(cards.length).fill(null);
-function render(){
-  const c=cards[idx];
-  document.getElementById('fc-q').textContent=c.q;
-  document.getElementById('fc-a').textContent=c.a;
-  document.getElementById('fc-ref').textContent=c.ref;
-  document.getElementById('fc-cur').textContent=idx+1;
-  document.getElementById('fc-tot').textContent=cards.length;
-  document.getElementById('fc-card').classList.remove('flipped');
-  document.getElementById('fc-hint').textContent='Click to reveal answer ▼';
-  document.getElementById('fc-prev').disabled=idx===0;
-  document.getElementById('fc-next').disabled=idx>=cards.length-1;
-  updateDots();updateScore();
-  document.getElementById('fc-wrap').style.display='';
-  document.getElementById('fc-nav').style.display='';
-  document.getElementById('fc-nav2').style.display='';
-  document.getElementById('fc-result').style.display='none';
-  document.querySelector('.fc-controls').style.display='';
-  document.querySelector('.fc-dots').style.display='';
-}
-function flipCard(){
-  const card=document.getElementById('fc-card');
-  const isFlipped=card.classList.contains('flipped');
-  card.classList.toggle('flipped');
-  document.getElementById('fc-hint').textContent=isFlipped?'Click to reveal answer ▼':'Click to hide answer ▲';
-}
-function markCard(knew){
-  if(answers[idx]===null){answers[idx]=knew;if(knew)score.y++;else score.n++;}
-  updateScore();updateDots();
-  setTimeout(()=>{if(idx<cards.length-1)nextCard();else showResult();},400);
-}
-function nextCard(){if(idx<cards.length-1){idx++;render()}}
-function prevCard(){if(idx>0){idx--;render()}}
-function updateScore(){
-  document.getElementById('fc-right').textContent='✓ '+score.y;
-  document.getElementById('fc-wrong').textContent='✗ '+score.n;
-}
-function updateDots(){
-  const el=document.getElementById('fc-dots');el.innerHTML='';
-  cards.forEach((_,i)=>{
-    const d=document.createElement('div');d.className='fc-dot';
-    if(i===idx)d.classList.add('active');
-    if(answers[i]===true)d.classList.add('correct');
-    if(answers[i]===false)d.classList.add('incorrect');
-    d.onclick=()=>{idx=i;render()};el.appendChild(d);
-  });
-}
-function showResult(){
-  const total=score.y+score.n;const pct=total?Math.round(score.y/total*100):0;
-  document.getElementById('fc-pct').textContent=pct+'%';
-  let msg='';
-  if(pct>=90)msg='Outstanding! You know CalGEM permitting inside and out.';
-  else if(pct>=70)msg='Solid knowledge — a few areas to brush up on.';
-  else if(pct>=50)msg='Getting there — review the tabs for topics you missed.';
-  else msg='Time to study! Use the knowledge base tabs to review.';
-  document.getElementById('fc-msg').textContent=msg;
-  document.getElementById('fc-detail').textContent=score.y+' correct, '+score.n+' missed out of '+total;
-  document.getElementById('fc-result').style.display='';
-  document.getElementById('fc-wrap').style.display='none';
-  document.getElementById('fc-nav').style.display='none';
-  document.getElementById('fc-nav2').style.display='none';
-}
-function restartQuiz(){
-  idx=0;score={y:0,n:0};answers=new Array(cards.length).fill(null);
-  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
+    // Dot click
+    container.querySelectorAll('.quiz-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        idx = parseInt(dot.dataset.idx);
+        render();
+      });
+    });
+
+    // Question click
+    document.getElementById('qq').addEventListener('click', () => {
+      document.getElementById('qq').classList.add('revealed');
+      document.getElementById('qa').classList.add('show');
+      document.getElementById('qbtns').style.display = 'flex';
+    });
+
+    document.getElementById('btn-knew').addEventListener('click', () => {
+      scores[idx] = true;
+      idx++;
+      render();
+    });
+    document.getElementById('btn-didnt').addEventListener('click', () => {
+      scores[idx] = false;
+      idx++;
+      render();
+    });
+  }
+
+  function renderScore() {
+    const correct = scores.filter(s => s === true).length;
+    const pct = Math.round((correct / shuffled.length) * 100);
+    let msg = '';
+    if (pct >= 90) msg = 'Outstanding! You have expert-level knowledge of these regulations.';
+    else if (pct >= 70) msg = 'Strong knowledge — review the items you missed for full mastery.';
+    else if (pct >= 50) msg = 'Solid foundation — spend some time with the regulatory text to fill gaps.';
+    else msg = 'Keep studying — review the regulations and retake the quiz.';
+
+    let dotsHtml = '<div class="quiz-progress">';
+    for (let i = 0; i < shuffled.length; i++) {
+      let cls = 'quiz-dot';
+      if (scores[i] === true) cls += ' correct';
+      else if (scores[i] === false) cls += ' incorrect';
+      dotsHtml += `<div class="${cls}"></div>`;
+    }
+    dotsHtml += '</div>';
+
+    container.innerHTML = `
+      ${dotsHtml}
+      <div class="quiz-score">
+        <h3>Quiz Complete!</h3>
+        <div class="pct">${pct}%</div>
+        <div class="msg">${correct} of ${shuffled.length} correct — ${msg}</div>
+        <button class="quiz-restart" id="restart">↻ Restart Quiz</button>
+      </div>
+    `;
+    document.getElementById('restart').addEventListener('click', () => {
+      shuffled = shuffle(cards);
+      idx = 0;
+      scores = new Array(shuffled.length).fill(null);
+      render();
+    });
+  }
+
   render();
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
-  render();
-});
+
+// Initialize all quizzes
+initQuiz('quiz-newdrill', quizData.newdrill);
+initQuiz('quiz-sidetrack', quizData.sidetrack);
+initQuiz('quiz-rework', quizData.rework);
+initQuiz('quiz-deepen', quizData.deepen);
+initQuiz('quiz-abandon', quizData.abandon);
+initQuiz('quiz-reabandon', quizData.reabandon);
 </script>
 </body>
 </html>
