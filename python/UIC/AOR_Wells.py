@@ -1,5 +1,5 @@
+#Help: Input 12-digit UWIs and output Well information table in AOR format
 """
-AOR Well Information Lookup
 ===========================
 Input: 12-digit UWIs (one per line, or comma/space separated)
 Output: Well information table matching CalGEM AOR format

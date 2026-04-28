@@ -1,3 +1,4 @@
+#Help: Pull wells abandoned since a specified date, view details.
 """
 Abandoned Wells Performance Viewer  (v2)
 ==========================================
@@ -130,7 +131,7 @@ ORDER BY a.opnl_fld, a.cmpl_nme
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SQL — Tab 3: Monthly production history for a single well (full life)
+# SQL — Monthly production history for a single well (full life)
 # ─────────────────────────────────────────────────────────────────────────────
 SQL_MONTHLY_PROD_HISTORY = """
 SELECT
@@ -150,7 +151,7 @@ ORDER BY cmf.eftv_dttm
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SQL — Tab 3: Well test history for a single well (full life)
+# SQL — Well test history for a single well (full life)
 # ─────────────────────────────────────────────────────────────────────────────
 SQL_WELL_TEST_HISTORY = """
 SELECT
@@ -168,13 +169,14 @@ ORDER BY f.prod_msmt_strt_dttm
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SQL — Tab 3: Status history for a single well
+# SQL — Status history for a single well
+# FIXED: opnl_stat_on_indc (not cmpl_stat_type_cde which does not exist)
 # ─────────────────────────────────────────────────────────────────────────────
 SQL_STATUS_HISTORY = """
 SELECT
     cosf.opnl_stat_eftv_dttm AS STATUS_START,
     cosf.opnl_stat_term_dttm AS STATUS_END,
-    cosf.cmpl_stat_type_cde AS ON_OFF,
+    cosf.opnl_stat_on_indc AS ON_OFF,
     cosf.off_rsn_type_cde AS OFF_REASON,
     cosf.off_rsn_sub_type_cde AS OFF_SUB_REASON,
     ROUND(NVL(cosf.opnl_stat_term_dttm, SYSDATE) - cosf.opnl_stat_eftv_dttm, 0) AS DURATION_DAYS
@@ -184,7 +186,7 @@ ORDER BY cosf.opnl_stat_eftv_dttm
 """
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SQL — Tab 3: WRA notes for a single well
+# SQL — WRA notes for a single well
 # ─────────────────────────────────────────────────────────────────────────────
 SQL_WRA_NOTES = """
 SELECT

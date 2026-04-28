@@ -1,3 +1,4 @@
+#Help: UIC Project Dashboard - Well List, Inj & Prod Charts, Cumulative
 """
 UIC Project Dashboard  (v4)
 ============================
