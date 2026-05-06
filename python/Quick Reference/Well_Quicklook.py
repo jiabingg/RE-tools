@@ -23,6 +23,9 @@ Performance notes (v2):
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
+import json
+import urllib.request
+import urllib.parse
 from datetime import datetime
 
 # ---------------------------------------------------------------------------
@@ -51,6 +54,33 @@ except ImportError:
 DB_USER = "rptguser"
 DB_PASS = "allusers"
 DB_DSN = "ODW"
+
+# CalGEM WellStar ArcGIS REST API (public, no auth required)
+WELLSTAR_API_URL = (
+    "https://gis.conservation.ca.gov/server/rest/services/"
+    "WellSTAR/Wells/MapServer/0/query"
+)
+
+
+def fetch_wellstar(api_nbr):
+    """Query CalGEM WellStar ArcGIS REST API by 10-digit API number.
+    Returns a dict of field→value, or None on failure."""
+    params = urllib.parse.urlencode({
+        "where": f"API='{api_nbr}'",
+        "outFields": "*",
+        "f": "json",
+    })
+    url = f"{WELLSTAR_API_URL}?{params}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "WellPassport/1.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        features = data.get("features", [])
+        if features:
+            return features[0].get("attributes", {})
+    except Exception:
+        pass
+    return None
 
 
 # ============================================================================
@@ -95,6 +125,7 @@ _RESOLVE_COLS = """
     -- Master: location (well_dmn + fac_lctn_dmn)
     cd.opnl_fld,                                -- cmpl_dmn.opnl_fld
     wdm.well_nme,                               -- well_dmn.well_nme
+    wdm.dog_lse_nme AS lease_name,              -- well_dmn.dog_lse_nme
     wdm.dog_crit_indc,                          -- well_dmn.dog_crit_indc
     wdm.fctl_locn AS functional_location,       -- well_dmn.fctl_locn
     wdm.orig_grnd_elev_qty AS kb_elevation,     -- well_dmn.orig_grnd_elev_qty
@@ -125,7 +156,9 @@ _RESOLVE_COLS = """
 
     -- Extra context (used by other tabs)
     cd.cmpl_state_type_cde,
-    cd.prim_purp_type_cde
+    cd.cmpl_state_eftv_dttm,                    -- cmpl_dmn.cmpl_state_eftv_dttm
+    cd.prim_purp_type_cde,
+    wd.bore_start_dttm AS spud_date             -- wlbr_dmn.bore_start_dttm
 """
 
 _RESOLVE_FROM = """
@@ -330,8 +363,11 @@ class WellPassportApp:
         self.tab_info = ttk.Frame(self.notebook)
         self.notebook.add(self.tab_info, text="  Completion & Wellbore  ")
 
-        self.tab_mech = ttk.Frame(self.notebook)
-        self.notebook.add(self.tab_mech, text="  Casing / Tubing / Perfs  ")
+        self.tab_calgem = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_calgem, text="  ODW vs. CalGEM  ")
+
+        self.tab_prod = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_prod, text="  Production Chart (36 mo)  ")
 
         self.tab_status = ttk.Frame(self.notebook)
         self.notebook.add(self.tab_status, text="  Status & Well Test  ")
@@ -339,11 +375,11 @@ class WellPassportApp:
         self.tab_wra = ttk.Frame(self.notebook)
         self.notebook.add(self.tab_wra, text="  WRA Notes  ")
 
-        self.tab_prod = ttk.Frame(self.notebook)
-        self.notebook.add(self.tab_prod, text="  Production Chart (36 mo)  ")
-
         self.tab_wo = ttk.Frame(self.notebook)
         self.notebook.add(self.tab_wo, text="  Workover History  ")
+
+        self.tab_mech = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_mech, text="  Casing / Tubing / Perfs  ")
 
     # ---- LOOKUP DISPATCH ---------------------------------------------------
 
@@ -503,6 +539,15 @@ class WellPassportApp:
             if err:
                 errors.append(f"Workovers: {err}")
 
+            # CalGEM WellStar (external API call — independent of ODW)
+            calgem_data = None
+            api_for_calgem = info.get("WELL_API_NBR", "")
+            if api_for_calgem:
+                try:
+                    calgem_data = fetch_wellstar(api_for_calgem)
+                except Exception as e2:
+                    errors.append(f"CalGEM WellStar: {e2}")
+
             # Dispatch to UI — always, even if some queries failed
             self.root.after(0, lambda: self._populate_all(
                 resolved_name, info,
@@ -511,6 +556,7 @@ class WellPassportApp:
                 cols_wr, rows_wr,
                 cols_mp, rows_mp,
                 cols_wo, rows_wo,
+                calgem_data,
             ))
 
             # Show collected errors as a non-blocking warning
@@ -540,7 +586,8 @@ class WellPassportApp:
                       cols_st, rows_st, cols_wt, rows_wt,
                       cols_wr, rows_wr,
                       cols_mp, rows_mp,
-                      cols_wo, rows_wo):
+                      cols_wo, rows_wo,
+                      calgem_data):
 
         self.status_var.set(
             f"{well}  —  {info.get('OPNL_FLD', '')}  |  "
@@ -554,6 +601,7 @@ class WellPassportApp:
         self._populate_wra(cols_wr, rows_wr)
         self._populate_prod_chart(cols_mp, rows_mp, well, info)
         self._populate_workovers(cols_wo, rows_wo)
+        self._populate_calgem(info, calgem_data)
 
     # ---- TAB 1: Completion & Wellbore --------------------------------------
 
@@ -932,6 +980,174 @@ class WellPassportApp:
 
         tree = self._make_treeview(frm, cols_wo, rows_wo, height=20)
         tree.pack(fill=tk.BOTH, expand=True)
+
+    # ---- TAB 7: CalGEM Comparison -------------------------------------------
+
+    def _populate_calgem(self, info, calgem):
+        for w in self.tab_calgem.winfo_children():
+            w.destroy()
+
+        frm = ttk.Frame(self.tab_calgem, padding=10)
+        frm.pack(fill=tk.BOTH, expand=True)
+
+        api = info.get("WELL_API_NBR", "")
+        link = f"https://wellstar-public.conservation.ca.gov/Well/Well/Detail?api={api}"
+
+        ttk.Label(frm, text="ODW vs CalGEM WellStar Comparison",
+                  font=("Segoe UI", 12, "bold")).pack(anchor=tk.W, pady=(0, 3))
+        link_lbl = tk.Label(frm, text=link,
+                            font=("Segoe UI", 9, "underline"),
+                            foreground="#2980B9", cursor="hand2")
+        link_lbl.pack(anchor=tk.W, pady=(0, 8))
+        link_lbl.bind("<Button-1>", lambda e, url=link: __import__('webbrowser').open(url))
+
+        if calgem is None:
+            ttk.Label(frm,
+                      text="Could not retrieve CalGEM WellStar data.\n"
+                           "The ArcGIS REST API may be unavailable, or the API # "
+                           "was not found in WellStar.",
+                      font=("Consolas", 10), foreground="red").pack(
+                anchor=tk.W, padx=10, pady=10)
+            return
+
+        # Helper: CalGEM epoch dates (ms since 1970) → string
+        def _epoch_to_str(v):
+            if v is None:
+                return "\u2014"
+            try:
+                return datetime.utcfromtimestamp(v / 1000).strftime("%Y-%m-%d")
+            except Exception:
+                return str(v)
+
+        # Helper: format status On/Off from ODW
+        status_raw = info.get("STATUS_ON_OFF", "")
+        odw_status = {"Y": "On", "N": "Off"}.get(status_raw, status_raw or "\u2014")
+
+        # Helper: section/twp/range from ODW
+        sxn = info.get("SXN_NBR")
+        twp = info.get("TWP") or ""
+        rnge = info.get("RNGE") or ""
+        if sxn is not None:
+            sxn_str = str(int(sxn)) if isinstance(sxn, float) else str(sxn)
+            odw_str = f"{sxn_str}-{twp}-{rnge}"
+        else:
+            odw_str = "\u2014"
+
+        # CalGEM section/twp/range
+        c_sxn = calgem.get("Section", "")
+        c_twp = calgem.get("Township", "")
+        c_rnge = calgem.get("Range", "")
+        c_bm = calgem.get("BaseMeridian", "")
+        calgem_str = f"{c_sxn}-{c_twp}-{c_rnge} {c_bm}".strip()
+
+        # DOG Critical
+        dog_raw = info.get("DOG_CRIT_INDC", "")
+        odw_dog = {"Y": "Yes", "N": "No"}.get(dog_raw, dog_raw or "\u2014")
+        c_dog_raw = calgem.get("DOGCritical", "")
+        calgem_dog = {"Y": "Yes", "N": "No"}.get(c_dog_raw, str(c_dog_raw) if c_dog_raw else "\u2014")
+
+        # Build comparison rows: (label, odw_value, calgem_value)
+        rows = [
+            ("API #",
+             info.get("WELL_API_NBR", ""),
+             calgem.get("API", "")),
+            ("Well Name / Designation",
+             info.get("CMPL_NME", ""),
+             calgem.get("WellDesignation", "")),
+            ("Lease Name",
+             info.get("LEASE_NAME", ""),
+             calgem.get("LeaseName", "")),
+            ("Well Number",
+             "\u2014",
+             calgem.get("WellNumber", "")),
+            ("State / Status",
+             info.get("STATE", ""),
+             calgem.get("WellStatus", "")),
+            ("State / Status Eftv Date",
+             self._fmt_date(info.get("CMPL_STATE_EFTV_DTTM")),
+             _epoch_to_str(calgem.get("WellStatusDate"))),
+            ("Status On/Off",
+             odw_status,
+             "\u2014"),
+            ("Well Type",
+             info.get("PRIMARY_PURPOSE", ""),
+             calgem.get("WellTypeLabel", "") or calgem.get("WellType", "")),
+            ("Operator",
+             "\u2014",
+             calgem.get("OperatorName", "")),
+            ("Field",
+             info.get("OPNL_FLD", ""),
+             calgem.get("FieldName", "")),
+            ("Pool / Reservoir",
+             info.get("RESERVOIR_NAME", ""),
+             calgem.get("PoolName", "")),
+            ("County",
+             "\u2014",
+             calgem.get("County", "")),
+            ("District",
+             "\u2014",
+             calgem.get("District", "")),
+            ("Section-Township-Range",
+             odw_str,
+             calgem_str),
+            ("Latitude",
+             "\u2014",
+             str(calgem.get("Latitude", "")) if calgem.get("Latitude") else "\u2014"),
+            ("Longitude",
+             "\u2014",
+             str(calgem.get("Longitude", "")) if calgem.get("Longitude") else "\u2014"),
+            ("Surface X (State Plane)",
+             self._fmt_num(info.get("SURFACE_X")),
+             "\u2014"),
+            ("Surface Y (State Plane)",
+             self._fmt_num(info.get("SURFACE_Y")),
+             "\u2014"),
+            ("Total Depth",
+             self._fmt_num(info.get("WELLBORE_DEPTH_MD")),
+             str(calgem.get("TotalDepth", "")) if calgem.get("TotalDepth") else "\u2014"),
+            ("Elevation / KB",
+             self._fmt_num(info.get("KB_ELEVATION")),
+             str(calgem.get("Elevation", "")) if calgem.get("Elevation") else "\u2014"),
+            ("Spud Date",
+             self._fmt_date(info.get("SPUD_DATE")),
+             _epoch_to_str(calgem.get("SpudDate"))),
+            ("DOG Critical",
+             odw_dog,
+             calgem_dog),
+        ]
+
+        # Create treeview with 4 columns
+        tree_cols = ("FIELD", "ODW_VALUE", "CALGEM_VALUE", "MATCH")
+        tree = ttk.Treeview(frm, columns=tree_cols, show="headings", height=22)
+
+        tree.heading("FIELD", text="Field")
+        tree.heading("ODW_VALUE", text="ODW (Internal)")
+        tree.heading("CALGEM_VALUE", text="CalGEM WellStar")
+        tree.heading("MATCH", text="Match?")
+
+        tree.column("FIELD", width=200, minwidth=150)
+        tree.column("ODW_VALUE", width=250, minwidth=150)
+        tree.column("CALGEM_VALUE", width=250, minwidth=150)
+        tree.column("MATCH", width=80, minwidth=60)
+
+        for label, odw_val, calgem_val in rows:
+            odw_s = str(odw_val).strip() if odw_val else "\u2014"
+            cal_s = str(calgem_val).strip() if calgem_val else "\u2014"
+
+            # Determine match (skip if either is missing)
+            if odw_s in ("\u2014", "", "None") or cal_s in ("\u2014", "", "None"):
+                match = "\u2014"
+            elif odw_s.lower() == cal_s.lower():
+                match = "\u2713"  # checkmark
+            else:
+                match = "\u2717"  # cross mark
+
+            tree.insert("", tk.END, values=(label, odw_s, cal_s, match))
+
+        vsb = ttk.Scrollbar(frm, orient=tk.VERTICAL, command=tree.yview)
+        tree.configure(yscrollcommand=vsb.set)
+        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        vsb.pack(side=tk.RIGHT, fill=tk.Y)
 
     # ---- HELPERS -----------------------------------------------------------
 
