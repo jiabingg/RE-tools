@@ -172,6 +172,14 @@ FROM ODS.BI_WELL W WHERE {w3a}"""
 
 
 def fetch_tab3(cur, api14_wellid_map, log):
+    """Tab 3: Top Perf Depths with TVD interpolation.
+
+    Two-source strategy:
+      1. EDM.CD_PERF_INTERVAL_X  (primary — uses MD_TOP_SHOT, MD_BOTTOM_SHOT)
+      2. EDM.OXY_WELLBORE_OPENINGS_V_X  (fallback — uses OPENING_TOP_MD, OPENING_BTM_MD)
+    Wells found in source 1 are NOT re-queried in source 2.
+    TVD from DSS.SURVEY (interpolated) or MD≈TVD for vertical wells.
+    """
     all_sql = []
     well_ids = list(set(v["well_id"] for v in api14_wellid_map.values() if v.get("well_id")))
     api14s = list(api14_wellid_map.keys())
@@ -179,21 +187,75 @@ def fetch_tab3(cur, api14_wellid_map, log):
         log("Tab3: No WELL_IDs — skipping.")
         return [], "-- No WELL_IDs"
 
+    wb_to_api14 = {}
+    for a14, info in api14_wellid_map.items():
+        key = (info.get("well_id",""), info.get("wellbore_id",""))
+        wb_to_api14[key] = a14
+        # Also map by well_id alone for fallback
+        wb_to_api14.setdefault(("wellid_" + info.get("well_id",""),), a14)
+
+    perf_groups = defaultdict(list)
+    wells_with_data = set()
+
+    # ── Source 1: EDM.CD_PERF_INTERVAL_X ──
     t = time.time()
     w_perf = _chunked_in("P.WELL_ID", well_ids)
     sql_perf = f"""SELECT P.WELL_ID, P.WELLBORE_ID, P.MD_TOP_SHOT, P.MD_BOTTOM_SHOT,
     TO_CHAR(P.DATE_INTERVAL_SHOT,'YYYY-MM-DD') AS SHOT_DATE, P.INTERVAL_TYPE
 FROM EDM.CD_PERF_INTERVAL_X P WHERE {w_perf} ORDER BY P.WELL_ID, P.MD_TOP_SHOT"""
-    all_sql.append(sql_perf)
+    all_sql.append(f"-- Source 1: CD_PERF_INTERVAL_X\n{sql_perf}")
     cur.execute(sql_perf)
     perf_rows = cur.fetchall()
     perf_cols = [d[0] for d in cur.description]
-    log(f"Tab3-Perfs: {len(perf_rows)} intervals ({time.time()-t:.1f}s)")
+    log(f"Tab3-Source1 (CD_PERF_INTERVAL_X): {len(perf_rows)} intervals ({time.time()-t:.1f}s)")
 
+    for row in perf_rows:
+        d = dict(zip(perf_cols, row))
+        wid = str(d["WELL_ID"]).strip()
+        wbid = str(d["WELLBORE_ID"]).strip()
+        key = (wid, wbid)
+        top, btm = d["MD_TOP_SHOT"], d["MD_BOTTOM_SHOT"]
+        if top is not None and btm is not None:
+            perf_groups[key].append((float(top), float(btm), d.get("SHOT_DATE",""),
+                                      d.get("INTERVAL_TYPE",""), "CD_PERF_INTERVAL_X"))
+            wells_with_data.add(wid)
+
+    # ── Source 2: EDM.OXY_WELLBORE_OPENINGS_V_X (for wells NOT found in Source 1) ──
+    missing_well_ids = [w for w in well_ids if w not in wells_with_data]
+    if missing_well_ids:
+        t = time.time()
+        w_open = _chunked_in("O.WELL_ID", missing_well_ids)
+        sql_open = f"""SELECT O.WELL_ID, O.WELLBORE_ID, O.OPENING_TOP_MD, O.OPENING_BTM_MD,
+    TO_CHAR(O.DATE_PERFS_SHOT,'YYYY-MM-DD') AS SHOT_DATE, O.OPENING_TYPE, O.CURRENT_STATUS
+FROM EDM.OXY_WELLBORE_OPENINGS_V_X O WHERE {w_open}
+  AND O.OPENING_TOP_MD IS NOT NULL
+ORDER BY O.WELL_ID, O.OPENING_TOP_MD"""
+        all_sql.append(f"-- Source 2: OXY_WELLBORE_OPENINGS_V_X (fallback for {len(missing_well_ids)} wells)\n{sql_open}")
+        cur.execute(sql_open)
+        open_rows = cur.fetchall()
+        open_cols = [d[0] for d in cur.description]
+        log(f"Tab3-Source2 (OXY_WELLBORE_OPENINGS_V_X): {len(open_rows)} intervals for {len(missing_well_ids)} missing wells ({time.time()-t:.1f}s)")
+
+        for row in open_rows:
+            d = dict(zip(open_cols, row))
+            wid = str(d["WELL_ID"]).strip()
+            wbid = str(d["WELLBORE_ID"]).strip()
+            key = (wid, wbid)
+            top, btm = d["OPENING_TOP_MD"], d["OPENING_BTM_MD"]
+            if top is not None and btm is not None:
+                otype = d.get("OPENING_TYPE","")
+                status = d.get("CURRENT_STATUS","")
+                label = f"{otype}" + (f" ({status})" if status else "")
+                perf_groups[key].append((float(top), float(btm), d.get("SHOT_DATE",""),
+                                          label, "OXY_WELLBORE_OPENINGS"))
+    else:
+        log("Tab3-Source2: All wells found in Source 1 — skipping fallback.")
+
+    # ── Directional survey ──
     t = time.time()
     w_svy = _chunked_in("S.PID", api14s)
     sql_svy = f"SELECT S.PID, S.MD, S.TVD FROM DSS.SURVEY S WHERE {w_svy} ORDER BY S.PID, S.MD"
-    all_sql.append(sql_svy)
+    all_sql.append(f"-- Survey data\n{sql_svy}")
     cur.execute(sql_svy)
     svy_rows = cur.fetchall()
     log(f"Tab3-Survey: {len(svy_rows)} stations ({time.time()-t:.1f}s)")
@@ -202,19 +264,7 @@ FROM EDM.CD_PERF_INTERVAL_X P WHERE {w_perf} ORDER BY P.WELL_ID, P.MD_TOP_SHOT""
     for pid, md, tvd in svy_rows:
         svy_map.setdefault(str(pid), []).append((float(md), float(tvd)))
 
-    wb_to_api14 = {}
-    for a14, info in api14_wellid_map.items():
-        key = (info.get("well_id",""), info.get("wellbore_id",""))
-        wb_to_api14[key] = a14
-
-    perf_groups = defaultdict(list)
-    for row in perf_rows:
-        d = dict(zip(perf_cols, row))
-        key = (str(d["WELL_ID"]).strip(), str(d["WELLBORE_ID"]).strip())
-        top, btm = d["MD_TOP_SHOT"], d["MD_BOTTOM_SHOT"]
-        if top is not None and btm is not None:
-            perf_groups[key].append((float(top), float(btm), d.get("SHOT_DATE",""), d.get("INTERVAL_TYPE","")))
-
+    # ── Build results per completion ──
     results = []
     for (wid, wbid), intervals in perf_groups.items():
         api14 = wb_to_api14.get((wid, wbid), "")
@@ -226,12 +276,19 @@ FROM EDM.CD_PERF_INTERVAL_X P WHERE {w_perf} ORDER BY P.WELL_ID, P.MD_TOP_SHOT""
         all_tops = [i[0] for i in intervals]; all_btms = [i[1] for i in intervals]
         top_md = min(all_tops) if all_tops else None
         btm_md = max(all_btms) if all_btms else None
+
+        # Source tag
+        sources = set(i[4] for i in intervals)
+        source_tag = ", ".join(sources)
+
+        # TVD
         survey = svy_map.get(api14, [])
         if survey:
             top_tvd = _interp_tvd(top_md, survey); btm_tvd = _interp_tvd(btm_md, survey)
             tvd_method = "SURVEY"
         else:
             top_tvd = top_md; btm_tvd = btm_md; tvd_method = "MD≈TVD (no survey)"
+
         dates = [i[2] for i in intervals if i[2]]
         types = list(set(i[3] for i in intervals if i[3]))
         results.append({
@@ -244,6 +301,7 @@ FROM EDM.CD_PERF_INTERVAL_X P WHERE {w_perf} ORDER BY P.WELL_ID, P.MD_TOP_SHOT""
             "INTERVAL_TYPES": ", ".join(types),
             "EARLIEST_SHOT": min(dates) if dates else "",
             "LATEST_SHOT": max(dates) if dates else "",
+            "DATA_SOURCE": source_tag,
         })
     results.sort(key=lambda d: (d.get("API_10",""), d.get("API_14","")))
     return results, "\n\n".join(all_sql)
@@ -283,13 +341,18 @@ ORDER BY MV.PID, MV.PROD_INJ_DATE"""
 
 
 def fetch_tab5(cur, api14_list, api14_name_map, log):
-    """Tab 5: Daily Injection & Pressure — 60 days from HMR.DAILY_INJECTION_DATA.
-    Columns: API14, well name, date, calculated rate, accumulated volume,
-    wellhead pressure, injection pressure, upstream/downstream pressure,
-    pressure ratio, choke size, hours, 7-day averages, comp type/status."""
-    t = time.time()
+    """Tab 5: Daily Injection & Pressure from HMR.DAILY_INJECTION_DATA.
+
+    Two-pass strategy:
+      Pass 1: Last 60 days (SYSDATE - 60).  Fast for active injectors.
+      Pass 2: If Pass 1 returns zero rows, find MAX(INJ_DATE) per well across
+              all history, then pull 60 days ending at that max date.
+              This handles wells that stopped injecting but still have data.
+    """
+    all_sql = []
     w = _chunked_in("D.API_NO14", api14_list)
-    sql = f"""SELECT D.API_NO14 AS API_14, D.AUTOMATION_NAME AS WELL_NAME,
+
+    _detail_cols = """D.API_NO14 AS API_14, D.AUTOMATION_NAME AS WELL_NAME,
     TO_CHAR(D.INJ_DATE, 'YYYY-MM-DD') AS INJ_DATE,
     ROUND(D.CALCULATED_RATE, 2) AS CALC_RATE,
     ROUND(D.ACCUM_VOL, 2) AS ACCUM_VOL,
@@ -304,15 +367,59 @@ def fetch_tab5(cur, api14_list, api14_name_map, log):
     D.CURR_COMP_STATUS AS STATUS,
     ROUND(D.INJ_RATE_7D_AVG, 2) AS RATE_7D_AVG,
     ROUND(D.UPSTREAM_PRESS_7D_AVG, 1) AS UP_PRESS_7D,
-    ROUND(D.DOWNSTREAM_PRESS_7D_AVG, 1) AS DN_PRESS_7D
+    ROUND(D.DOWNSTREAM_PRESS_7D_AVG, 1) AS DN_PRESS_7D"""
+
+    # ── Pass 1: recent 60 days ──
+    t = time.time()
+    sql1 = f"""SELECT {_detail_cols}
 FROM HMR.DAILY_INJECTION_DATA D
 WHERE {w}
   AND D.INJ_DATE >= SYSDATE - 60
 ORDER BY D.API_NO14, D.INJ_DATE"""
-    cur.execute(sql)
+    all_sql.append(f"-- Pass 1: Last 60 days\n{sql1}")
+    cur.execute(sql1)
     rows = cur.fetchall()
     cols = [d[0] for d in cur.description]
-    log(f"Tab5: {len(rows)} daily rows ({time.time()-t:.1f}s)")
+    log(f"Tab5-Pass1 (recent 60d): {len(rows)} rows ({time.time()-t:.1f}s)")
+
+    date_note = "Last 60 days"
+
+    # ── Pass 2: fallback — find last available date range ──
+    if not rows:
+        t = time.time()
+        sql_max = f"""SELECT D.API_NO14,
+    TO_CHAR(MAX(D.INJ_DATE), 'YYYY-MM-DD') AS LAST_DATE,
+    TO_CHAR(MAX(D.INJ_DATE) - 59, 'YYYY-MM-DD') AS START_DATE
+FROM HMR.DAILY_INJECTION_DATA D
+WHERE {w}
+GROUP BY D.API_NO14
+ORDER BY MAX(D.INJ_DATE) DESC"""
+        all_sql.append(f"-- Pass 2a: Find last available dates\n{sql_max}")
+        cur.execute(sql_max)
+        max_rows = cur.fetchall()
+        log(f"Tab5-Pass2a: {len(max_rows)} wells have historical data ({time.time()-t:.1f}s)")
+
+        if max_rows:
+            # Use the most recent date across all wells as the anchor
+            latest_date = max_rows[0][1]  # already sorted DESC
+            start_date = max_rows[0][2]
+            log(f"Tab5-Pass2: Using date range {start_date} to {latest_date}")
+            date_note = f"Historical: {start_date} to {latest_date}"
+
+            t = time.time()
+            sql2 = f"""SELECT {_detail_cols}
+FROM HMR.DAILY_INJECTION_DATA D
+WHERE {w}
+  AND D.INJ_DATE >= TO_DATE('{start_date}', 'YYYY-MM-DD')
+  AND D.INJ_DATE <= TO_DATE('{latest_date}', 'YYYY-MM-DD')
+ORDER BY D.API_NO14, D.INJ_DATE"""
+            all_sql.append(f"-- Pass 2b: Historical 60-day window\n{sql2}")
+            cur.execute(sql2)
+            rows = cur.fetchall()
+            cols = [d[0] for d in cur.description]
+            log(f"Tab5-Pass2b: {len(rows)} rows ({time.time()-t:.1f}s)")
+        else:
+            log("Tab5-Pass2: No historical data found in HMR for these wells.")
 
     results = []
     for row in rows:
@@ -322,7 +429,7 @@ ORDER BY D.API_NO14, D.INJ_DATE"""
         if not d.get("WELL_NAME"):
             d["WELL_NAME"] = api14_name_map.get(a14, "")
         results.append(d)
-    return results, sql
+    return results, "\n\n".join(all_sql), date_note
 
 
 # ---------------------------------------------------------------------------
@@ -519,13 +626,13 @@ class WellDataViewer(tk.Tk):
         self.notebook.add(tab, text="  Top Perf Depths  ")
         cols = ("WELL_NAME","API_10","API_14","TOP_PERF_MD","BTM_PERF_MD",
                 "TOP_PERF_TVD","BTM_PERF_TVD","TVD_METHOD","N_INTERVALS",
-                "INTERVAL_TYPES","EARLIEST_SHOT","LATEST_SHOT")
+                "INTERVAL_TYPES","EARLIEST_SHOT","LATEST_SHOT","DATA_SOURCE")
         hm = {"WELL_NAME":"Well Name","API_10":"API 10","API_14":"API 14",
               "TOP_PERF_MD":"Top Perf MD","BTM_PERF_MD":"Btm Perf MD",
               "TOP_PERF_TVD":"Top Perf TVD","BTM_PERF_TVD":"Btm Perf TVD",
               "TVD_METHOD":"TVD Method","N_INTERVALS":"# Intervals",
               "INTERVAL_TYPES":"Interval Types","EARLIEST_SHOT":"Earliest Shot",
-              "LATEST_SHOT":"Latest Shot"}
+              "LATEST_SHOT":"Latest Shot","DATA_SOURCE":"Data Source"}
         toolbar, self.tree3, self.sql3 = self._make_tree_tab(tab, cols, hm, "SQL (Perf + Survey)")
         ttk.Button(toolbar, text="Copy to Clipboard",
                    command=lambda: copy_tree_to_clipboard(self.tree3, self)).pack(side="left", padx=4)
@@ -750,8 +857,10 @@ class WellDataViewer(tk.Tk):
         ttk.Button(toolbar, text="Copy to Clipboard",
                    command=lambda: copy_tree_to_clipboard(self.tree5, self)).pack(side="left", padx=4)
 
-        ttk.Label(toolbar, text="  Source: HMR.DAILY_INJECTION_DATA (60 days)",
-                  foreground="gray", font=("TkDefaultFont",8)).pack(side="left", padx=12)
+        self.lbl_tab5_source = ttk.Label(toolbar,
+                  text="  Source: HMR.DAILY_INJECTION_DATA (60 days)",
+                  foreground="gray", font=("TkDefaultFont",8))
+        self.lbl_tab5_source.pack(side="left", padx=12)
 
         self.lbl_tab5_status = ttk.Label(toolbar, text="")
         self.lbl_tab5_status.pack(side="right", padx=8)
@@ -840,14 +949,17 @@ class WellDataViewer(tk.Tk):
 
             # Tab 5
             self.after(0, lambda: self.lbl_tab5_status.config(text="Fetching…", foreground="blue"))
-            t5_res, t5_sql = fetch_tab5(cur, api14_list, api14_name_map,
+            t5_res, t5_sql, t5_date_note = fetch_tab5(cur, api14_list, api14_name_map,
                                          lambda m: self.after(0, self.log, m))
             self.after(0, self._populate_generic, self.tree5, t5_res)
             self.after(0, self._fill_sql, self.sql5, t5_sql)
             n5 = len(t5_res)
             self.after(0, lambda: self.lbl_tab5_status.config(
-                text=f"{n5} daily rows" if n5 else "No daily injection data (60 days)",
+                text=f"{n5} daily rows ({t5_date_note})" if n5 else "No daily injection data found",
                 foreground="green" if n5 else "orange"))
+            # Update the source label on tab5 toolbar
+            self.after(0, lambda: self.lbl_tab5_source.config(
+                text=f"  Source: HMR.DAILY_INJECTION_DATA — {t5_date_note}"))
 
             cur.close(); conn.close()
             elapsed = time.time() - t_total

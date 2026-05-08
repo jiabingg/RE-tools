@@ -1,0 +1,19 @@
+Field Quicklook Viewer
+=====================
+Author:  Bin Jia
+Created: 2025-12-01
+
+Description:
+  Pulls monthly production data for all active producers
+  in a selected field and displays oil, gross, and water
+  trends in a multi-panel chart.
+
+How to use:
+  1. Launch the app
+  2. Select a field from the dropdown (e.g. San Ardo, Coalinga)
+  3. Choose a date range
+  4. Click "Load" to pull data from ODW
+  5. Use the tabs to switch between chart and table views
+
+Notes:
+  - Requires ODW network access (VPN if remote)
