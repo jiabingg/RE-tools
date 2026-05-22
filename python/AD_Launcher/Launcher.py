@@ -1,184 +1,25 @@
 import os
 import sys
-import ast
 import subprocess
-import importlib
 import tkinter as tk
 from tkinter import ttk
+import ttkbootstrap as tb
 
 """
 Launcher app with dynamically generated sections for different folders.
 Buttons are created automatically by scanning Python files in the specified folders at runtime.
-On startup, scans all scripts for third-party imports, checks which are missing,
-installs them automatically, and reports status in a bottom label.
 Buttons reflow dynamically when the window is resized.
 
 Each script can have a companion .txt file (same name, .txt extension) that serves as
 a README. Hovering over the launch button shows the README content as a tooltip.
 """
 
-# Standard library module names (Python 3.10+). Used to filter out non-pip packages.
-STDLIB_MODULES = {
-    'abc', 'aifc', 'argparse', 'array', 'ast', 'asynchat', 'asyncio', 'asyncore',
-    'atexit', 'audioop', 'base64', 'bdb', 'binascii', 'binhex', 'bisect',
-    'builtins', 'bz2', 'calendar', 'cgi', 'cgitb', 'chunk', 'cmath', 'cmd',
-    'code', 'codecs', 'codeop', 'collections', 'colorsys', 'compileall',
-    'concurrent', 'configparser', 'contextlib', 'contextvars', 'copy', 'copyreg',
-    'cProfile', 'crypt', 'csv', 'ctypes', 'curses', 'dataclasses', 'datetime',
-    'dbm', 'decimal', 'difflib', 'dis', 'distutils', 'doctest', 'email',
-    'encodings', 'enum', 'errno', 'faulthandler', 'fcntl', 'filecmp', 'fileinput',
-    'fnmatch', 'fractions', 'ftplib', 'functools', 'gc', 'getopt', 'getpass',
-    'gettext', 'glob', 'grp', 'gzip', 'hashlib', 'heapq', 'hmac', 'html',
-    'http', 'idlelib', 'imaplib', 'imghdr', 'imp', 'importlib', 'inspect', 'io',
-    'ipaddress', 'itertools', 'json', 'keyword', 'lib2to3', 'linecache', 'locale',
-    'logging', 'lzma', 'mailbox', 'mailcap', 'marshal', 'math', 'mimetypes',
-    'mmap', 'modulefinder', 'msvcrt', 'multiprocessing', 'netrc', 'nis', 'nntplib',
-    'numbers', 'operator', 'optparse', 'os', 'ossaudiodev', 'pathlib',
-    'pdb', 'pickle', 'pickletools', 'pipes', 'pkgutil', 'platform', 'plistlib',
-    'poplib', 'posix', 'posixpath', 'pprint', 'profile', 'pstats', 'pty',
-    'pwd', 'py_compile', 'pyclbr', 'pydoc', 'queue', 'quopri', 'random', 're',
-    'readline', 'reprlib', 'resource', 'rlcompleter', 'runpy', 'sched', 'secrets',
-    'select', 'selectors', 'shelve', 'shlex', 'shutil', 'signal', 'site',
-    'smtpd', 'smtplib', 'sndhdr', 'socket', 'socketserver', 'spwd', 'sqlite3',
-    'sre_compile', 'sre_constants', 'sre_parse', 'ssl', 'stat', 'statistics',
-    'string', 'stringprep', 'struct', 'subprocess', 'sunau', 'symtable', 'sys',
-    'sysconfig', 'syslog', 'tabnanny', 'tarfile', 'telnetlib', 'tempfile',
-    'termios', 'test', 'textwrap', 'threading', 'time', 'timeit', 'tkinter',
-    'token', 'tokenize', 'tomllib', 'trace', 'traceback', 'tracemalloc', 'tty',
-    'turtle', 'turtledemo', 'types', 'typing', 'unicodedata', 'unittest', 'urllib',
-    'uu', 'uuid', 'venv', 'warnings', 'wave', 'weakref', 'webbrowser', 'winreg',
-    'winsound', 'wsgiref', 'xdrlib', 'xml', 'xmlrpc', 'zipapp', 'zipfile',
-    'zipimport', 'zlib', '_thread', '__future__',
-}
-
-# Map import names that differ from their pip package names
-IMPORT_TO_PACKAGE = {
-    'cv2': 'opencv-python',
-    'PIL': 'Pillow',
-    'sklearn': 'scikit-learn',
-    'skimage': 'scikit-image',
-    'bs4': 'beautifulsoup4',
-    'yaml': 'PyYAML',
-    'wx': 'wxPython',
-    'gi': 'PyGObject',
-    'attr': 'attrs',
-    'dateutil': 'python-dateutil',
-    'dotenv': 'python-dotenv',
-    'serial': 'pyserial',
-    'usb': 'pyusb',
-    'docx': 'python-docx',
-    'pptx': 'python-pptx',
-    'win32com': 'pywin32',
-    'win32api': 'pywin32',
-    'win32gui': 'pywin32',
-    'pywintypes': 'pywin32',
-    'pythoncom': 'pywin32',
-    'tb': 'ttkbootstrap',
-    'cx_Oracle': 'cx_Oracle',
-    'oracledb': 'oracledb',
-}
-
-
-def scan_imports_from_file(filepath: str) -> set[str]:
-    try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-            source = f.read()
-        tree = ast.parse(source, filename=filepath)
-    except (SyntaxError, ValueError):
-        return set()
-    imports = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                imports.add(alias.name.split('.')[0])
-        elif isinstance(node, ast.ImportFrom):
-            if node.module and node.level == 0:
-                imports.add(node.module.split('.')[0])
-    return imports
-
-
-def scan_all_imports(base_dir: str) -> dict[str, str]:
-    all_imports = set()
-    for root, dirs, files in os.walk(base_dir):
-        dirs[:] = [d for d in dirs if not d.startswith(('.', '_'))]
-        for f in files:
-            if f.endswith('.py'):
-                all_imports |= scan_imports_from_file(os.path.join(root, f))
-    packages = {}
-    for mod in all_imports:
-        if mod in STDLIB_MODULES:
-            continue
-        pip_name = IMPORT_TO_PACKAGE.get(mod, mod)
-        packages[mod] = pip_name
-    return packages
-
-
-def check_missing(packages: dict[str, str]) -> dict[str, str]:
-    missing = {}
-    for import_name, pip_name in packages.items():
-        try:
-            importlib.import_module(import_name)
-        except ImportError:
-            missing[import_name] = pip_name
-    return missing
-
-
-def install_packages(pip_names: list[str]) -> tuple[bool, str, list[str]]:
-    """Install packages one by one. Returns (all_ok, message, failed_list)."""
-    unique = sorted(set(pip_names))
-    installed = []
-    failed = []
-    for pkg in unique:
-        try:
-            result = subprocess.run(
-                [sys.executable, '-m', 'pip', 'install', pkg, '--quiet'],
-                capture_output=True, text=True, timeout=120,
-            )
-            if result.returncode == 0:
-                installed.append(pkg)
-            else:
-                failed.append(pkg)
-        except Exception:
-            failed.append(pkg)
-
-    if failed and installed:
-        msg = (f"Installed {len(installed)} package(s): {', '.join(installed)}. "
-               f"Failed: {', '.join(failed)}")
-        return False, msg, failed
-    elif failed:
-        return False, f"Failed to install: {', '.join(failed)}", failed
-    else:
-        return True, f"Installed {len(installed)} package(s): {', '.join(installed)}", []
-
-
-# ---------------------------------------------------------------------------
-# Package check runs BEFORE ttkbootstrap import
-# ---------------------------------------------------------------------------
-_base_dir = os.path.dirname(os.path.abspath(__file__))
-_all_packages = scan_all_imports(_base_dir)
-_missing = check_missing(_all_packages)
-_startup_status = ""
-
-if _missing:
-    _ok, _msg, _failed = install_packages(list(_missing.values()))
-    if _ok:
-        _startup_status = f"\u2705  {_msg}"
-    else:
-        _startup_status = f"\u26a0\ufe0f  {_msg}"
-else:
-    _startup_status = f"\u2705  All {len(_all_packages)} required packages detected"
-
-try:
-    import ttkbootstrap as tb
-except ImportError:
-    tb = None
-
 
 # ---------------------------------------------------------------------------
 # Hover tooltip — shows .txt README content on the button itself
 # ---------------------------------------------------------------------------
 class HelpTooltip:
-    """Tooltip that shows on hover with a slight delay. Stays on screen."""
+    """Tooltip that shows on hover with a slight delay."""
 
     MAX_WIDTH = 480
     SHOW_DELAY = 400  # ms
@@ -203,7 +44,6 @@ class HelpTooltip:
     def _show(self):
         if self.tooltip:
             return
-        # Position below the button
         x = self.widget.winfo_rootx()
         y = self.widget.winfo_rooty() + self.widget.winfo_height() + 4
 
@@ -222,7 +62,6 @@ class HelpTooltip:
         )
         label.pack()
 
-        # Keep tooltip on screen
         tw.update_idletasks()
         tw_w = tw.winfo_reqwidth()
         tw_h = tw.winfo_reqheight()
@@ -289,13 +128,9 @@ class FlowFrame(ttk.Frame):
 BOOTSTYLES = ["primary", "info", "warning", "success", "danger", "secondary"]
 
 
-class Launcher(tb.Window if tb else tk.Tk):
+class Launcher(tb.Window):
     def __init__(self):
-        if tb:
-            super().__init__(themename="flatly")
-        else:
-            super().__init__()
-
+        super().__init__(themename="flatly")
         self.title("Project Utilities Launcher")
 
         # Size to 80% of screen, centered
@@ -310,17 +145,7 @@ class Launcher(tb.Window if tb else tk.Tk):
         s = ttk.Style()
         s.configure("TButton", font=("Helvetica", 12, "bold"))
 
-        self.base_dir = _base_dir
-
-        # --- Status bar at bottom (pack first so it stays visible) ---
-        status_frame = ttk.Frame(self)
-        status_frame.pack(side="bottom", fill="x")
-        ttk.Separator(status_frame, orient="horizontal").pack(fill="x")
-        self.status_label = ttk.Label(
-            status_frame, text=_startup_status,
-            font=("Helvetica", 10), padding=(12, 6),
-        )
-        self.status_label.pack(anchor="w")
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
         # --- Scrollable sections ---
         sections = self.discover_sections()
@@ -356,10 +181,7 @@ class Launcher(tb.Window if tb else tk.Tk):
             folder_path = os.path.join(self.base_dir, folder_name)
             scripts = sorted([f for f in os.listdir(folder_path) if f.endswith('.py')])
 
-            if tb:
-                section = tb.LabelFrame(self.scroll_frame, text=folder_name)
-            else:
-                section = ttk.LabelFrame(self.scroll_frame, text=folder_name)
+            section = tb.LabelFrame(self.scroll_frame, text=folder_name)
             section.pack(fill="x", padx=12, pady=8)
 
             flow = FlowFrame(section)
@@ -399,25 +221,15 @@ class Launcher(tb.Window if tb else tk.Tk):
             script_path = os.path.join(self.base_dir, folder, script)
             help_text = self.read_help_file(script_path)
 
-            if tb:
-                btn = tb.Button(
-                    flow_frame,
-                    text=display_name,
-                    bootstyle=bootstyle,
-                    command=lambda s=script, f=folder: self.run_script(
-                        os.path.join(self.base_dir, f, s)
-                    ),
-                )
-            else:
-                btn = ttk.Button(
-                    flow_frame,
-                    text=display_name,
-                    command=lambda s=script, f=folder: self.run_script(
-                        os.path.join(self.base_dir, f, s)
-                    ),
-                )
+            btn = tb.Button(
+                flow_frame,
+                text=display_name,
+                bootstyle=bootstyle,
+                command=lambda s=script, f=folder: self.run_script(
+                    os.path.join(self.base_dir, f, s)
+                ),
+            )
 
-            # Attach tooltip directly to the button if .txt exists
             if help_text:
                 HelpTooltip(btn, help_text)
 
