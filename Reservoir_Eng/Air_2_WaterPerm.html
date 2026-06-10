@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Air to Liquid Permeability Conversion Tool</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #dbe3ef;
+      --accent: #2563eb;
+      --accent2: #0f766e;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --good: #047857;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.10);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #e0f2fe 0, transparent 35%),
+                  radial-gradient(circle at bottom right, #dcfce7 0, transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 18px 48px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .hero, .card {
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(219, 227, 239, 0.95);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: 28px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 780px;
+    }
+
+    .paper-note {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .paper-note .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .paper-note strong {
+      font-size: 17px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      padding: 22px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      margin: 20px 0 8px;
+      font-size: 15px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin: 14px 0 7px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 13px;
+      font-size: 16px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 15px;
+      background: linear-gradient(180deg, #fff, #f9fafb);
+    }
+
+    .metric .name {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .metric .value {
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      word-break: break-word;
+    }
+
+    .metric .unit {
+      color: var(--muted);
+      font-weight: 700;
+      margin-left: 4px;
+      font-size: 14px;
+    }
+
+    .formula {
+      margin-top: 16px;
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      color: #0f172a;
+      overflow-x: auto;
+    }
+
+    .note {
+      margin-top: 14px;
+      padding: 12px 13px;
+      border-radius: 14px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #7c2d12;
+      font-size: 14px;
+    }
+
+    .good-note {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #065f46;
+    }
+
+    .chart-wrap {
+      height: 460px;
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 4px;
+      border-radius: 999px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 8px;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    .table th, .table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .table th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: #f8fafc;
+    }
+
+    .table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    details {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 12px 14px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      header, .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-wrap {
+        height: 360px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+      .hero, .card, .paper-note {
+        box-shadow: none;
+      }
+      button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <section class="hero">
+        <h1>Air to Liquid Permeability Conversion Tool</h1>
+        <p>
+          Estimate liquid permeability from standard air permeability using empirical LN correlations
+          published by Pugh, Thomas, and Gupta in <em>The Log Analyst</em> (1991).
+        </p>
+      </section>
+      <aside class="paper-note card">
+        <div class="label">Source paper</div>
+        <strong>Correlations of Liquid and Air Permeabilities for Use in Reservoir Engineering Studies</strong>
+        <span>Dataset: 1,868 sandstone and carbonate samples, approximately 0.1 to 10,000 md.</span>
+      </aside>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2>Calculator</h2>
+
+        <label for="kair">Air permeability, k<sub>air</sub> (md)</label>
+        <input id="kair" type="number" min="0.000001" step="any" value="100" />
+
+        <label for="model">Correlation</label>
+        <select id="model">
+          <option value="oil_all">Specific oil permeability vs air - all rock types, 1,868 samples</option>
+          <option value="brine_all" selected>Specific brine permeability vs air - all rock types, 895 samples</option>
+          <option value="brine_sandstone">Specific brine permeability vs air - sandstone, 578 samples</option>
+          <option value="brine_limestone">Specific brine permeability vs air - limestone, 111 samples</option>
+          <option value="brine_dolomite">Specific brine permeability vs air - dolomite, 206 samples</option>
+          <option value="effective_oil_clayey">Effective oil permeability at connate water vs air - clayey sandstone, 71 samples</option>
+        </select>
+
+        <div class="button-row">
+          <button class="primary" onclick="calculate()">Calculate</button>
+          <button class="secondary" onclick="loadExample(10)">10 md</button>
+          <button class="secondary" onclick="loadExample(100)">100 md</button>
+          <button class="secondary" onclick="loadExample(1000)">1000 md</button>
+        </div>
+
+        <div id="status" class="note good-note">
+          Ready. Enter a positive air permeability and choose a correlation.
+        </div>
+
+        <div class="results">
+          <div class="metric">
+            <div class="name">Estimated liquid perm</div>
+            <div><span id="kliq" class="value">--</span><span class="unit">md</span></div>
+          </div>
+          <div class="metric">
+            <div class="name">Ratio</div>
+            <div><span id="ratio" class="value">--</span></div>
+          </div>
+          <div class="metric">
+            <div class="name">Percent of air perm</div>
+            <div><span id="percent" class="value">--</span><span class="unit">%</span></div>
+          </div>
+        </div>
+
+        <div class="formula" id="formulaBox">Formula will appear here.</div>
+
+        <details open>
+          <summary>Important interpretation notes</summary>
+          <ul>
+            <li>This tool uses natural logarithms directly with the coefficients printed on the paper figures.</li>
+            <li>These are empirical screening correlations, not a replacement for measured water/brine permeability or SCAL data.</li>
+            <li>For water-sensitive or swelling-clay intervals, brine/water permeability may be much lower than air permeability.</li>
+            <li>The paper specifically says brine-to-air permeability averaged about 0.5 across 0.1 to 10,000 md for the composite brine dataset.</li>
+            <li>The clayey sandstone effective-oil model is field-specific and should not be applied blindly to other reservoirs.</li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="card">
+        <h2>Log-log relationship</h2>
+        <div class="chart-wrap">
+          <svg id="chart" viewBox="0 0 760 460" preserveAspectRatio="none" aria-label="Log-log permeability chart"></svg>
+        </div>
+        <div class="legend">
+          <span><span class="swatch" style="background: #2563eb;"></span>Selected correlation</span>
+          <span><span class="swatch" style="background: #94a3b8;"></span>Reference line: k<sub>liquid</sub> = k<sub>air</sub></span>
+          <span><span class="swatch" style="background: #ef4444;"></span>Your input</span>
+        </div>
+
+        <h3>Correlations included</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Equation</th>
+              <th>Use case</th>
+            </tr>
+          </thead>
+          <tbody id="eqTable"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <section class="card" style="margin-top:20px;">
+      <h2>How to use in a workbook or report</h2>
+      <p>
+        The general Excel form using natural log is:
+      </p>
+      <div class="formula">=EXP(intercept + slope*LN(k_air_cell))</div>
+      <p>
+        Example for the composite brine correlation:
+      </p>
+      <div class="formula">=EXP(-0.2687 + 1.0165*LN(A2))</div>
+      <p class="footer">
+        This tool reports permeability in md when the input air permeability is in md.
+      </p>
+    </section>
+
+    <p class="footer">
+      Built from the equations shown in Figures 1-6 of Pugh, Thomas, and Gupta (1991), using the printed coefficients directly in LN form.
+      Coefficients checked from the paper images: Fig. 1 oil/all = 1.0258, -0.1394; Fig. 2 brine/all = 1.0165, -0.2687; Fig. 3 sandstone = 1.047, -0.834; Fig. 4 limestone = 1.0299, -0.571; Fig. 5 dolomite = 1.056, -0.503; Fig. 6 clayey effective oil = 1.2651, -2.5351.
+      Verify applicability for your reservoir, especially for high-clay or water-sensitive formations.
+    </p>
+  </div>
+
+  <script>
+    const models = {
+      oil_all: {
+        label: "Specific oil vs air - all rock types",
+        outputName: "k_oil",
+        sample: "1,868 samples",
+        slope: 1.0258,
+        intercept: -0.1394,
+        rangeMin: 0.1,
+        rangeMax: 10000,
+        use: "Specific single-phase oil permeability estimate from air permeability."
+      },
+      brine_all: {
+        label: "Specific brine vs air - all rock types",
+        outputName: "k_brine",
+        sample: "895 samples",
+        slope: 1.0165,
+        intercept: -0.2687,
+        rangeMin: 0.1,
+        rangeMax: 10000,
+        use: "General brine/water-like liquid permeability screening estimate."
+      },
+      brine_sandstone: {
+        label: "Specific brine vs air - sandstone",
+        outputName: "k_brine",
+        sample: "578 sandstone samples",
+        slope: 1.0470,
+        intercept: -0.8340,
+        rangeMin: 0.1,
+        rangeMax: 10000,
+        use: "Sandstone-specific brine estimate."
+      },
+      brine_limestone: {
+        label: "Specific brine vs air - limestone",
+        outputName: "k_brine",
+        sample: "111 limestone samples",
+        slope: 1.0299,
+        intercept: -0.5710,
+        rangeMin: 0.1,
+        rangeMax: 10000,
+        use: "Limestone-specific brine estimate."
+      },
+      brine_dolomite: {
+        label: "Specific brine vs air - dolomite",
+        outputName: "k_brine",
+        sample: "206 dolomite samples",
+        slope: 1.0560,
+        intercept: -0.5030,
+        rangeMin: 0.1,
+        rangeMax: 10000,
+        use: "Dolomite-specific brine estimate."
+      },
+      effective_oil_clayey: {
+        label: "Effective oil at connate water vs air - clayey sandstone",
+        outputName: "k_eff_oil",
+        sample: "71 clayey sandstone samples",
+        slope: 1.2651,
+        intercept: -2.5351,
+        rangeMin: 1,
+        rangeMax: 10000,
+        use: "Field-specific clayey sandstone effective oil estimate at connate water."
+      }
+    };
+
+    const chart = document.getElementById("chart");
+
+    function fmt(x) {
+      if (!isFinite(x)) return "--";
+      if (x === 0) return "0";
+      if (Math.abs(x) >= 1000) return x.toLocaleString(undefined, {maximumSignificantDigits: 4});
+      if (Math.abs(x) >= 1) return x.toLocaleString(undefined, {maximumSignificantDigits: 4});
+      return x.toPrecision(3);
+    }
+
+    function calcK(kair, model) {
+      // Natural-log calculation using the coefficients printed on the paper figures:
+      // ln(k_liquid) = intercept + slope*ln(k_air)
+      return Math.exp(model.intercept + model.slope * Math.log(kair));
+    }
+
+    function formulaText(m) {
+      const sign = m.intercept >= 0 ? "+" : "-";
+      return `ln(${m.outputName}) = ${m.slope.toFixed(4)} ln(k_air) ${sign} ${Math.abs(m.intercept).toFixed(4)}; therefore ${m.outputName} = EXP(${m.intercept.toFixed(4)} + ${m.slope.toFixed(4)}*LN(k_air))`;
+    }
+
+    function statusMessage(kair, model) {
+      if (kair <= 0 || !isFinite(kair)) {
+        return { cls: "note", text: "Enter a positive air permeability." };
+      }
+      if (kair < model.rangeMin || kair > model.rangeMax) {
+        return {
+          cls: "note",
+          text: `Caution: ${fmt(kair)} md is outside the approximate data/application range shown for this selected model (${model.rangeMin} to ${model.rangeMax} md). Treat as extrapolation.`
+        };
+      }
+      return {
+        cls: "note good-note",
+        text: `Within the approximate published data range for this model (${model.rangeMin} to ${model.rangeMax} md).`
+      };
+    }
+
+    function calculate() {
+      const kair = Number(document.getElementById("kair").value);
+      const model = models[document.getElementById("model").value];
+
+      const status = document.getElementById("status");
+      if (kair <= 0 || !isFinite(kair)) {
+        document.getElementById("kliq").textContent = "--";
+        document.getElementById("ratio").textContent = "--";
+        document.getElementById("percent").textContent = "--";
+        status.className = "note";
+        status.textContent = "Enter a positive air permeability.";
+        drawChart(model, NaN, NaN);
+        return;
+      }
+
+      const kliq = calcK(kair, model);
+      const ratio = kliq / kair;
+
+      document.getElementById("kliq").textContent = fmt(kliq);
+      document.getElementById("ratio").textContent = fmt(ratio);
+      document.getElementById("percent").textContent = fmt(ratio * 100);
+      document.getElementById("formulaBox").textContent = formulaText(model);
+
+      const msg = statusMessage(kair, model);
+      status.className = msg.cls;
+      status.textContent = msg.text;
+
+      drawChart(model, kair, kliq);
+    }
+
+    function loadExample(k) {
+      document.getElementById("kair").value = k;
+      calculate();
+    }
+
+    function drawChart(model, kair, kliq) {
+      const W = 760, H = 460;
+      const pad = {l: 74, r: 22, t: 24, b: 62};
+      // Natural-log axes equivalent to 10^-2 through 10^5 on x and 10^-4 through 10^5 on y.
+      const xmin = -2 * Math.LN10, xmax = 5 * Math.LN10;
+      const ymin = -4 * Math.LN10, ymax = 5 * Math.LN10;
+
+      function xScale(lnx) { return pad.l + (lnx - xmin) / (xmax - xmin) * (W - pad.l - pad.r); }
+      function yScale(lny) { return H - pad.b - (lny - ymin) / (ymax - ymin) * (H - pad.t - pad.b); }
+
+      let s = "";
+      s += `<rect x="0" y="0" width="${W}" height="${H}" fill="white"/>`;
+
+      for (let p = -2; p <= 5; p++) {
+        const lnx = p * Math.LN10;
+        const x = xScale(lnx);
+        s += `<line x1="${x}" y1="${pad.t}" x2="${x}" y2="${H-pad.b}" stroke="#e5e7eb" stroke-width="1"/>`;
+        s += `<text x="${x}" y="${H-pad.b+24}" text-anchor="middle" font-size="12" fill="#64748b">1E${p}</text>`;
+      }
+
+      for (let p = -4; p <= 5; p++) {
+        const lny = p * Math.LN10;
+        const y = yScale(lny);
+        s += `<line x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}" stroke="#e5e7eb" stroke-width="1"/>`;
+        s += `<text x="${pad.l-12}" y="${y+4}" text-anchor="end" font-size="12" fill="#64748b">1E${p}</text>`;
+      }
+
+      s += `<line x1="${pad.l}" y1="${H-pad.b}" x2="${W-pad.r}" y2="${H-pad.b}" stroke="#0f172a" stroke-width="1.5"/>`;
+      s += `<line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${H-pad.b}" stroke="#0f172a" stroke-width="1.5"/>`;
+      s += `<text x="${W/2}" y="${H-18}" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">Air permeability, k_air (md)</text>`;
+      s += `<text x="18" y="${H/2}" transform="rotate(-90 18 ${H/2})" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">Estimated liquid permeability (md)</text>`;
+
+      function pathFor(fn) {
+        const pts = [];
+        for (let i = 0; i <= 240; i++) {
+          const lnx = xmin + (xmax - xmin) * i / 240;
+          const lny = fn(lnx);
+          pts.push(`${i===0 ? "M" : "L"} ${xScale(lnx).toFixed(2)} ${yScale(lny).toFixed(2)}`);
+        }
+        return pts.join(" ");
+      }
+
+      s += `<path d="${pathFor(lnx => lnx)}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8 7"/>`;
+      s += `<path d="${pathFor(lnx => model.intercept + model.slope * lnx)}" fill="none" stroke="#2563eb" stroke-width="3"/>`;
+
+      if (isFinite(kair) && isFinite(kliq) && kair > 0 && kliq > 0) {
+        const lx = Math.log(kair);
+        const ly = Math.log(kliq);
+        const x = xScale(lx);
+        const y = yScale(ly);
+        if (x >= pad.l && x <= W-pad.r && y >= pad.t && y <= H-pad.b) {
+          s += `<line x1="${x}" y1="${H-pad.b}" x2="${x}" y2="${y}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+          s += `<line x1="${pad.l}" y1="${y}" x2="${x}" y2="${y}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+          s += `<circle cx="${x}" cy="${y}" r="6" fill="#ef4444" stroke="white" stroke-width="2"/>`;
+          s += `<text x="${Math.min(x+12, W-170)}" y="${Math.max(y-12, 24)}" font-size="13" font-weight="800" fill="#991b1b">Input: ${fmt(kair)} md -> ${fmt(kliq)} md</text>`;
+        }
+      }
+
+      s += `<text x="${pad.l+8}" y="${pad.t+18}" font-size="13" fill="#334155" font-weight="800">${model.label}</text>`;
+      chart.innerHTML = s;
+    }
+
+    function populateTable() {
+      const tbody = document.getElementById("eqTable");
+      tbody.innerHTML = Object.values(models).map(m => `
+        <tr>
+          <td><strong>${m.label}</strong><br><span style="color:#64748b;">${m.sample}</span></td>
+          <td><code>${formulaText(m)}</code></td>
+          <td>${m.use}</td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("kair").addEventListener("input", calculate);
+    document.getElementById("model").addEventListener("change", calculate);
+    populateTable();
+    calculate();
+  </script>
+</body>
+</html>
