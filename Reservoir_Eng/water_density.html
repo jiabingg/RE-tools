@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brine Specific Gravity Calculator - McCain Fig. 16-8</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1f2933;
+      --muted: #5c6b7a;
+      --line: #d6dde5;
+      --accent: #0f766e;
+      --accent-2: #115e59;
+      --warn: #8a5a00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    header {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      padding: 28px 20px;
+    }
+    header .wrap, main { max-width: 1120px; margin: 0 auto; }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    header p { margin: 0; opacity: .95; }
+    main { padding: 22px 16px 36px; }
+    .grid { display: grid; grid-template-columns: 410px 1fr; gap: 18px; align-items: start; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      padding: 18px;
+    }
+    label { display: block; font-weight: 700; margin: 13px 0 6px; }
+    input, select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #cbd5df;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #fff;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .button-row { display: flex; gap: 10px; margin-top: 16px; }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+    }
+    button.secondary { background: #e7edf3; color: #24313d; }
+    .results { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+    .metric { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: #fbfcfd; }
+    .metric .name { color: var(--muted); font-size: 13px; margin-bottom: 4px; }
+    .metric .value { font-size: 22px; font-weight: 800; }
+    .metric .unit { color: var(--muted); font-size: 12px; }
+    .note { color: var(--muted); font-size: 13px; margin-top: 14px; }
+    .warning { color: var(--warn); background: #fff8e8; border: 1px solid #f3d28a; padding: 10px 12px; border-radius: 10px; margin-top: 12px; display: none; }
+    svg { width: 100%; height: auto; display: block; }
+    .small { font-size: 12px; color: var(--muted); }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 13px; }
+    th, td { border: 1px solid var(--line); padding: 7px 8px; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    th { background: #eef3f7; }
+    .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f1f5f9; padding: 10px; border-radius: 10px; overflow-x: auto; }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+      .results { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Brine Specific Gravity Calculator</h1>
+      <p>Approximate brine density from TDS/salinity using McCain Fig. 16-8 style relationship.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>Inputs</h2>
+        <label for="mode">Input type</label>
+        <select id="mode">
+          <option value="tds">TDS, mg/L</option>
+          <option value="wt">Salinity, wt%</option>
+        </select>
+
+        <label for="value">TDS or salinity value</label>
+        <input id="value" type="number" step="0.001" min="0" value="2600" />
+
+        <div class="row">
+          <div>
+            <label for="waterDensity">Fresh water density at 60°F</label>
+            <input id="waterDensity" type="number" step="0.001" value="62.37" />
+            <div class="small">lb/ft³, used for SG</div>
+          </div>
+          <div>
+            <label for="tvdDiff">Optional TVD difference</label>
+            <input id="tvdDiff" type="number" step="0.1" value="" placeholder="ft" />
+            <div class="small">for pressure difference</div>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="calc">Calculate</button>
+          <button class="secondary" id="example">Load 2,600 mg/L example</button>
+        </div>
+
+        <div id="warn" class="warning"></div>
+
+        <div class="results">
+          <div class="metric">
+            <div class="name">Salinity</div>
+            <div class="value" id="wtOut">0.260</div>
+            <div class="unit">wt% dissolved solids</div>
+          </div>
+          <div class="metric">
+            <div class="name">Brine density</div>
+            <div class="value" id="rhoOut">62.50</div>
+            <div class="unit">lb/ft³ at 14.7 psia and 60°F</div>
+          </div>
+          <div class="metric">
+            <div class="name">Specific gravity</div>
+            <div class="value" id="sgOut">1.002</div>
+            <div class="unit">relative to fresh water at 60°F</div>
+          </div>
+          <div class="metric">
+            <div class="name">Hydrostatic gradient</div>
+            <div class="value" id="gradOut">0.434</div>
+            <div class="unit">psi/ft</div>
+          </div>
+          <div class="metric">
+            <div class="name">Density</div>
+            <div class="value" id="ppgOut">8.36</div>
+            <div class="unit">lb/gal</div>
+          </div>
+          <div class="metric">
+            <div class="name">Pressure difference</div>
+            <div class="value" id="dpOut">—</div>
+            <div class="unit">psi, if TVD difference provided</div>
+          </div>
+        </div>
+
+        <p class="note">For low salinity water, wt% is approximately TDS mg/L ÷ 10,000. This tool refines that slightly by iterating with the calculated brine density.</p>
+      </section>
+
+      <section class="card">
+        <h2>Density curve</h2>
+        <svg id="chart" viewBox="0 0 720 430" role="img" aria-label="Brine density versus total dissolved solids chart">
+          <rect x="0" y="0" width="720" height="430" fill="#fff" />
+          <g id="grid"></g>
+          <polyline id="curve" fill="none" stroke="#24313d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+          <line id="markerV" stroke="#0f766e" stroke-width="2" stroke-dasharray="6 6" />
+          <line id="markerH" stroke="#0f766e" stroke-width="2" stroke-dasharray="6 6" />
+          <circle id="marker" r="7" fill="#0f766e" stroke="#fff" stroke-width="2" />
+          <text id="markerLabel" font-size="14" fill="#0f766e" font-weight="700"></text>
+          <text x="360" y="410" text-anchor="middle" font-size="15" fill="#1f2933">Total dissolved solids, wt%</text>
+          <text x="22" y="220" text-anchor="middle" transform="rotate(-90,22,220)" font-size="15" fill="#1f2933">Brine density, lb/ft³</text>
+          <text x="360" y="24" text-anchor="middle" font-size="16" fill="#1f2933" font-weight="700">Effect of salinity on brine density</text>
+        </svg>
+        <p class="small">Curve is a digitized/approximated version of McCain Fig. 16-8: “Effect of salinity on the density of brine.” Use for screening-level calculations, not as a substitute for measured density.</p>
+
+        <h3>Reference points used by this tool</h3>
+        <table>
+          <thead><tr><th>TDS, wt%</th><th>Density, lb/ft³</th><th>SG</th></tr></thead>
+          <tbody id="points"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:18px;">
+      <h2>Method</h2>
+      <div class="formula">
+        wt% ≈ TDS(mg/L) ÷ [10,000 × brine density(g/mL)]<br>
+        SG = brine density(lb/ft³) ÷ fresh water density(lb/ft³)<br>
+        Hydrostatic gradient = 0.433 × SG psi/ft<br>
+        Pressure difference = Hydrostatic gradient × TVD difference
+      </div>
+      <p class="note">Suggested citation: McCain, W.D. Jr., <em>The Properties of Petroleum Fluids</em>, 2nd ed., PennWell, Chapter 16, Fig. 16-8, “Effect of salinity on the density of brine.” The figure cites data from <em>International Critical Tables II</em>, 1927, p. 79.</p>
+    </section>
+  </main>
+
+  <script>
+    const pts = [
+      {x:0, y:62.4},
+      {x:5, y:64.5},
+      {x:10, y:66.8},
+      {x:15, y:69.2},
+      {x:20, y:71.8},
+      {x:25, y:74.7},
+      {x:26, y:75.0}
+    ];
+    const margin = {l:72, r:40, t:54, b:58};
+    const W = 720, H = 430;
+    const xMin = 0, xMax = 30, yMin = 60, yMax = 76;
+    const lbft3ToGml = 0.016018463;
+    const ft3PerGal = 7.48051948;
+
+    function xScale(x){ return margin.l + (x - xMin) / (xMax - xMin) * (W - margin.l - margin.r); }
+    function yScale(y){ return H - margin.b - (y - yMin) / (yMax - yMin) * (H - margin.t - margin.b); }
+
+    function interpDensity(wt) {
+      if (wt <= pts[0].x) return pts[0].y + (pts[1].y - pts[0].y) / (pts[1].x - pts[0].x) * (wt - pts[0].x);
+      for (let i = 0; i < pts.length - 1; i++) {
+        if (wt <= pts[i+1].x) {
+          const a = pts[i], b = pts[i+1];
+          return a.y + (b.y - a.y) * (wt - a.x) / (b.x - a.x);
+        }
+      }
+      const a = pts[pts.length-2], b = pts[pts.length-1];
+      return b.y + (b.y - a.y) / (b.x - a.x) * (wt - b.x);
+    }
+
+    function wtFromTds(tds) {
+      let wt = tds / 10000;
+      for (let i = 0; i < 8; i++) {
+        const rhoGml = interpDensity(wt) * lbft3ToGml;
+        wt = tds / (10000 * rhoGml);
+      }
+      return wt;
+    }
+
+    function drawBaseChart() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      for (let x = 0; x <= 30; x += 5) {
+        const X = xScale(x);
+        grid.insertAdjacentHTML('beforeend', `<line x1="${X}" y1="${yScale(yMin)}" x2="${X}" y2="${yScale(yMax)}" stroke="#d6dde5"/>`);
+        grid.insertAdjacentHTML('beforeend', `<text x="${X}" y="${H-36}" text-anchor="middle" font-size="13" fill="#4b5563">${x}</text>`);
+      }
+      for (let y = 60; y <= 76; y += 2) {
+        const Y = yScale(y);
+        grid.insertAdjacentHTML('beforeend', `<line x1="${xScale(xMin)}" y1="${Y}" x2="${xScale(xMax)}" y2="${Y}" stroke="#d6dde5"/>`);
+        grid.insertAdjacentHTML('beforeend', `<text x="${margin.l-12}" y="${Y+4}" text-anchor="end" font-size="13" fill="#4b5563">${y}</text>`);
+      }
+      grid.insertAdjacentHTML('beforeend', `<rect x="${xScale(xMin)}" y="${yScale(yMax)}" width="${xScale(xMax)-xScale(xMin)}" height="${yScale(yMin)-yScale(yMax)}" fill="none" stroke="#1f2933" stroke-width="2"/>`);
+
+      const curvePoints = [];
+      for (let x=0; x<=26; x += .25) curvePoints.push(`${xScale(x)},${yScale(interpDensity(x))}`);
+      document.getElementById('curve').setAttribute('points', curvePoints.join(' '));
+
+      const tbody = document.getElementById('points');
+      tbody.innerHTML = pts.map(p => `<tr><td>${p.x.toFixed(1)}</td><td>${p.y.toFixed(2)}</td><td>${(p.y/62.37).toFixed(3)}</td></tr>`).join('');
+    }
+
+    function calculate() {
+      const mode = document.getElementById('mode').value;
+      const v = parseFloat(document.getElementById('value').value || '0');
+      const waterDensity = parseFloat(document.getElementById('waterDensity').value || '62.37');
+      const tvdDiff = parseFloat(document.getElementById('tvdDiff').value || '');
+      const warn = document.getElementById('warn');
+      warn.style.display = 'none';
+      warn.textContent = '';
+
+      let wt = mode === 'tds' ? wtFromTds(v) : v;
+      if (!isFinite(wt) || wt < 0) wt = 0;
+      if (wt > 26) {
+        warn.textContent = 'Warning: salinity is outside the digitized figure range. Result is extrapolated.';
+        warn.style.display = 'block';
+      }
+      const rho = interpDensity(wt);
+      const sg = rho / waterDensity;
+      const ppg = rho / ft3PerGal;
+      const grad = 0.433 * sg;
+      const dp = isFinite(tvdDiff) ? grad * tvdDiff : null;
+
+      document.getElementById('wtOut').textContent = wt.toFixed(3);
+      document.getElementById('rhoOut').textContent = rho.toFixed(2);
+      document.getElementById('sgOut').textContent = sg.toFixed(3);
+      document.getElementById('gradOut').textContent = grad.toFixed(3);
+      document.getElementById('ppgOut').textContent = ppg.toFixed(2);
+      document.getElementById('dpOut').textContent = dp === null ? '—' : dp.toFixed(0);
+
+      const X = xScale(Math.max(xMin, Math.min(xMax, wt)));
+      const Y = yScale(Math.max(yMin, Math.min(yMax, rho)));
+      document.getElementById('marker').setAttribute('cx', X);
+      document.getElementById('marker').setAttribute('cy', Y);
+      document.getElementById('markerV').setAttribute('x1', X);
+      document.getElementById('markerV').setAttribute('x2', X);
+      document.getElementById('markerV').setAttribute('y1', yScale(yMin));
+      document.getElementById('markerV').setAttribute('y2', Y);
+      document.getElementById('markerH').setAttribute('x1', xScale(xMin));
+      document.getElementById('markerH').setAttribute('x2', X);
+      document.getElementById('markerH').setAttribute('y1', Y);
+      document.getElementById('markerH').setAttribute('y2', Y);
+      const label = document.getElementById('markerLabel');
+      label.setAttribute('x', Math.min(X + 12, 560));
+      label.setAttribute('y', Math.max(Y - 10, 70));
+      label.textContent = `${wt.toFixed(2)} wt%, ${rho.toFixed(2)} lb/ft³`;
+    }
+
+    document.getElementById('mode').addEventListener('change', () => {
+      const mode = document.getElementById('mode').value;
+      document.getElementById('value').value = mode === 'tds' ? '2600' : '0.26';
+      calculate();
+    });
+    document.getElementById('calc').addEventListener('click', calculate);
+    document.getElementById('example').addEventListener('click', () => {
+      document.getElementById('mode').value = 'tds';
+      document.getElementById('value').value = '2600';
+      document.getElementById('tvdDiff').value = '';
+      calculate();
+    });
+    ['value','waterDensity','tvdDiff'].forEach(id => document.getElementById(id).addEventListener('input', calculate));
+
+    drawBaseChart();
+    calculate();
+  </script>
+</body>
+</html>
