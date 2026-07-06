@@ -1,11 +1,12 @@
-#Help: Input 12-digit UWIs and output Well information table in AOR format
+#Help: Input 10-digit APIs and output Well information table in AOR format
 """
 ===========================
-Input: 12-digit UWIs (one per line, or comma/space separated)
+Input: 10-digit API numbers (one per line, or comma/space separated)
 Output: Well information table matching CalGEM AOR format
 
-UWI structure: first 10 digits = API number, last 2 digits = wellbore suffix
-Each UWI+completion gets its own row with translated well type and status.
+Each API may have multiple completions (original + sidetracks).
+Each completion gets its own row with the derived 12-digit UWI,
+well name, translated well type and status.
 
 Translations:
   well_type:  INJ+Steam -> "Steam Injector", INJ+Water -> "Water Injector",
@@ -95,7 +96,7 @@ class TreeviewMixin:
             self.result_tree.delete(i)
 
         if df.empty:
-            messagebox.showinfo("No Results", "No data found for the provided UWIs.")
+            messagebox.showinfo("No Results", "No data found for the provided APIs.")
             self.result_tree["columns"] = []
             return
 
@@ -168,46 +169,61 @@ def build_treeview(parent):
     return tree_frame, result_tree
 
 
-# ── UWI Parsing ──────────────────────────────────────────────────────────
+# ── API Parsing ──────────────────────────────────────────────────────────
 
-def parse_uwis(raw_text):
-    """Parse raw text into a list of clean 12-digit UWI strings."""
-    # Split on any whitespace, commas, semicolons
+def parse_apis(raw_text):
+    """Parse raw text into a list of clean 10-digit API strings."""
     tokens = raw_text.replace(",", " ").replace(";", " ").split()
-    uwis = []
+    apis = []
     seen = set()
     for tok in tokens:
-        # Strip non-digit characters
         cleaned = ''.join(c for c in tok.strip() if c.isdigit())
-        if len(cleaned) == 12 and cleaned not in seen:
-            uwis.append(cleaned)
+        # Accept 10-digit APIs; also accept 12-digit (strip last 2)
+        if len(cleaned) == 12:
+            cleaned = cleaned[:10]
+        if len(cleaned) == 10 and cleaned not in seen:
+            apis.append(cleaned)
             seen.add(cleaned)
-    return uwis
+    return apis
 
 
-def build_aor_sql(uwis):
-    """Build the Oracle SQL query for AOR well lookup from 12-digit UWIs."""
-    # Extract unique 10-digit APIs for the first filter (performance)
-    apis = list(set(u[:10] for u in uwis))
+def build_aor_sql(apis):
+    """Build Oracle SQL for AOR well lookup from 10-digit APIs.
+
+    For each API, pulls all active completions. Each completion is
+    paired with exactly one wellbore (highest suffix) to derive the
+    12-digit UWI. Returns Well Name (from wlbr_dmn) alongside
+    Completion Name (from cmpl_dmn).
+    """
     api_in = ", ".join(f"'{a}'" for a in apis)
-    uwi_in = ", ".join(f"'{u}'" for u in uwis)
 
     return f"""
-SELECT
-    cd.well_api_nbr || LPAD(wd.wlbr_api_suff_nbr, 2, '0') AS UWI,
-    cd.well_api_nbr                    AS API,
-    cd.cmpl_nme                        AS "Well Name",
-    cd.prim_purp_type_cde              AS WELL_TYPE_CODE,
-    cd.prim_matl_desc                  AS MATERIAL,
-    cd.cmpl_state_type_cde             AS STATUS_CODE,
-    cd.opnl_fld                        AS "Field",
-    cd.in_svc_indc                     AS IN_SERVICE
-FROM dwrptg.cmpl_dmn cd
-JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
-WHERE cd.actv_indc = 'Y'
-  AND cd.well_api_nbr IN ({api_in})
-  AND cd.well_api_nbr || LPAD(wd.wlbr_api_suff_nbr, 2, '0') IN ({uwi_in})
-ORDER BY cd.well_api_nbr, wd.wlbr_api_suff_nbr, cd.cmpl_nme
+WITH ranked AS (
+    SELECT
+        cd.well_api_nbr                                          AS API,
+        cd.well_api_nbr || LPAD(wd.wlbr_api_suff_nbr, 2, '0')  AS UWI,
+        wd.well_nme                                              AS WELL_NAME,
+        cd.cmpl_nme                                              AS COMPLETION_NAME,
+        cd.prim_purp_type_cde                                    AS WELL_TYPE_CODE,
+        cd.prim_matl_desc                                        AS MATERIAL,
+        cd.cmpl_state_type_cde                                   AS STATUS_CODE,
+        cd.opnl_fld                                              AS FIELD,
+        cd.in_svc_indc                                           AS IN_SERVICE,
+        cd.cmpl_fac_id,
+        ROW_NUMBER() OVER (
+            PARTITION BY cd.cmpl_fac_id
+            ORDER BY wd.wlbr_api_suff_nbr DESC
+        ) AS rn
+    FROM dwrptg.cmpl_dmn cd
+    JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
+    WHERE cd.well_api_nbr IN ({api_in})
+      AND cd.actv_indc = 'Y'
+)
+SELECT API, UWI, WELL_NAME, COMPLETION_NAME,
+       WELL_TYPE_CODE, MATERIAL, STATUS_CODE, FIELD, IN_SERVICE
+FROM ranked
+WHERE rn = 1
+ORDER BY API, cmpl_fac_id
 """
 
 
@@ -226,13 +242,18 @@ def transform_aor_results(df):
     # Translate status
     df["Well Status"] = df["STATUS_CODE"].apply(translate_status)
 
-    # Add operator (not in DB — hardcoded per screenshot)
+    # Add operator
     df["Operator"] = "Aera Energy LLC"
 
     # Select and rename to final output columns
-    output = df[["UWI", "API", "Well Name", "Well Type",
-                 "Well Status", "Field", "MATERIAL", "Operator"]].copy()
-    output.rename(columns={"MATERIAL": "Material"}, inplace=True)
+    output = df[["UWI", "API", "WELL_NAME", "COMPLETION_NAME", "Well Type",
+                 "Well Status", "FIELD", "MATERIAL", "Operator"]].copy()
+    output.rename(columns={
+        "WELL_NAME": "Well Name",
+        "COMPLETION_NAME": "Completion Name",
+        "FIELD": "Field",
+        "MATERIAL": "Material",
+    }, inplace=True)
 
     return output
 
@@ -260,23 +281,24 @@ class AORWellLookupApp(tb.Window, TreeviewMixin):
         top = tb.Frame(self)
         top.pack(fill="x", padx=15, pady=(15, 5))
 
-        # Left: UWI input
-        input_frame = tb.LabelFrame(top, text="Enter 12-Digit UWIs")
+        # Left: API input
+        input_frame = tb.LabelFrame(top, text="Enter 10-Digit API Numbers")
         input_frame.pack(side="left", fill="both", expand=True, padx=5, pady=5)
 
-        self.uwi_text = scrolledtext.ScrolledText(
+        self.api_text = scrolledtext.ScrolledText(
             input_frame, wrap=tk.WORD, width=40, height=10,
             font=("Courier New", 10)
         )
-        self.uwi_text.pack(fill="both", expand=True)
+        self.api_text.pack(fill="both", expand=True)
 
-        # Pre-populate with example from the screenshot
-        self.uwi_text.insert(tk.END, "040532203000\n040532203001")
+        # Pre-populate with example
+        self.api_text.insert(tk.END, "0405322030\n0403059234")
 
         hint = tb.Label(
             input_frame,
-            text="One UWI per line, or comma/space separated. "
-                 "UWI = 10-digit API + 2-digit wellbore suffix.",
+            text="One API per line, or comma/space separated. "
+                 "10-digit format (e.g. 0405322030). "
+                 "12-digit UWIs also accepted (suffix stripped).",
             font=("Helvetica", 9), foreground="gray"
         )
         hint.pack(anchor="w", pady=(5, 0))
@@ -310,7 +332,7 @@ class AORWellLookupApp(tb.Window, TreeviewMixin):
         ).pack(pady=5)
 
         # ── Status Bar ───────────────────────────────────────────────────
-        self.status_var = tk.StringVar(value="Ready — enter UWIs and click Run Lookup")
+        self.status_var = tk.StringVar(value="Ready — enter API numbers and click Run Lookup")
         status_bar = tb.Label(
             self, textvariable=self.status_var,
             font=("Helvetica", 10), anchor="w", padding=(15, 5)
@@ -324,22 +346,23 @@ class AORWellLookupApp(tb.Window, TreeviewMixin):
     # ── Core Logic ───────────────────────────────────────────────────────
 
     def run_lookup(self):
-        raw = self.uwi_text.get("1.0", tk.END)
-        uwis = parse_uwis(raw)
+        raw = self.api_text.get("1.0", tk.END)
+        apis = parse_apis(raw)
 
-        if not uwis:
+        if not apis:
             messagebox.showwarning(
                 "Input Error",
-                "No valid 12-digit UWIs found.\n\n"
-                "UWI format: 10-digit API + 2-digit wellbore suffix\n"
-                "Example: 040532203000"
+                "No valid API numbers found.\n\n"
+                "API format: 10-digit number\n"
+                "Example: 0405322030\n\n"
+                "12-digit UWIs are also accepted (last 2 digits stripped)."
             )
             return
 
-        self.status_var.set(f"Querying {len(uwis)} UWI(s)...")
+        self.status_var.set(f"Querying {len(apis)} API(s)...")
         self.update_idletasks()
 
-        sql = build_aor_sql(uwis)
+        sql = build_aor_sql(apis)
 
         try:
             conn = self.conn_manager.get_connection("odw")
@@ -367,7 +390,7 @@ class AORWellLookupApp(tb.Window, TreeviewMixin):
             self.display_results(df_out)
             self.status_var.set(
                 f"Done — {len(df_out)} completion(s) found for "
-                f"{len(uwis)} UWI(s)"
+                f"{len(apis)} API(s)"
             )
 
         except ConnectionError as e:
@@ -413,7 +436,7 @@ class AORWellLookupApp(tb.Window, TreeviewMixin):
     # ── Clear ────────────────────────────────────────────────────────────
 
     def clear_all(self):
-        self.uwi_text.delete("1.0", tk.END)
+        self.api_text.delete("1.0", tk.END)
         self.clear_results()
         self.status_var.set("Cleared — ready for new input")
 

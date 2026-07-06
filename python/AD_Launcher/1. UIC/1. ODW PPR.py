@@ -2,11 +2,14 @@
 import os
 import oracledb
 import tkinter as tk
-from tkinter import messagebox, scrolledtext
+from tkinter import messagebox, scrolledtext, filedialog
 from tkinter import ttk
 import tkinter.font
 import ttkbootstrap as tb
 import pandas as pd
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill
+from openpyxl.utils import get_column_letter
 from datetime import datetime, date, timedelta
 
 # --- CONNECTION FIX: Enable Thick Mode ---
@@ -17,7 +20,6 @@ except Exception as e:
 # -----------------------------------------
 
 
-# Oracle Connection Manager
 class OracleConnectionManager:
     def __init__(self):
         self._connections = {
@@ -50,10 +52,9 @@ class OracleConnectionManager:
             )
         except oracledb.Error as e:
             error_obj, = e.args
-            raise ConnectionError(f"Failed to connect to Oracle DB '{name}': {error_obj.message}") from e
-
-    def available_connections(self):
-        return list(self._connections.keys())
+            raise ConnectionError(
+                f"Failed to connect to Oracle DB '{name}': {error_obj.message}"
+            ) from e
 
 
 def format_well_api_list(raw_api_list):
@@ -73,64 +74,70 @@ def format_well_api_list(raw_api_list):
     return ", ".join(escaped)
 
 
+def _is_api_column(col_name):
+    """Return True if a column name looks like an API number column."""
+    return 'API' in col_name.upper()
+
+
 # --------------------------------------------------------------------------
-# Mixin with common Treeview display / clear / copy methods
+# Mixin: Treeview display, clipboard copy (API-safe), and Excel export
 # --------------------------------------------------------------------------
 class TreeviewMixin:
-    """Provides display_results, clear_results, copy_to_clipboard for any
-    frame that has a `self.result_tree` Treeview and `self.current_data` attr."""
 
     def display_results(self, df, apply_global_sort=True):
         for i in self.result_tree.get_children():
             self.result_tree.delete(i)
 
         if df.empty:
-            messagebox.showinfo("No Results", "No data found for the query.")
             self.result_tree["columns"] = []
             return
 
         if apply_global_sort:
-            sort_columns = ['PRIM_PURP_TYPE_CDE', 'WELL_API_NBR']
-            available_sort_columns = [col for col in sort_columns if col in df.columns]
-            if available_sort_columns:
+            sort_cols = ['PRIM_PURP_TYPE_CDE', 'WELL_API_NBR']
+            avail = [c for c in sort_cols if c in df.columns]
+            if avail:
                 try:
                     if 'WELL_API_NBR' in df.columns:
                         df['WELL_API_NBR'] = df['WELL_API_NBR'].astype(str)
-                    df.sort_values(by=available_sort_columns, inplace=True)
-                except Exception as e:
-                    messagebox.showwarning("Sorting Warning",
-                                           f"Error during sorting: {e}. Displaying unsorted data.")
+                    df.sort_values(by=avail, inplace=True)
+                except Exception:
+                    pass
+
+        # Force every API column to string so leading zeros survive
+        for col in df.columns:
+            if _is_api_column(col):
+                df[col] = df[col].astype(str)
 
         columns = list(df.columns)
         self.result_tree["columns"] = columns
         self.result_tree["displaycolumns"] = columns
 
         try:
-            treeview_font_name = ttk.Style().lookup("Treeview", "font")
-            tree_font = tkinter.font.Font(font=treeview_font_name)
+            fn = ttk.Style().lookup("Treeview", "font")
+            tree_font = tkinter.font.Font(font=fn)
         except Exception:
             tree_font = tkinter.font.Font(family="TkDefaultFont", size=10)
 
         for col in columns:
             self.result_tree.heading(col, text=col, anchor="w")
-            self.result_tree.column(col, width=tree_font.measure(col) + 20, stretch=False)
+            self.result_tree.column(col, width=tree_font.measure(col) + 20,
+                                    stretch=False)
 
         for _, row in df.iterrows():
-            display_values = []
+            vals = []
             for item in row:
                 if isinstance(item, pd.Timestamp):
-                    display_values.append(item.strftime('%Y-%m-%d') if not pd.isna(item) else '')
+                    vals.append(item.strftime('%Y-%m-%d') if not pd.isna(item) else '')
                 elif pd.isna(item):
-                    display_values.append('')
+                    vals.append('')
                 else:
-                    display_values.append(item)
-            self.result_tree.insert("", "end", values=display_values)
-
-            for i, item in enumerate(display_values):
-                col_width = tree_font.measure(str(item)) + 10
-                current_col_id = columns[i]
-                if self.result_tree.column(current_col_id, width=None) < col_width:
-                    self.result_tree.column(current_col_id, width=col_width)
+                    vals.append(item)
+            self.result_tree.insert("", "end", values=vals)
+            for i, item in enumerate(vals):
+                w = tree_font.measure(str(item)) + 10
+                cid = columns[i]
+                if self.result_tree.column(cid, width=None) < w:
+                    self.result_tree.column(cid, width=w)
 
     def clear_results(self):
         for i in self.result_tree.get_children():
@@ -138,35 +145,162 @@ class TreeviewMixin:
         self.result_tree["columns"] = []
         self.current_data = None
 
+    # --- Clipboard: wrap API columns so Excel keeps leading zeros ---
     def copy_to_clipboard(self):
-        if self.current_data is not None and not self.current_data.empty:
-            try:
-                self.current_data.to_clipboard(excel=True, index=False, header=True)
-                messagebox.showinfo("Copy Success", "Results copied to clipboard (Excel format).")
-            except Exception as e:
-                messagebox.showerror("Copy Error", f"Failed to copy to clipboard: {e}")
-        else:
+        if self.current_data is None or self.current_data.empty:
             messagebox.showwarning("No Data", "No results to copy to clipboard.")
+            return
+        try:
+            df_copy = self.current_data.copy()
+            for col in df_copy.columns:
+                if _is_api_column(col):
+                    df_copy[col] = df_copy[col].apply(
+                        lambda v: f'="{v}"' if pd.notna(v) and str(v).strip() else ''
+                    )
+            df_copy.to_clipboard(excel=True, index=False, header=True)
+            messagebox.showinfo("Copy Success",
+                                "Copied to clipboard (Excel format). "
+                                "API columns are preserved as text.")
+        except Exception as e:
+            messagebox.showerror("Copy Error", f"Failed to copy: {e}")
+
+
+
 
 
 # --------------------------------------------------------------------------
-# Helper: build a standard treeview + scrollbars inside a parent frame
+# Helper: build treeview + scrollbars
 # --------------------------------------------------------------------------
 def build_treeview(parent):
-    """Returns (tree_frame, result_tree) with horizontal & vertical scrollbars."""
     tree_frame = tb.Frame(parent)
-    tree_scroll_y = tb.Scrollbar(tree_frame, orient="vertical")
-    tree_scroll_y.pack(side="right", fill="y")
-    tree_scroll_x = tb.Scrollbar(tree_frame, orient="horizontal")
-    tree_scroll_x.pack(side="bottom", fill="x")
+    sy = tb.Scrollbar(tree_frame, orient="vertical")
+    sy.pack(side="right", fill="y")
+    sx = tb.Scrollbar(tree_frame, orient="horizontal")
+    sx.pack(side="bottom", fill="x")
+    tree = ttk.Treeview(tree_frame, show="headings",
+                         yscrollcommand=sy.set, xscrollcommand=sx.set)
+    tree.pack(fill="both", expand=True)
+    sy.config(command=tree.yview)
+    sx.config(command=tree.xview)
+    return tree_frame, tree
 
-    result_tree = ttk.Treeview(tree_frame, show="headings",
-                                yscrollcommand=tree_scroll_y.set,
-                                xscrollcommand=tree_scroll_x.set)
-    result_tree.pack(fill="both", expand=True)
-    tree_scroll_y.config(command=result_tree.yview)
-    tree_scroll_x.config(command=result_tree.xview)
-    return tree_frame, result_tree
+
+# --------------------------------------------------------------------------
+# Helper: write a DataFrame to an openpyxl worksheet (API-safe)
+# --------------------------------------------------------------------------
+def _write_df_to_sheet(ws, df):
+    """Write a DataFrame to an openpyxl worksheet with formatting."""
+    columns = list(df.columns)
+    api_col_indices = {i for i, c in enumerate(columns) if _is_api_column(c)}
+
+    header_font = Font(name="Arial", bold=True, size=10)
+    header_fill = PatternFill("solid", fgColor="D9E2F3")
+    data_font = Font(name="Arial", size=10)
+
+    for c_idx, col_name in enumerate(columns, start=1):
+        cell = ws.cell(row=1, column=c_idx, value=col_name)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center")
+
+    for r_idx, (_, row) in enumerate(df.iterrows(), start=2):
+        for c_idx, (col_name, val) in enumerate(zip(columns, row), start=1):
+            if isinstance(val, pd.Timestamp):
+                cell_val = val.strftime('%Y-%m-%d') if not pd.isna(val) else None
+            elif pd.isna(val):
+                cell_val = None
+            else:
+                cell_val = val
+
+            cell = ws.cell(row=r_idx, column=c_idx, value=cell_val)
+            cell.font = data_font
+
+            if (c_idx - 1) in api_col_indices:
+                cell.number_format = '@'
+                cell.value = str(cell_val) if cell_val is not None else ''
+
+    for c_idx, col_name in enumerate(columns, start=1):
+        max_len = len(str(col_name))
+        for r_idx in range(2, min(ws.max_row + 1, 200)):
+            v = ws.cell(row=r_idx, column=c_idx).value
+            if v is not None:
+                max_len = max(max_len, len(str(v)))
+        ws.column_dimensions[get_column_letter(c_idx)].width = min(max_len + 3, 40)
+
+    ws.freeze_panes = "A2"
+
+
+# --------------------------------------------------------------------------
+# Export ALL tabs into one xlsx workbook (one sheet per tab)
+# --------------------------------------------------------------------------
+def export_all_tabs(app):
+    """Collect data from every data tab and write to a single .xlsx file."""
+    tabs = [
+        ("Basic Data",       app.basic_tab),
+        ("Top Perf",         app.perf_tab),
+        ("Summary",          app.summary_tab),
+        ("Avg Tubing Pres",  app.tubing_tab),
+        ("Monthly Prod Inj", app.prod_inj_tab),
+        ("Daily Inj Pres",   app.daily_tab),
+    ]
+
+    # Check that at least one tab has data
+    has_data = any(
+        getattr(t, 'current_data', None) is not None
+        and not t.current_data.empty
+        for _, t in tabs
+    )
+    if not has_data:
+        messagebox.showwarning("No Data",
+                               "No data loaded on any tab. "
+                               "Click 'Load All Data' first.")
+        return
+
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".xlsx",
+        filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+        title="Export All Tabs to Spreadsheet"
+    )
+    if not file_path:
+        return
+
+    try:
+        wb = Workbook()
+        # Remove the default empty sheet that openpyxl creates
+        wb.remove(wb.active)
+
+        sheets_written = 0
+        for sheet_name, tab in tabs:
+            df = getattr(tab, 'current_data', None)
+            if df is None or df.empty:
+                continue
+            ws = wb.create_sheet(title=sheet_name)
+            _write_df_to_sheet(ws, df.copy())
+            sheets_written += 1
+
+        if sheets_written == 0:
+            messagebox.showwarning("No Data", "All tabs are empty — nothing to export.")
+            return
+
+        wb.save(file_path)
+        messagebox.showinfo("Export Success",
+                            f"Exported {sheets_written} tab(s) to:\n{file_path}")
+
+    except Exception as e:
+        messagebox.showerror("Export Error", f"Failed to export: {e}")
+
+
+# --------------------------------------------------------------------------
+# Helper: bottom button bar (Copy + Export All) — shared by all data tabs
+# --------------------------------------------------------------------------
+def build_button_bar(parent, tab):
+    bar = tb.Frame(parent)
+    tb.Button(bar, text="Copy to Clipboard", command=tab.copy_to_clipboard,
+              bootstyle="secondary").pack(side="left", padx=5)
+    tb.Button(bar, text="Export All Tabs to Spreadsheet",
+              command=lambda: export_all_tabs(tab.app),
+              bootstyle="success").pack(side="left", padx=5)
+    return bar
 
 
 # =========================================================================
@@ -179,73 +313,125 @@ class WellAPITab(tb.Frame):
         self._build()
 
     def _build(self):
-        label = tb.Label(self,
-                         text="Enter Well APIs (one per line — all other tabs will use these):",
-                         font=("Helvetica", 14))
-        label.pack(pady=10)
+        tb.Label(self,
+                 text="Enter Well APIs (one per line — all tabs load automatically):",
+                 font=("Helvetica", 14)).pack(pady=10)
 
-        self.well_api_text = scrolledtext.ScrolledText(self, wrap=tk.WORD,
-                                                        width=50, height=25,
-                                                        font=("Courier New", 10))
+        self.well_api_text = scrolledtext.ScrolledText(
+            self, wrap=tk.WORD, width=50, height=25, font=("Courier New", 10))
         self.well_api_text.pack(pady=10)
 
         default_apis = ["0401920171", "0401922081", "0401922236"]
         self.well_api_text.insert(tk.END, "\n".join(default_apis))
 
-        tb.Button(self, text="Set Well APIs", command=self._set_apis,
+        tb.Button(self, text="Load All Data", command=self._load_all,
                   bootstyle="primary").pack(pady=10)
 
-    def _set_apis(self):
-        raw = self.well_api_text.get("1.0", tk.END).strip().split('\n')
-        apis = list(dict.fromkeys(a.strip() for a in raw if a.strip()))
-        if not apis:
-            messagebox.showwarning("Input Error", "Please enter at least one Well API number.")
-            return
-        self.app.shared_data["well_apis"] = apis
-        messagebox.showinfo("APIs Set", f"{len(apis)} unique Well API(s) saved. You can now pull data on any tab.")
+        self.status_label = tb.Label(self, text="", font=("Helvetica", 11))
+        self.status_label.pack(pady=5)
 
     def get_apis(self):
-        """Read current text box content (called by other tabs before querying)."""
         raw = self.well_api_text.get("1.0", tk.END).strip().split('\n')
         apis = list(dict.fromkeys(a.strip() for a in raw if a.strip()))
         self.app.shared_data["well_apis"] = apis
         return apis
 
+    def _load_all(self):
+        apis = self.get_apis()
+        if not apis:
+            messagebox.showwarning("Input Error",
+                                   "Please enter at least one Well API number.")
+            return
+
+        self.status_label.config(text=f"Loading data for {len(apis)} API(s)…")
+        self.update_idletasks()
+
+        tabs_to_load = [
+            ("Basic Data",        self.app.basic_tab),
+            ("Top Perf",          self.app.perf_tab),
+            ("Summary",           self.app.summary_tab),
+            ("Avg Tubing Pres",   self.app.tubing_tab),
+            ("Monthly Prod/Inj",  self.app.prod_inj_tab),
+            ("Daily Inj/Pres",    self.app.daily_tab),
+        ]
+
+        errors = []
+        for name, tab in tabs_to_load:
+            try:
+                self.status_label.config(text=f"Loading {name}…")
+                self.update_idletasks()
+                tab.pull_data()
+            except Exception as e:
+                errors.append(f"{name}: {e}")
+
+        if errors:
+            self.status_label.config(text="Done (some tabs had errors)")
+            messagebox.showwarning("Load Warnings",
+                                   "Errors on these tabs:\n\n" + "\n".join(errors))
+        else:
+            self.status_label.config(text="All tabs loaded successfully.")
+
+
+# =========================================================================
+#  Shared query executor
+# =========================================================================
+class _QueryTab:
+    """Mixin that adds a shared _execute helper."""
+    conn_manager = OracleConnectionManager()
+
+    def _execute(self, sql, date_cols=None, sort=True):
+        try:
+            conn = self.conn_manager.get_connection('odw')
+            cursor = conn.cursor()
+            cursor.execute(sql)
+            if cursor.description:
+                rows = cursor.fetchall()
+                columns = [col[0] for col in cursor.description]
+                df = pd.DataFrame(rows, columns=columns)
+                for col in (date_cols or []):
+                    if col in df.columns:
+                        df[col] = pd.to_datetime(df[col], errors='coerce')
+                self.display_results(df, apply_global_sort=sort)
+                self.current_data = df
+            else:
+                self.clear_results()
+            cursor.close()
+            conn.close()
+        except ConnectionError as e:
+            messagebox.showerror("Connection Error", str(e))
+            self.clear_results()
+        except oracledb.Error as e:
+            error_obj, = e.args
+            messagebox.showerror("Database Error",
+                                 f"Oracle Error: {error_obj.message}")
+            self.clear_results()
+        except Exception as e:
+            messagebox.showerror("Error", f"Unexpected error: {e}")
+            self.clear_results()
+
 
 # =========================================================================
 #  TAB 2 – Well Basic Data
 # =========================================================================
-class WellBasicDataTab(tb.Frame, TreeviewMixin):
+class WellBasicDataTab(tb.Frame, TreeviewMixin, _QueryTab):
     def __init__(self, parent, app):
         super().__init__(parent)
         self.app = app
-        self.conn_manager = OracleConnectionManager()
         self.current_data = None
         self._build()
 
     def _build(self):
-        tb.Label(self, text="Well Basic Data", font=("Helvetica", 16, "bold")).pack(pady=10)
-        tb.Button(self, text="Pull Basic Well Data", command=self.pull_basic_data,
-                  bootstyle="info").pack(pady=10)
-
+        tb.Label(self, text="Well Basic Data",
+                 font=("Helvetica", 16, "bold")).pack(pady=10)
         self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
+        build_button_bar(self, self).pack(pady=10)
 
-        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
-                  bootstyle="secondary").pack(pady=10)
-
-    def pull_basic_data(self):
-        apis = self.app.api_tab.get_apis()
-        if not apis:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
-            self.clear_results()
-            return
-
-        formatted = format_well_api_list(apis)
+    def pull_data(self):
+        formatted = format_well_api_list(self.app.api_tab.get_apis())
         if not formatted:
             self.clear_results(); return
-
-        sql_query = f"""
+        sql = f"""
 SELECT
     wd.wlbr_nme                    AS well_name,
     cd.opnl_fld                    AS field_name,
@@ -262,69 +448,31 @@ JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
 WHERE cd.actv_indc = 'Y' AND cd.well_api_nbr IN ({formatted})
 ORDER BY cd.well_api_nbr, wd.wlbr_api_suff_nbr, cd.cmpl_nme
 """
-        self._execute(sql_query, date_cols=['INITIAL_PROD_DATE'])
-
-    def _execute(self, sql, date_cols=None):
-        try:
-            conn = self.conn_manager.get_connection('odw')
-            cursor = conn.cursor()
-            cursor.execute(sql)
-            if cursor.description:
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
-                df = pd.DataFrame(rows, columns=columns)
-                for col in (date_cols or []):
-                    if col in df.columns:
-                        df[col] = pd.to_datetime(df[col], errors='coerce')
-                self.display_results(df)
-                self.current_data = df
-            else:
-                conn.commit()
-                messagebox.showinfo("Query Executed", "No results to display.")
-                self.clear_results()
-            cursor.close(); conn.close()
-        except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e)); self.clear_results()
-        except oracledb.Error as e:
-            error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results()
-        except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results()
+        self._execute(sql, date_cols=['INITIAL_PROD_DATE'])
 
 
 # =========================================================================
 #  TAB 3 – Top Perf Data
 # =========================================================================
-class TopPerfTab(tb.Frame, TreeviewMixin):
+class TopPerfTab(tb.Frame, TreeviewMixin, _QueryTab):
     def __init__(self, parent, app):
         super().__init__(parent)
         self.app = app
-        self.conn_manager = OracleConnectionManager()
         self.current_data = None
         self._build()
 
     def _build(self):
-        tb.Label(self, text="Top Perf Query", font=("Helvetica", 16, "bold")).pack(pady=10)
-        tb.Button(self, text="Run Top Perf Query", command=self.execute_query,
-                  bootstyle="info").pack(pady=10)
-
+        tb.Label(self, text="Top Perf Query",
+                 font=("Helvetica", 16, "bold")).pack(pady=10)
         self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
+        build_button_bar(self, self).pack(pady=10)
 
-        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
-                  bootstyle="secondary").pack(pady=10)
-
-    def execute_query(self):
-        apis = self.app.api_tab.get_apis()
-        if not apis:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
-            self.clear_results(); return
-
-        formatted = format_well_api_list(apis)
+    def pull_data(self):
+        formatted = format_well_api_list(self.app.api_tab.get_apis())
         if not formatted:
             self.clear_results(); return
-
-        sql_query = f"""
+        sql = f"""
 WITH T AS (
     SELECT cd.cmpl_nme, cd.cmpl_fac_id, cd.well_fac_id,
            wd.well_api_nbr, cd.engr_strg_nme
@@ -347,79 +495,56 @@ perfs AS (
              t.well_fac_id, t.engr_strg_nme
 ),
 surveys AS (
-    SELECT wd.well_fac_id,
-           d.md_qty AS svy_md,
-           d.tvd_qty AS svy_tvd
+    SELECT wd.well_fac_id, d.md_qty AS svy_md, d.tvd_qty AS svy_tvd
     FROM dwrptg.dsvy_pt_dmn d
     JOIN dwrptg.wlbr_dmn wd ON d.wlbr_fac_id = wd.wlbr_fac_id
     WHERE wd.well_fac_id IN (SELECT well_fac_id FROM T)
-      AND d.tvd_qty IS NOT NULL
-      AND d.md_qty IS NOT NULL
+      AND d.tvd_qty IS NOT NULL AND d.md_qty IS NOT NULL
       AND d.tvd_qty <= d.md_qty
 ),
 top_above AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
            ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id ORDER BY s.svy_md DESC) AS rn
-    FROM perfs p
-    JOIN surveys s ON s.well_fac_id = p.well_fac_id
+    FROM perfs p JOIN surveys s ON s.well_fac_id = p.well_fac_id
     WHERE s.svy_md <= p.top_perf
 ),
 top_below AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
            ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id ORDER BY s.svy_md ASC) AS rn
-    FROM perfs p
-    JOIN surveys s ON s.well_fac_id = p.well_fac_id
+    FROM perfs p JOIN surveys s ON s.well_fac_id = p.well_fac_id
     WHERE s.svy_md > p.top_perf
 ),
 btm_above AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
            ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id ORDER BY s.svy_md DESC) AS rn
-    FROM perfs p
-    JOIN surveys s ON s.well_fac_id = p.well_fac_id
+    FROM perfs p JOIN surveys s ON s.well_fac_id = p.well_fac_id
     WHERE s.svy_md <= p.btm_perf
 ),
 btm_below AS (
     SELECT p.cmpl_fac_id, s.svy_md, s.svy_tvd,
            ROW_NUMBER() OVER (PARTITION BY p.cmpl_fac_id ORDER BY s.svy_md ASC) AS rn
-    FROM perfs p
-    JOIN surveys s ON s.well_fac_id = p.well_fac_id
+    FROM perfs p JOIN surveys s ON s.well_fac_id = p.well_fac_id
     WHERE s.svy_md > p.btm_perf
 )
-SELECT p.well_api_nbr,
-       p.cmpl_nme,
-       p.engr_strg_nme,
+SELECT p.well_api_nbr, p.cmpl_nme, p.engr_strg_nme,
        p.top_perf,
-       LEAST(
-           p.top_perf,
-           ROUND(
-               CASE
-                   WHEN ta.svy_md IS NOT NULL AND tb.svy_md IS NOT NULL
-                        AND tb.svy_md != ta.svy_md
-                   THEN ta.svy_tvd +
-                        (p.top_perf - ta.svy_md) *
-                        (tb.svy_tvd - ta.svy_tvd) /
-                        (tb.svy_md - ta.svy_md)
-                   WHEN ta.svy_md IS NOT NULL
-                   THEN ta.svy_tvd
-                   ELSE p.top_perf
-               END, 1)
-       ) AS top_perf_tvd,
+       LEAST(p.top_perf,
+             ROUND(CASE
+                 WHEN ta.svy_md IS NOT NULL AND tb.svy_md IS NOT NULL
+                      AND tb.svy_md != ta.svy_md
+                 THEN ta.svy_tvd + (p.top_perf - ta.svy_md)
+                      * (tb.svy_tvd - ta.svy_tvd) / (tb.svy_md - ta.svy_md)
+                 WHEN ta.svy_md IS NOT NULL THEN ta.svy_tvd
+                 ELSE p.top_perf END, 1)) AS top_perf_tvd,
        p.btm_perf,
-       LEAST(
-           p.btm_perf,
-           ROUND(
-               CASE
-                   WHEN ba.svy_md IS NOT NULL AND bb.svy_md IS NOT NULL
-                        AND bb.svy_md != ba.svy_md
-                   THEN ba.svy_tvd +
-                        (p.btm_perf - ba.svy_md) *
-                        (bb.svy_tvd - ba.svy_tvd) /
-                        (bb.svy_md - ba.svy_md)
-                   WHEN ba.svy_md IS NOT NULL
-                   THEN ba.svy_tvd
-                   ELSE p.btm_perf
-               END, 1)
-       ) AS btm_perf_tvd
+       LEAST(p.btm_perf,
+             ROUND(CASE
+                 WHEN ba.svy_md IS NOT NULL AND bb.svy_md IS NOT NULL
+                      AND bb.svy_md != ba.svy_md
+                 THEN ba.svy_tvd + (p.btm_perf - ba.svy_md)
+                      * (bb.svy_tvd - ba.svy_tvd) / (bb.svy_md - ba.svy_md)
+                 WHEN ba.svy_md IS NOT NULL THEN ba.svy_tvd
+                 ELSE p.btm_perf END, 1)) AS btm_perf_tvd
 FROM perfs p
 LEFT JOIN top_above ta ON p.cmpl_fac_id = ta.cmpl_fac_id AND ta.rn = 1
 LEFT JOIN top_below tb ON p.cmpl_fac_id = tb.cmpl_fac_id AND tb.rn = 1
@@ -427,218 +552,74 @@ LEFT JOIN btm_above ba ON p.cmpl_fac_id = ba.cmpl_fac_id AND ba.rn = 1
 LEFT JOIN btm_below bb ON p.cmpl_fac_id = bb.cmpl_fac_id AND bb.rn = 1
 ORDER BY p.cmpl_nme
 """
-        self._execute(sql_query)
-
-    def _execute(self, sql):
-        try:
-            conn = self.conn_manager.get_connection('odw')
-            cursor = conn.cursor()
-            cursor.execute(sql)
-            if cursor.description:
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
-                df = pd.DataFrame(rows, columns=columns)
-                self.display_results(df)
-                self.current_data = df
-            else:
-                conn.commit()
-                messagebox.showinfo("Query Executed", "No results to display.")
-                self.clear_results()
-            cursor.close(); conn.close()
-        except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e)); self.clear_results()
-        except oracledb.Error as e:
-            error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results()
-        except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results()
+        self._execute(sql)
 
 
 # =========================================================================
-#  TAB 4 – Performance Summary
+#  TAB 4 – Performance Summary  (simplified — data table only)
 # =========================================================================
-class PerformanceSummaryTab(tb.Frame, TreeviewMixin):
+class PerformanceSummaryTab(tb.Frame, TreeviewMixin, _QueryTab):
     def __init__(self, parent, app):
         super().__init__(parent)
         self.app = app
-        self.conn_manager = OracleConnectionManager()
         self.current_data = None
-        self.calculation_labels = {}
         self._build()
 
     def _build(self):
-        tb.Label(self, text="Performance Summary by Field",
+        tb.Label(self, text="Performance Summary",
                  font=("Helvetica", 16, "bold")).pack(pady=10)
-
-        # Top row: date entry + pull button
-        top_row = tb.Frame(self)
-        top_row.pack(pady=5, padx=20, fill="x")
-
-        date_frame = tb.Frame(top_row)
-        date_frame.pack(side="left")
-        tb.Label(date_frame, text="Last Project Update Date:").pack(side="left", padx=5)
-        self.project_update_date_entry = tb.DateEntry(date_frame, dateformat="%Y-%m-%d")
-        self.project_update_date_entry.pack(side="left", padx=5)
-        two_years_ago = date.today() - timedelta(days=730)
-        self.project_update_date_entry.entry.delete(0, tk.END)
-        self.project_update_date_entry.entry.insert(0, two_years_ago.strftime("%Y-%m-%d"))
-
-        tb.Button(top_row, text="Pull Performance Summary Data",
-                  command=self.pull_summary_data, bootstyle="info").pack(side="right")
-
-        # Calculations label frame
-        calc_lf = ttk.LabelFrame(self, text="Calculations", style="info.TLabelframe")
-        calc_lf.pack(pady=10, padx=20, fill="x")
-        calc_lf.columnconfigure(1, weight=1)
-
-        calc_items = [
-            ("Total INJ wells (Active/TA):", "total_inj"),
-            ("Total PROD wells:", "total_prod"),
-            ("Active Injectors (Last 2 yrs):", "active_injectors"),
-            ("Idle Injectors (Last 2 yrs):", "idle_injectors"),
-            ("Injectors Drilled Since Last Update:", "injectors_drilled"),
-            ("Active Producers (Last 2 yrs):", "active_producers"),
-            ("Idle Producers (Last 2 yrs):", "idle_producers"),
-            ("Producers Drilled Since Last Update:", "producers_drilled"),
-            ("Producers Abandoned Since Last Update:", "producers_abandoned"),
-        ]
-        for row_idx, (text, key) in enumerate(calc_items):
-            tb.Label(calc_lf, text=text, anchor="w").grid(row=row_idx, column=0, sticky="ew", padx=5, pady=2)
-            lbl = tb.Label(calc_lf, text="N/A", bootstyle="success", font=("TkDefaultFont", 10, "bold"))
-            lbl.grid(row=row_idx, column=1, sticky="ew", padx=5, pady=2)
-            self.calculation_labels[key] = lbl
-
         self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
+        build_button_bar(self, self).pack(pady=10)
 
-        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
-                  bootstyle="secondary").pack(pady=10)
-
-    def pull_summary_data(self):
-        apis = self.app.api_tab.get_apis()
-        if not apis:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
-            self.clear_calculations(); return
-
-        formatted = format_well_api_list(apis)
+    def pull_data(self):
+        formatted = format_well_api_list(self.app.api_tab.get_apis())
         if not formatted:
-            self.clear_calculations(); return
-
-        sql_query = f"""
-        WITH T1 AS (
-            SELECT cmpl_fac_id, eftv_dttm AS last_inj_dte FROM
-            (
-                SELECT cmpl_fac_id, eftv_dttm, aloc_stm_inj_dly_rte_qty, aloc_wtr_inj_dly_rte_qty,
-                       DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
-                FROM cmpl_mnly_fact
-                WHERE aloc_wtr_inj_dly_rte_qty > 0 OR aloc_stm_inj_dly_rte_qty > 0
-            ) WHERE rnk = 1
-        ),
-        T2 AS (
-            SELECT cmpl_fac_id, eftv_dttm AS last_prod_dte FROM
-            (
-                SELECT cmpl_fac_id, eftv_dttm, aloc_gros_prod_dly_rte_qty,
-                       DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
-                FROM cmpl_mnly_fact
-                WHERE aloc_gros_prod_dly_rte_qty > 0
-            ) WHERE rnk = 1
-        )
-        SELECT wd.well_nme, wd.well_api_nbr, wd.fld_nme,
-               cd.init_prod_dte, cd.init_inj_dte, cd.prim_purp_type_cde,
-               cd.ENGR_STRG_NME,
-               t1.last_inj_dte, t2.last_prod_dte,
-               cd.CMPL_STATE_TYPE_DESC, cd.CMPL_STATE_EFTV_DTTM
-        FROM well_dmn wd
-        JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-        LEFT JOIN cmpl_non_ver_dmn cnd ON cd.cmpl_fac_id = cnd.cmpl_fac_id
-        LEFT JOIN curr_cmpl_opnl_stat os ON cd.cmpl_fac_id = os.cmpl_fac_id
-        LEFT JOIN T1 ON cd.cmpl_fac_id = T1.cmpl_fac_id
-        LEFT JOIN T2 ON cd.cmpl_fac_id = T2.cmpl_fac_id
-        WHERE
-            cd.actv_indc = 'Y'
-            AND wd.actv_indc = 'Y'
-            AND wd.well_api_nbr IN ({formatted})
-            AND cd.prim_purp_type_cde IN ('PROD', 'INJ')
-        """
-
-        try:
-            conn = self.conn_manager.get_connection('odw')
-            cursor = conn.cursor()
-            cursor.execute(sql_query)
-            if cursor.description:
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
-                df = pd.DataFrame(rows, columns=columns)
-                date_cols = ['LAST_INJ_DTE', 'LAST_PROD_DTE', 'INIT_INJ_DTE',
-                             'INIT_PROD_DTE', 'CMPL_STATE_EFTV_DTTM']
-                for col in date_cols:
-                    if col in df.columns:
-                        df[col] = pd.to_datetime(df[col], errors='coerce')
-                self.display_results(df)
-                self.current_data = df
-                self.perform_calculations(df)
-            else:
-                conn.commit()
-                messagebox.showinfo("Query Executed", "No results to display.")
-                self.clear_results(); self.clear_calculations()
-            cursor.close(); conn.close()
-        except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e))
-            self.clear_results(); self.clear_calculations()
-        except oracledb.Error as e:
-            error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}")
-            self.clear_results(); self.clear_calculations()
-        except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
-            self.clear_results(); self.clear_calculations()
-
-    def perform_calculations(self, df):
-        try:
-            project_update_date_str = self.project_update_date_entry.entry.get()
-            project_update_date = datetime.strptime(project_update_date_str, "%Y-%m-%d").date()
-        except ValueError:
-            messagebox.showerror("Date Error", "Invalid date format. Please use YYYY-MM-DD.")
-            self.clear_calculations(); return
-
-        today = date.today()
-        project_update_date_ts = pd.Timestamp(project_update_date)
-        two_years_ago_ts = pd.Timestamp(today - timedelta(days=730))
-
-        inj_df = df[df['PRIM_PURP_TYPE_CDE'] == 'INJ']
-        prod_df = df[df['PRIM_PURP_TYPE_CDE'] == 'PROD']
-
-        def _set(key, val):
-            if key in self.calculation_labels:
-                self.calculation_labels[key].config(text=str(val))
-
-        _set("total_inj", len(inj_df[inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned']))
-        _set("total_prod", len(prod_df))
-        _set("active_injectors", len(inj_df[inj_df['LAST_INJ_DTE'] >= two_years_ago_ts]))
-        _set("idle_injectors", len(inj_df[(inj_df['LAST_INJ_DTE'] < two_years_ago_ts) &
-                                           (inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]))
-        _set("injectors_drilled", len(inj_df[(inj_df['INIT_INJ_DTE'] > project_update_date_ts) &
-                                              (inj_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]))
-        _set("active_producers", len(prod_df[prod_df['LAST_PROD_DTE'] >= two_years_ago_ts]))
-        _set("idle_producers", len(prod_df[(prod_df['LAST_PROD_DTE'] < two_years_ago_ts) &
-                                            (prod_df['CMPL_STATE_TYPE_DESC'] != 'Permanently Abandoned')]))
-        _set("producers_drilled", len(prod_df[prod_df['INIT_PROD_DTE'] > project_update_date_ts]))
-        _set("producers_abandoned", len(prod_df[(prod_df['CMPL_STATE_TYPE_DESC'] == 'Permanently Abandoned') &
-                                                 (prod_df['CMPL_STATE_EFTV_DTTM'] > project_update_date_ts)]))
-
-    def clear_calculations(self):
-        for lbl in self.calculation_labels.values():
-            lbl.config(text="N/A")
+            self.clear_results(); return
+        sql = f"""
+WITH T1 AS (
+    SELECT cmpl_fac_id, eftv_dttm AS last_inj_dte FROM (
+        SELECT cmpl_fac_id, eftv_dttm,
+               DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
+        FROM cmpl_mnly_fact
+        WHERE aloc_wtr_inj_dly_rte_qty > 0 OR aloc_stm_inj_dly_rte_qty > 0
+    ) WHERE rnk = 1
+),
+T2 AS (
+    SELECT cmpl_fac_id, eftv_dttm AS last_prod_dte FROM (
+        SELECT cmpl_fac_id, eftv_dttm,
+               DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
+        FROM cmpl_mnly_fact
+        WHERE aloc_gros_prod_dly_rte_qty > 0
+    ) WHERE rnk = 1
+)
+SELECT wd.well_nme, wd.well_api_nbr, wd.fld_nme,
+       cd.init_prod_dte, cd.init_inj_dte, cd.prim_purp_type_cde,
+       cd.ENGR_STRG_NME,
+       t1.last_inj_dte, t2.last_prod_dte,
+       cd.CMPL_STATE_TYPE_DESC, cd.CMPL_STATE_EFTV_DTTM
+FROM well_dmn wd
+JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+LEFT JOIN cmpl_non_ver_dmn cnd ON cd.cmpl_fac_id = cnd.cmpl_fac_id
+LEFT JOIN curr_cmpl_opnl_stat os ON cd.cmpl_fac_id = os.cmpl_fac_id
+LEFT JOIN T1 ON cd.cmpl_fac_id = T1.cmpl_fac_id
+LEFT JOIN T2 ON cd.cmpl_fac_id = T2.cmpl_fac_id
+WHERE cd.actv_indc = 'Y' AND wd.actv_indc = 'Y'
+  AND wd.well_api_nbr IN ({formatted})
+  AND cd.prim_purp_type_cde IN ('PROD', 'INJ')
+"""
+        self._execute(sql, date_cols=['LAST_INJ_DTE', 'LAST_PROD_DTE',
+                                       'INIT_INJ_DTE', 'INIT_PROD_DTE',
+                                       'CMPL_STATE_EFTV_DTTM'])
 
 
 # =========================================================================
 #  TAB 5 – Avg Tubing Pressure & Inj Vol
 # =========================================================================
-class TubingPressureTab(tb.Frame, TreeviewMixin):
+class TubingPressureTab(tb.Frame, TreeviewMixin, _QueryTab):
     def __init__(self, parent, app):
         super().__init__(parent)
         self.app = app
-        self.conn_manager = OracleConnectionManager()
         self.current_data = None
         self._build()
 
@@ -646,243 +627,136 @@ class TubingPressureTab(tb.Frame, TreeviewMixin):
         tb.Label(self, text="Avg Injection Volume and Wlhd Tubing Pressure",
                  font=("Helvetica", 16, "bold")).pack(pady=10)
 
-        control = tb.Frame(self)
-        control.pack(pady=10, padx=20, fill="x")
-
-        tb.Button(control, text="Pull Averages Data", command=self.pull_data,
-                  bootstyle="info").pack(side="left")
-
-        avg_frame = tb.Frame(control)
-        avg_frame.pack(side="right")
+        # Average pressure readout
+        avg_frame = tb.Frame(self)
+        avg_frame.pack(pady=5, padx=20, fill="x")
         tb.Label(avg_frame, text="Overall Avg Tubing Pressure:").pack(side="left", padx=5)
-        self.avg_pressure_label = tb.Label(avg_frame, text="N/A", bootstyle="success",
+        self.avg_pressure_label = tb.Label(avg_frame, text="N/A",
+                                            bootstyle="success",
                                             font=("TkDefaultFont", 10, "bold"))
         self.avg_pressure_label.pack(side="left", padx=5)
 
         self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
-
-        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
-                  bootstyle="secondary").pack(pady=10)
+        build_button_bar(self, self).pack(pady=10)
 
     def pull_data(self):
-        apis = self.app.api_tab.get_apis()
-        if not apis:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
-            self.clear_results(); self._clear_avg(); return
-
-        formatted = format_well_api_list(apis)
+        formatted = format_well_api_list(self.app.api_tab.get_apis())
         if not formatted:
-            self.clear_results(); self._clear_avg(); return
-
-        sql_query = f"""
-        SELECT wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id,
-            AVG(CASE WHEN cf.aloc_stm_inj_vol_qty > 0 THEN cf.aloc_stm_inj_vol_qty END) AS avg_stm_inj_vol,
-            ROUND(AVG(CASE WHEN cf.aloc_wtr_inj_vol_qty > 0 THEN cf.aloc_wtr_inj_vol_qty END), 2) AS avg_wtr_inj_vol,
-            ROUND(AVG(CASE WHEN cf.wlhd_tbg_prsr_qty > 0 THEN cf.wlhd_tbg_prsr_qty END), 2) AS avg_wlhd_tbg_prsr
-        FROM well_dmn wd
-        JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-        JOIN cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
-        WHERE wd.actv_indc = 'Y' AND cd.actv_indc = 'Y'
-            AND cf.eftv_dttm >= TRUNC(SYSDATE) - 60
-            AND wd.well_api_nbr IN ({formatted})
-        GROUP BY wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id
-        """
-
-        try:
-            conn = self.conn_manager.get_connection('odw')
-            cursor = conn.cursor()
-            cursor.execute(sql_query)
-            if cursor.description:
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
-                df = pd.DataFrame(rows, columns=columns)
-                self.display_results(df)
-                self.current_data = df
-                self._calc_avg(df)
-            else:
-                conn.commit()
-                messagebox.showinfo("Query Executed", "No results to display.")
-                self.clear_results(); self._clear_avg()
-            cursor.close(); conn.close()
-        except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e)); self.clear_results(); self._clear_avg()
-        except oracledb.Error as e:
-            error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results(); self._clear_avg()
-        except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results(); self._clear_avg()
-
-    def _calc_avg(self, df):
-        col = next((c for c in df.columns if c.upper() == 'AVG_WLHD_TBG_PRSR'), None)
-        if col is None:
-            self.avg_pressure_label.config(text="Column not found"); return
-        vals = pd.to_numeric(df[col], errors='coerce').dropna()
-        if not vals.empty:
-            self.avg_pressure_label.config(text=f"{vals.mean():.1f}")
-        else:
-            self.avg_pressure_label.config(text="No valid data")
-
-    def _clear_avg(self):
+            self.clear_results(); self.avg_pressure_label.config(text="N/A"); return
+        sql = f"""
+SELECT wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id,
+    AVG(CASE WHEN cf.aloc_stm_inj_vol_qty > 0
+         THEN cf.aloc_stm_inj_vol_qty END) AS avg_stm_inj_vol,
+    ROUND(AVG(CASE WHEN cf.aloc_wtr_inj_vol_qty > 0
+              THEN cf.aloc_wtr_inj_vol_qty END), 2) AS avg_wtr_inj_vol,
+    ROUND(AVG(CASE WHEN cf.wlhd_tbg_prsr_qty > 0
+              THEN cf.wlhd_tbg_prsr_qty END), 2) AS avg_wlhd_tbg_prsr
+FROM well_dmn wd
+JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+JOIN cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+WHERE wd.actv_indc = 'Y' AND cd.actv_indc = 'Y'
+    AND cf.eftv_dttm >= TRUNC(SYSDATE) - 60
+    AND wd.well_api_nbr IN ({formatted})
+GROUP BY wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id
+"""
+        self._execute(sql)
+        # Calculate overall average after data loads
+        if self.current_data is not None and not self.current_data.empty:
+            col = next((c for c in self.current_data.columns
+                        if c.upper() == 'AVG_WLHD_TBG_PRSR'), None)
+            if col:
+                vals = pd.to_numeric(self.current_data[col], errors='coerce').dropna()
+                if not vals.empty:
+                    self.avg_pressure_label.config(text=f"{vals.mean():.1f}")
+                    return
         self.avg_pressure_label.config(text="N/A")
 
 
 # =========================================================================
-#  TAB 6 – Production and Injection (Monthly)
+#  TAB 6 – Monthly Production & Injection
 # =========================================================================
-class ProductionInjectionTab(tb.Frame, TreeviewMixin):
+class ProductionInjectionTab(tb.Frame, TreeviewMixin, _QueryTab):
     def __init__(self, parent, app):
         super().__init__(parent)
         self.app = app
-        self.conn_manager = OracleConnectionManager()
         self.current_data = None
         self._build()
 
     def _build(self):
         tb.Label(self, text="Production and Injection Data",
                  font=("Helvetica", 16, "bold")).pack(pady=10)
-        tb.Button(self, text="Pull Production/Injection Data", command=self.pull_data,
-                  bootstyle="info").pack(pady=10)
-
         self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
-
-        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
-                  bootstyle="secondary").pack(pady=10)
+        build_button_bar(self, self).pack(pady=10)
 
     def pull_data(self):
-        apis = self.app.api_tab.get_apis()
-        if not apis:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
-            self.clear_results(); return
-
-        formatted = format_well_api_list(apis)
+        formatted = format_well_api_list(self.app.api_tab.get_apis())
         if not formatted:
             self.clear_results(); return
-
-        sql_query = f"""
-        SELECT
-            wd.well_nme AS "WELL NAME",
-            wd.well_api_nbr AS "WELL API",
-            cf.eftv_dttm AS "DATE",
-            cf.aloc_oil_prod_dly_rte_qty AS "OIL PROD BOPD",
-            cf.aloc_wtr_prod_dly_rte_qty AS "WATER PROD BWPD",
-            cf.aloc_gas_prod_dly_rte_qty AS "GAS PROD MCFD",
-            cf.aloc_stm_inj_dly_rte_qty AS "STEAM INJ Per Day",
-            cf.aloc_wtr_inj_dly_rte_qty AS "WATER INJ Per Day",
-            cf.aloc_gas_inj_dly_rte_qty AS "GAS INJ Per Day"
-        FROM well_dmn wd
-        JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-        JOIN cmpl_mnly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
-        WHERE cd.actv_indc = 'Y' AND wd.actv_indc = 'Y'
-            AND wd.well_api_nbr IN ({formatted})
-            AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -62)
-            AND cf.eftv_dttm <= TRUNC(SYSDATE)
-        ORDER BY wd.well_api_nbr, cf.eftv_dttm
-        """
-
-        try:
-            conn = self.conn_manager.get_connection('odw')
-            cursor = conn.cursor()
-            cursor.execute(sql_query)
-            if cursor.description:
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
-                df = pd.DataFrame(rows, columns=columns)
-                if 'DATE' in df.columns:
-                    df['DATE'] = pd.to_datetime(df['DATE'], errors='coerce')
-                self.display_results(df, apply_global_sort=False)
-                self.current_data = df
-            else:
-                conn.commit()
-                messagebox.showinfo("Query Executed", "No results to display.")
-                self.clear_results()
-            cursor.close(); conn.close()
-        except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e)); self.clear_results()
-        except oracledb.Error as e:
-            error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results()
-        except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results()
+        sql = f"""
+SELECT
+    wd.well_nme AS "WELL NAME",
+    wd.well_api_nbr AS "WELL API",
+    cf.eftv_dttm AS "DATE",
+    cf.aloc_oil_prod_dly_rte_qty AS "OIL PROD BOPD",
+    cf.aloc_wtr_prod_dly_rte_qty AS "WATER PROD BWPD",
+    cf.aloc_gas_prod_dly_rte_qty AS "GAS PROD MCFD",
+    cf.aloc_stm_inj_dly_rte_qty AS "STEAM INJ Per Day",
+    cf.aloc_wtr_inj_dly_rte_qty AS "WATER INJ Per Day",
+    cf.aloc_gas_inj_dly_rte_qty AS "GAS INJ Per Day"
+FROM well_dmn wd
+JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+JOIN cmpl_mnly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+WHERE cd.actv_indc = 'Y' AND wd.actv_indc = 'Y'
+    AND wd.well_api_nbr IN ({formatted})
+    AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -62)
+    AND cf.eftv_dttm <= TRUNC(SYSDATE)
+ORDER BY wd.well_api_nbr, cf.eftv_dttm
+"""
+        self._execute(sql, date_cols=['DATE'], sort=False)
 
 
 # =========================================================================
-#  TAB 7 – Daily Injection and Tubing Pressure
+#  TAB 7 – Daily Injection & Tubing Pressure
 # =========================================================================
-class DailyInjectionPressureTab(tb.Frame, TreeviewMixin):
+class DailyInjectionPressureTab(tb.Frame, TreeviewMixin, _QueryTab):
     def __init__(self, parent, app):
         super().__init__(parent)
         self.app = app
-        self.conn_manager = OracleConnectionManager()
         self.current_data = None
         self._build()
 
     def _build(self):
         tb.Label(self, text="Daily Injection and Tubing Pressure (Full Data)",
                  font=("Helvetica", 16, "bold")).pack(pady=10)
-        tb.Button(self, text="Pull Daily Data", command=self.pull_data,
-                  bootstyle="info").pack(pady=10)
-
         self.tree_frame, self.result_tree = build_treeview(self)
         self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
-
-        tb.Button(self, text="Copy Results to Clipboard", command=self.copy_to_clipboard,
-                  bootstyle="secondary").pack(pady=10)
+        build_button_bar(self, self).pack(pady=10)
 
     def pull_data(self):
-        apis = self.app.api_tab.get_apis()
-        if not apis:
-            messagebox.showwarning("Input Error", "No Well APIs entered on the Well APIs tab.")
-            self.clear_results(); return
-
-        formatted = format_well_api_list(apis)
+        formatted = format_well_api_list(self.app.api_tab.get_apis())
         if not formatted:
             self.clear_results(); return
-
-        sql_query = f"""
-        SELECT wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id,
-            cf.eftv_dttm,
-            cf.aloc_stm_inj_vol_qty,
-            cf.aloc_wtr_inj_vol_qty,
-            cf.wlhd_tbg_prsr_qty
-        FROM well_dmn wd
-        JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-        JOIN cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
-        WHERE wd.actv_indc = 'Y' AND cd.actv_indc = 'Y'
-            AND cf.eftv_dttm >= TRUNC(SYSDATE) - 60
-            AND wd.well_api_nbr IN ({formatted})
-        ORDER BY cf.eftv_dttm
-        """
-
-        try:
-            conn = self.conn_manager.get_connection('odw')
-            cursor = conn.cursor()
-            cursor.execute(sql_query)
-            if cursor.description:
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
-                df = pd.DataFrame(rows, columns=columns)
-                if 'EFTV_DTTM' in df.columns:
-                    df['EFTV_DTTM'] = pd.to_datetime(df['EFTV_DTTM'], errors='coerce')
-                self.display_results(df, apply_global_sort=False)
-                self.current_data = df
-            else:
-                conn.commit()
-                messagebox.showinfo("Query Executed", "No results to display.")
-                self.clear_results()
-            cursor.close(); conn.close()
-        except ConnectionError as e:
-            messagebox.showerror("Connection Error", str(e)); self.clear_results()
-        except oracledb.Error as e:
-            error_obj, = e.args
-            messagebox.showerror("Database Error", f"Oracle Error: {error_obj.message}"); self.clear_results()
-        except Exception as e:
-            messagebox.showerror("Error", f"An unexpected error occurred: {e}"); self.clear_results()
+        sql = f"""
+SELECT wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id,
+    cf.eftv_dttm,
+    cf.aloc_stm_inj_vol_qty,
+    cf.aloc_wtr_inj_vol_qty,
+    cf.wlhd_tbg_prsr_qty
+FROM well_dmn wd
+JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
+JOIN cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+WHERE wd.actv_indc = 'Y' AND cd.actv_indc = 'Y'
+    AND cf.eftv_dttm >= TRUNC(SYSDATE) - 60
+    AND wd.well_api_nbr IN ({formatted})
+ORDER BY cf.eftv_dttm
+"""
+        self._execute(sql, date_cols=['EFTV_DTTM'], sort=False)
 
 
 # =========================================================================
-#  MAIN APPLICATION  –  single window with ttk.Notebook
+#  MAIN APPLICATION
 # =========================================================================
 class MainApplication(tb.Window):
     def __init__(self):
@@ -892,16 +766,14 @@ class MainApplication(tb.Window):
 
         s = ttk.Style()
         s.configure("TButton", font=("Helvetica", 12, "bold"))
-        # Make notebook tab text larger and bolder
-        s.configure("TNotebook.Tab", font=("Helvetica", 11, "bold"), padding=[12, 6])
+        s.configure("TNotebook.Tab", font=("Helvetica", 11, "bold"),
+                    padding=[12, 6])
 
         self.shared_data = {}
 
-        # Create Notebook (tab container)
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Build each tab — order matches original page flow
         self.api_tab = WellAPITab(self.notebook, self)
         self.notebook.add(self.api_tab, text="  Well APIs  ")
 
