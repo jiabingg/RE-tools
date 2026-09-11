@@ -1,0 +1,53 @@
+WBD MARKER QC AND REPAIR - WINDOWS DESKTOP APP v2.6
+
+
+IMPORTANT v2.6 CHANGE
+The repair engine now falls back to the matching MD survey rows when the
+authoritative TVD picks cannot be mapped completely to the PDF TVD scale.
+This is intended for older sidetrack and non-standard TVD diagrams.
+
+---------------------
+Horizontal and highly deviated wells can have a TVD survey that decreases near
+the bottom of the diagram. TVD then no longer maps to one unique page position.
+The repair engine now detects this automatically and uses the authoritative MD
+survey row to disambiguate marker placement. The output log records the fallback.
+
+QUICKEST START
+1. Extract this ZIP to a normal folder on your Windows computer.
+2. Double-click Setup_and_Run.bat.
+3. The first run creates a local .venv folder and installs PyMuPDF and Pillow.
+4. Later, double-click Run_WBD_Marker_Tool.bat.
+
+NO WEB BROWSER IS USED
+The interface is a native Tkinter Windows desktop window.
+
+IMPORTANT v2.4 CHANGE
+The option "Move repaired originals to a 'repaired' subfolder" is enabled by
+default. After a repaired PDF is saved and passes the automatic verification,
+the original input PDF is moved to:
+
+  <original PDF folder>\repaired\<original filename>.pdf
+
+The repaired output PDF remains in the selected output folder. Existing files
+in the repaired subfolder are never overwritten; a numeric suffix is added.
+Uncheck this setting before repair to leave original PDFs in place.
+
+IMPORTANT v2.3 CHANGE
+Every CSV report includes a "Will repair" column. It reflects the current
+"Include partial mismatches" setting and is included in both the before-repair
+and after-repair reports.
+
+IMPORTANT v2.2 CHANGE
+Partial marker mismatches are included in automatic repair by default.
+
+CREATE A STANDALONE EXE
+Double-click Build_Windows_EXE.bat on a Windows computer. The finished file is:
+  dist\WBD_Marker_QC_Repair.exe
+
+The EXE build must be done on Windows because PyInstaller does not cross-compile
+a Windows executable from Linux or macOS.
+
+DEFAULT DEPTH SETTINGS
+- Plot location: TVD
+- Printed Top Zone Depth: MD
+- Precision: 1 decimal place

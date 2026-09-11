@@ -218,7 +218,7 @@ SECTION_STYLES = [
 class Launcher(tb.Window):
     def __init__(self):
         super().__init__(themename="flatly")
-        self.title("RE Tools  \u2502  Project Utilities Launcher")
+        self.title("UIC Tools  \u2502  Project Utilities Launcher")
 
         # 80% of screen, centered
         screen_w = self.winfo_screenwidth()
@@ -241,7 +241,7 @@ class Launcher(tb.Window):
 
         title_lbl = ttk.Label(
             header,
-            text="\U0001F6E0  RE Tools Launcher",
+            text="\U0001F6E0  UIC Tools Launcher",
             font=("Segoe UI", 22, "bold"),
         )
         title_lbl.pack(side="left")

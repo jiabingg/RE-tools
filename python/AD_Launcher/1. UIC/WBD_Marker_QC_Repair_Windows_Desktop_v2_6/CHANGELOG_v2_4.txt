@@ -1,0 +1,20 @@
+WBD Marker QC and Repair - Version 2.4
+
+NEW: ARCHIVE SUCCESSFULLY REPAIRED ORIGINAL PDFS
+
+- A new repair setting is enabled by default:
+  Move repaired originals to a 'repaired' subfolder
+- After a repaired PDF is written and the repaired pages pass the automatic
+  post-repair marker check, the original input PDF is moved to:
+
+    <original PDF folder>\repaired\<original filename>.pdf
+
+- The repaired output PDF remains in the selected output folder.
+- If a file with the same name already exists in the repaired subfolder, the
+  application adds a numeric suffix instead of overwriting it.
+- If the original is locked, read-only, or cannot be moved, the repaired output
+  is kept and a warning is written to the Activity log and repair_summary.txt.
+- Originals are not moved when repair fails or when post-repair verification
+  still reports a marker issue.
+- After repair, the application's PDF list is updated to point to the repaired
+  output PDFs, so the user can run another scan without broken source paths.

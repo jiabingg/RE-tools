@@ -1,0 +1,79 @@
+
+========================================================================
+Setup started: 2026-08-03 08:24:01
+Base Python: C:\Users\jiab\AppData\Local\Python\Python314\python.exe (3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)])
+Application folder: C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1
+
+> "C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\.venv\Scripts\python.exe" -m ensurepip --upgrade
+Looking in links: c:\Users\jiab\AppData\Local\Temp\tmp7hmrkv0d
+Requirement already satisfied: pip in c:\users\jiab\onedrive - california resources corporation\0_crcdocs\re-tools\python\ad_launcher\1. uic\fracture_data_pdf_scanner_v1_1\.venv\lib\site-packages (25.3)
+Return code: 0
+
+> "C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\.venv\Scripts\python.exe" -m pip install --disable-pip-version-check --upgrade pip setuptools wheel
+Requirement already satisfied: pip in c:\users\jiab\onedrive - california resources corporation\0_crcdocs\re-tools\python\ad_launcher\1. uic\fracture_data_pdf_scanner_v1_1\.venv\lib\site-packages (25.3)
+Collecting pip
+  Using cached pip-26.2-py3-none-any.whl.metadata (4.6 kB)
+WARNING: Cache entry deserialization failed, entry ignored
+Collecting setuptools
+  Downloading setuptools-83.0.0-py3-none-any.whl.metadata (6.6 kB)
+WARNING: Cache entry deserialization failed, entry ignored
+Collecting wheel
+  Using cached wheel-0.47.0-py3-none-any.whl.metadata (2.3 kB)
+WARNING: Cache entry deserialization failed, entry ignored
+Collecting packaging>=24.0 (from wheel)
+  Using cached packaging-26.2-py3-none-any.whl.metadata (3.5 kB)
+Using cached pip-26.2-py3-none-any.whl (1.8 MB)
+Downloading setuptools-83.0.0-py3-none-any.whl (1.0 MB)
+   ---------------------------------------- 1.0/1.0 MB 8.5 MB/s  0:00:00
+Using cached wheel-0.47.0-py3-none-any.whl (32 kB)
+Using cached packaging-26.2-py3-none-any.whl (100 kB)
+Installing collected packages: setuptools, pip, packaging, wheel
+  Attempting uninstall: pip
+    Found existing installation: pip 25.3
+    Uninstalling pip-25.3:
+      Successfully uninstalled pip-25.3
+
+Successfully installed packaging-26.2 pip-26.2 setuptools-83.0.0 wheel-0.47.0
+Return code: 0
+
+> "C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\.venv\Scripts\python.exe" -m pip install --disable-pip-version-check --prefer-binary --retries 3 --timeout 60 -r "C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\requirements_fracture_data_scanner.txt"
+Collecting PyMuPDF>=1.23 (from -r C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\requirements_fracture_data_scanner.txt (line 1))
+  Using cached pymupdf-1.28.0-cp310-abi3-win_amd64.whl.metadata (26 kB)
+Collecting openpyxl>=3.1 (from -r C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\requirements_fracture_data_scanner.txt (line 2))
+  Using cached openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+Collecting pytesseract>=0.3.10 (from -r C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\requirements_fracture_data_scanner.txt (line 3))
+  Downloading pytesseract-0.3.13-py3-none-any.whl.metadata (11 kB)
+Collecting Pillow>=10.0 (from -r C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\requirements_fracture_data_scanner.txt (line 4))
+  Downloading pillow-12.3.0-cp314-cp314-win_amd64.whl.metadata (9.3 kB)
+Collecting et-xmlfile (from openpyxl>=3.1->-r C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\requirements_fracture_data_scanner.txt (line 2))
+  Using cached et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+Requirement already satisfied: packaging>=21.3 in .\.venv\Lib\site-packages (from pytesseract>=0.3.10->-r C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\requirements_fracture_data_scanner.txt (line 3)) (26.2)
+Using cached pymupdf-1.28.0-cp310-abi3-win_amd64.whl (19.8 MB)
+Using cached openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+Downloading pytesseract-0.3.13-py3-none-any.whl (14 kB)
+Downloading pillow-12.3.0-cp314-cp314-win_amd64.whl (7.2 MB)
+   ---------------------------------------- 7.2/7.2 MB 7.6 MB/s  0:00:00
+Using cached et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+Installing collected packages: PyMuPDF, Pillow, et-xmlfile, pytesseract, openpyxl
+
+Successfully installed Pillow-12.3.0 PyMuPDF-1.28.0 et-xmlfile-2.0.0 openpyxl-3.1.5 pytesseract-0.3.13
+Return code: 0
+
+> "C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1\.venv\Scripts\python.exe" -m pip check
+No broken requirements found.
+Return code: 0
+
+> C:\Users\jiab\AppData\Local\Microsoft\WindowsApps\winget.EXE install --id tesseract-ocr.tesseract --exact --source winget --accept-package-agreements --accept-source-agreements --silent
+Found Tesseract-OCR - open source OCR engine [tesseract-ocr.tesseract] Version 5.5.0.20241111
+This application is licensed to you by its owner.
+Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+Downloading https://github.com/tesseract-ocr/tesseract/releases/download/5.5.0/tesseract-ocr-w64-setup-5.5.0.20241111.exe
+Successfully verified installer hash
+Starting package install...
+Successfully installed
+Return code: 0
+
+========================================================================
+Setup started: 2026-08-03 10:51:06
+Base Python: C:\Users\jiab\AppData\Local\Python\Python314\python.exe (3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)])
+Application folder: C:\Users\jiab\OneDrive - California Resources Corporation\0_CRCdocs\RE-tools\Python\AD_Launcher\1. UIC\Fracture_Data_PDF_Scanner_v1_1

@@ -42,6 +42,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.lines import Line2D
 
 # ------------------------------------------------------------------ config
 DB_USER = "rptguser"
@@ -79,6 +80,7 @@ def get_connection():
 SQL_WELLS = """
 SELECT
     cd.cmpl_fac_id,
+    cd.well_fac_id,
     cd.cmpl_nme,
     cd.prim_purp_type_cde,
     cd.in_svc_indc,
@@ -90,6 +92,49 @@ FROM dwrptg.cmpl_dmn cd
 LEFT JOIN dss.dss_completion_master cm ON cd.cmpl_fac_id = cm.pid
 WHERE cd.engr_strg_nme = :strg
   AND cd.actv_indc = 'Y'
+"""
+
+# Current open perforations / slots (actv_indc='Y' = current version)
+SQL_OPEN_INTERVALS = """
+SELECT
+    o.cmpl_fac_id,
+    o.actl_opg_ntvl_type_desc,
+    o.top_md_qty,
+    o.btm_md_qty,
+    o.top_lthsg_unit_nme,
+    o.btm_lthsg_unit_nme
+FROM dwrptg.actl_wlbr_opg_ntvl_dmn o
+JOIN dwrptg.cmpl_dmn cd ON cd.cmpl_fac_id = o.cmpl_fac_id
+WHERE cd.engr_strg_nme = :strg
+  AND cd.actv_indc = 'Y'
+  AND o.actv_indc = 'Y'
+  AND o.wlbr_opg_ntvl_stat_desc = 'Open'
+  AND o.top_md_qty IS NOT NULL
+"""
+
+# Current formation marker picks (Tulare / Etchegoin families).
+# Dedup across sidetracks: latest wellbore suffix wins per well + marker.
+SQL_MARKER_PICKS = """
+SELECT well_fac_id, mrkr_nme, md_qty
+FROM (
+    SELECT
+        cd.well_fac_id,
+        mp.mrkr_nme,
+        mp.md_qty,
+        ROW_NUMBER() OVER (
+            PARTITION BY cd.well_fac_id, mp.mrkr_nme
+            ORDER BY wd.wlbr_api_suff_nbr DESC, mp.eftv_dttm DESC
+        ) AS rn
+    FROM dwrptg.cmpl_dmn cd
+    JOIN dwrptg.wlbr_dmn wd ON wd.well_fac_id = cd.well_fac_id
+    JOIN dwrptg.wlbr_mrkr_pick_dmn mp ON mp.wlbr_fac_id = wd.wlbr_fac_id
+    WHERE cd.engr_strg_nme = :strg
+      AND cd.actv_indc = 'Y'
+      AND mp.term_dttm IS NULL
+      AND mp.md_qty IS NOT NULL
+      AND (mp.mrkr_nme LIKE 'TUL%' OR mp.mrkr_nme LIKE 'ETCH%')
+)
+WHERE rn = 1
 """
 
 # Current zone membership -> reservoir (TULARE / ETCHEGOIN)
@@ -143,11 +188,13 @@ def _safe_query(cur, sql, binds, label, errors):
 
 # ------------------------------------------------------------------ data
 class Well:
-    __slots__ = ("fac_id", "name", "purpose", "in_svc", "state",
-                 "init_prod", "x", "y", "reservoirs", "n_patterns")
+    __slots__ = ("fac_id", "well_fac_id", "name", "purpose", "in_svc",
+                 "state", "init_prod", "x", "y", "reservoirs", "n_patterns")
 
-    def __init__(self, fac_id, name, purpose, in_svc, state, init_prod, x, y):
+    def __init__(self, fac_id, well_fac_id, name, purpose, in_svc, state,
+                 init_prod, x, y):
         self.fac_id = fac_id
+        self.well_fac_id = well_fac_id
         self.name = name
         self.purpose = purpose            # PROD / INJ / OBSN
         self.in_svc = in_svc
@@ -175,6 +222,8 @@ class DataStore:
         self.months = []                  # sorted list of date objects
         self.monthly = defaultdict(dict)  # fac_id -> {month: row dict}
         self.patterns = {}                # inj fac_id -> Pattern
+        self.intervals = defaultdict(list)  # cmpl_fac_id -> [interval dict]
+        self.marker_picks = defaultdict(dict)  # well_fac_id -> {mrkr: md}
         self.load_errors = []
         self.loaded_at = None
 
@@ -191,21 +240,38 @@ class DataStore:
             cur.arraysize = 5000
 
             report(5, "Loading well inventory…")
-            for (fac_id, name, purp, in_svc, state, init_prod,
+            for (fac_id, well_fac_id, name, purp, in_svc, state, init_prod,
                  bx, by) in _safe_query(cur, SQL_WELLS, {"strg": ENGR_STRG},
                                         "Well inventory", errors):
-                w = Well(fac_id, name, purp, in_svc, state, init_prod, bx, by)
+                w = Well(fac_id, well_fac_id, name, purp, in_svc, state,
+                         init_prod, bx, by)
                 self.wells[fac_id] = w
                 self.by_name[name] = w
 
-            report(25, "Loading zone membership…")
+            report(20, "Loading zone membership…")
             for fac_id, rsvr in _safe_query(cur, SQL_ZONES,
                                             {"strg": ENGR_STRG},
                                             "Zone membership", errors):
                 if rsvr in ("TULARE", "ETCHEGOIN") and fac_id in self.wells:
                     self.wells[fac_id].reservoirs.add(rsvr)
 
-            report(45, f"Loading {HISTORY_MONTHS}-month production/injection…")
+            report(35, "Loading open perforations / slots…")
+            for (fac_id, typ, top, btm, tz, bz) in _safe_query(
+                    cur, SQL_OPEN_INTERVALS, {"strg": ENGR_STRG},
+                    "Open intervals", errors):
+                self.intervals[fac_id].append({
+                    "typ": typ, "top": top, "btm": btm,
+                    "top_zone": tz, "btm_zone": bz})
+            for ivs in self.intervals.values():
+                ivs.sort(key=lambda i: i["top"])
+
+            report(45, "Loading formation marker picks…")
+            for well_fac_id, mrkr, md in _safe_query(
+                    cur, SQL_MARKER_PICKS, {"strg": ENGR_STRG},
+                    "Marker picks", errors):
+                self.marker_picks[well_fac_id][mrkr] = md
+
+            report(55, f"Loading {HISTORY_MONTHS}-month production/injection…")
             months = set()
             for row in _safe_query(cur, SQL_MONTHLY, {"strg": ENGR_STRG},
                                    "Monthly rates", errors):
@@ -268,6 +334,80 @@ class DataStore:
     def well_series(self, fac_id, key):
         rows = self.monthly.get(fac_id, {})
         return [rows.get(m, {}).get(key) for m in self.months]
+
+    # ---------------- completion / marker helpers
+    @staticmethod
+    def zone_to_reservoir(zone_name):
+        if not zone_name:
+            return None
+        z = zone_name.upper()
+        if z.startswith("TUL"):
+            return "TULARE"
+        if z.startswith("ETCH") or z in ("D", "E", "F", "G"):
+            return "ETCHEGOIN"
+        return None
+
+    def well_tops(self, w):
+        """(tulare_top_md, etch_top_md, tul_marker, etch_marker).
+        Tulare top = TULRRIDER pick, else shallowest TULR* pick.
+        Etchegoin top = ETCHEGOIN pick, else shallowest ETCH* pick."""
+        picks = self.marker_picks.get(w.well_fac_id, {})
+        tul = etch = None
+        tul_n = etch_n = None
+        if "TULRRIDER" in picks:
+            tul, tul_n = picks["TULRRIDER"], "TULRRIDER"
+        else:
+            cands = [(md, n) for n, md in picks.items()
+                     if n.startswith("TUL")]
+            if cands:
+                tul, tul_n = min(cands)
+        if "ETCHEGOIN" in picks:
+            etch, etch_n = picks["ETCHEGOIN"], "ETCHEGOIN"
+        else:
+            cands = [(md, n) for n, md in picks.items()
+                     if n.startswith("ETCH")]
+            if cands:
+                etch, etch_n = min(cands)
+        return tul, etch, tul_n, etch_n
+
+    def open_summary(self, w):
+        """Summary of current open intervals for one well:
+        counts by type, top/btm MD, reservoirs derived from interval
+        zone names (falling back to marker tops when zones missing)."""
+        ivs = self.intervals.get(w.fac_id, [])
+        tul, etch, _, _ = self.well_tops(w)
+        counts = defaultdict(int)
+        rsvrs = set()
+        top = btm = None
+        for iv in ivs:
+            counts[iv["typ"]] += 1
+            top = iv["top"] if top is None else min(top, iv["top"])
+            b = iv["btm"] if iv["btm"] is not None else iv["top"]
+            btm = b if btm is None else max(btm, b)
+            r = (self.zone_to_reservoir(iv["top_zone"])
+                 or self.zone_to_reservoir(iv["btm_zone"]))
+            if r is None and etch is not None:
+                mid = (iv["top"] + (iv["btm"] or iv["top"])) / 2
+                r = "ETCHEGOIN" if mid >= etch else \
+                    ("TULARE" if tul is None or mid >= tul else None)
+            if r:
+                rsvrs.add(r)
+        abbr = {"Perforation": "perf", "Slots": "slot",
+                "Cavity Shot": "cav", "Screen": "scr"}
+        desc = ", ".join(f"{n} {abbr.get(t, t.lower())}"
+                         for t, n in sorted(counts.items()))
+        return {"n": len(ivs), "desc": desc, "top": top, "btm": btm,
+                "reservoirs": rsvrs}
+
+    def zone_check(self, w, pattern_reservoirs):
+        """Does the well's open interval reservoir agree with the pattern?"""
+        s = self.open_summary(w)
+        if not s["n"]:
+            return "NO OPEN INTV"
+        if not s["reservoirs"]:
+            return "?"
+        return "OK" if s["reservoirs"] & set(pattern_reservoirs) \
+            else "MISMATCH"
 
     def pattern_series(self, inj_fac_id):
         """Monthly allocated series for one pattern.
@@ -823,28 +963,43 @@ class App(tk.Tk):
         right.pack(side="left", fill="both", expand=True, padx=(4, 0))
 
         cols = ("Well", "Type", "Dist ft", "Share", "Oil BOPD",
-                "Gross BFPD", "Steam BSPD")
-        widths = (140, 60, 70, 60, 85, 90, 90)
+                "Gross BFPD", "Steam BSPD", "Open Intervals",
+                "Open Top", "Open Btm", "TULR Top", "ETCH Top", "Zone Chk")
+        widths = (120, 50, 60, 55, 75, 80, 80, 120, 70, 70, 70, 70, 90)
         self.pd_tree = SortableTree(left, cols, widths, height=18)
+        hs = ttk.Scrollbar(left, orient="horizontal",
+                           command=self.pd_tree.xview)
         vs = ttk.Scrollbar(left, orient="vertical", command=self.pd_tree.yview)
-        self.pd_tree.configure(yscrollcommand=vs.set)
+        self.pd_tree.configure(yscrollcommand=vs.set, xscrollcommand=hs.set)
+        hs.pack(side="bottom", fill="x", padx=8)
         self.pd_tree.pack(side="left", fill="both", expand=True,
                           padx=(8, 0), pady=8)
         vs.pack(side="left", fill="y", pady=8)
+        self.pd_tree.tag_configure("MISMATCH", background="#fadbd8")
+        self.pd_tree.tag_configure("NO OPEN INTV", background="#fdf2d0")
         self.pd_tree.bind("<Double-1>", self._open_well_from_pattern)
 
-        map_card = tk.Frame(right, bg=CARD, highlightbackground="#dcdfe3",
-                            highlightthickness=1)
-        map_card.pack(fill="both", expand=True, pady=(0, 4))
-        self.pd_map_fig = Figure(figsize=(5, 3), dpi=100, facecolor=CARD)
+        # Right side: notebook so each chart keeps full size
+        rnb = ttk.Notebook(right)
+        rnb.pack(fill="both", expand=True)
+        map_card = tk.Frame(rnb, bg=CARD)
+        comp_card = tk.Frame(rnb, bg=CARD)
+        hist_card = tk.Frame(rnb, bg=CARD)
+        rnb.add(map_card, text=" Map ")
+        rnb.add(comp_card, text=" Completions vs Markers ")
+        rnb.add(hist_card, text=" History ")
+
+        self.pd_map_fig = Figure(figsize=(5, 4), dpi=100, facecolor=CARD)
         self.pd_map = FigureCanvasTkAgg(self.pd_map_fig, master=map_card)
         self.pd_map.get_tk_widget().pack(fill="both", expand=True,
                                          padx=4, pady=4)
 
-        hist_card = tk.Frame(right, bg=CARD, highlightbackground="#dcdfe3",
-                             highlightthickness=1)
-        hist_card.pack(fill="both", expand=True, pady=(4, 0))
-        self.pd_hist_fig = Figure(figsize=(5, 3), dpi=100, facecolor=CARD)
+        self.pd_comp_fig = Figure(figsize=(5, 4), dpi=100, facecolor=CARD)
+        self.pd_comp = FigureCanvasTkAgg(self.pd_comp_fig, master=comp_card)
+        self.pd_comp.get_tk_widget().pack(fill="both", expand=True,
+                                          padx=4, pady=4)
+
+        self.pd_hist_fig = Figure(figsize=(5, 4), dpi=100, facecolor=CARD)
         self.pd_hist = FigureCanvasTkAgg(self.pd_hist_fig, master=hist_card)
         self.pd_hist.get_tk_widget().pack(fill="both", expand=True,
                                           padx=4, pady=4)
@@ -879,15 +1034,26 @@ class App(tk.Tk):
         t.delete(*t.get_children(""))
         d3 = lambda fid, key: self.data._avg(  # noqa: E731
             self.data.well_series(fid, key)[-3:])
+
+        def comp_cols(well):
+            s = self.data.open_summary(well)
+            tul, etch, _, _ = self.data.well_tops(well)
+            chk = self.data.zone_check(well, pat.reservoirs)
+            return (s["desc"] or "—", fmt(s["top"], 0), fmt(s["btm"], 0),
+                    fmt(tul, 0), fmt(etch, 0), chk)
+
         inj_steam = ((d3(w.fac_id, "steam") or 0) +
                      (d3(w.fac_id, "cycl") or 0))
-        t.insert("", "end", values=(w.name, "INJ", 0, "100%", "", "",
-                                    fmt(inj_steam, 0)))
+        ic = comp_cols(w)
+        t.insert("", "end", tags=(ic[5],), values=(
+            w.name, "INJ", 0, "100%", "", "", fmt(inj_steam, 0), *ic))
         for p, dist in pat.members:
             share = f"1/{p.n_patterns}" if p.n_patterns else "—"
-            t.insert("", "end", values=(
+            pc = comp_cols(p)
+            t.insert("", "end", tags=(pc[5],), values=(
                 p.name, "PROD", f"{dist:.0f}", share,
-                fmt(d3(p.fac_id, "oil")), fmt(d3(p.fac_id, "gross"), 0), ""))
+                fmt(d3(p.fac_id, "oil")), fmt(d3(p.fac_id, "gross"), 0),
+                "", *pc))
 
         # ---- map
         self.pd_map_fig.clear()
@@ -924,6 +1090,58 @@ class App(tk.Tk):
         ax.tick_params(labelsize=6)
         self.pd_map_fig.tight_layout()
         self.pd_map.draw()
+
+        # ---- completion diagram: open intervals vs Tulare/Etchegoin tops
+        self.pd_comp_fig.clear()
+        axc = self.pd_comp_fig.add_subplot(111)
+        wells_in_order = [w] + [p for p, _ in pat.members]
+        typ_colors = {"Perforation": ACCENT, "Slots": ACCENT2,
+                      "Cavity Shot": "#8e44ad", "Screen": "#d35400"}
+        seen_types = {}
+        tul_pts, etch_pts = [], []
+        for i, mw in enumerate(wells_in_order):
+            for iv in self.data.intervals.get(mw.fac_id, []):
+                b = iv["btm"] if iv["btm"] is not None else iv["top"]
+                b = max(b, iv["top"] + 2)  # min bar height for visibility
+                c = typ_colors.get(iv["typ"], "#777")
+                axc.plot([i, i], [iv["top"], b], color=c, lw=5,
+                         solid_capstyle="butt", zorder=3)
+                seen_types[iv["typ"]] = c
+            tul, etch, _, _ = self.data.well_tops(mw)
+            if tul is not None:
+                axc.plot([i - 0.32, i + 0.32], [tul, tul], color=ACCENT2,
+                         lw=1.6, zorder=4)
+                tul_pts.append((i, tul))
+            if etch is not None:
+                axc.plot([i - 0.32, i + 0.32], [etch, etch], color="#e67e22",
+                         lw=1.6, zorder=4)
+                etch_pts.append((i, etch))
+        if len(tul_pts) > 1:
+            axc.plot(*zip(*tul_pts), color=ACCENT2, lw=0.8, ls=":",
+                     alpha=0.6, zorder=1)
+        if len(etch_pts) > 1:
+            axc.plot(*zip(*etch_pts), color="#e67e22", lw=0.8, ls=":",
+                     alpha=0.6, zorder=1)
+        axc.set_xticks(range(len(wells_in_order)))
+        axc.set_xticklabels(
+            [f"{mw.name}\n({'INJ' if mw.purpose == 'INJ' else 'PROD'})"
+             for mw in wells_in_order], fontsize=6, rotation=45, ha="right")
+        axc.invert_yaxis()
+        axc.set_ylabel("MD (ft)", fontsize=8)
+        axc.grid(axis="y", alpha=0.25)
+        axc.tick_params(labelsize=7)
+        handles = [Line2D([], [], color=c, lw=5, label=tname)
+                   for tname, c in seen_types.items()]
+        handles += [
+            Line2D([], [], color=ACCENT2, lw=1.6,
+                                    label="Top Tulare (TULRRIDER)"),
+            Line2D([], [], color="#e67e22", lw=1.6,
+                                    label="Top Etchegoin"),
+        ]
+        axc.legend(handles=handles, fontsize=6, loc="lower right")
+        axc.set_title("Open intervals vs formation tops (MD)", fontsize=9)
+        self.pd_comp_fig.tight_layout()
+        self.pd_comp.draw()
 
         # ---- history
         self.pd_hist_fig.clear()

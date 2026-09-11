@@ -710,7 +710,7 @@ JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
 JOIN cmpl_mnly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
 WHERE cd.actv_indc = 'Y' AND wd.actv_indc = 'Y'
     AND wd.well_api_nbr IN ({formatted})
-    AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -62)
+    AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -65)
     AND cf.eftv_dttm <= TRUNC(SYSDATE)
 ORDER BY wd.well_api_nbr, cf.eftv_dttm
 """

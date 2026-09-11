@@ -1,0 +1,14 @@
+WBD Marker QC and Repair - Version 2.5
+
+- Fixed automatic repair for horizontal and highly deviated wells with
+  non-monotonic TVD survey values.
+- The previous TVD interpolation assumed TVD always increased with page Y.
+  For FREEMAN VH-1 (API 0403055510), TVD reaches about 1,797 ft and then
+  decreases to about 1,714.5 ft along the horizontal section. The old engine
+  truncated the usable TVD scale at 1,714.5 ft and rejected the 1,787.0 ft and
+  1,787.6 ft marker picks.
+- The engine now detects a non-monotonic TVD column and automatically uses the
+  authoritative MD survey row to disambiguate page placement.
+- A warning is written to the Activity log and repair summary whenever this
+  fallback is used.
+- Added Part125 / API 0403055510 to the smoke-test sample set.

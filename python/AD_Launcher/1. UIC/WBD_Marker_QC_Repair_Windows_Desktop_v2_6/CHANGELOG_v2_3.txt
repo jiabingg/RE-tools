@@ -1,0 +1,7 @@
+WBD Marker QC and Repair v2.3
+
+- Added a "Will repair" column to every CSV report.
+- The exported value respects the current Include partial mismatches setting.
+- Updated the manual Export current scan CSV output.
+- Updated scan_report_before.csv and scan_report_after.csv generated during repair.
+- Kept the existing Can fix column so technical repairability and current repair scope remain distinct.

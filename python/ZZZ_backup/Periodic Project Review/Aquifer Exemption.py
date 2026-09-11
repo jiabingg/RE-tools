@@ -147,7 +147,7 @@ class FieldDataPage(Page):
         header_label.pack(pady=10)
 
         # Field Selection Frame
-        field_selection_frame = tb.LabelFrame(self, text="Select Fields", bootstyle="primary")
+        field_selection_frame = tb.Labelframe(self, text="Select Fields", bootstyle="primary")
         field_selection_frame.pack(pady=10, padx=20, fill="x")
 
         num_columns = 3

@@ -1,0 +1,20 @@
+WBD Marker QC and Repair v2.2
+
+Problem corrected
+- Version 2.1 distinguished between technical repairability and repair scope.
+- A PARTIAL MISMATCH could show "Can automatically repair: Yes" but "Will repair: No"
+  because the partial-mismatch option was off by default.
+
+Changes
+- Partial mismatches are now included in automatic repair by default.
+- Added a synchronized "Include partial mismatches" control on the Results tab.
+- Clarified selected-page details with separate "Technically repairable" and
+  "Included in current repair scope" fields.
+- Changed the core repair defaults so direct Python use also repairs partial mismatches.
+- Verification summary now counts any remaining mismatch, duplicate, or all-missing page.
+- Added regression coverage for All_WBD_combined_Part10.pdf / API 0402918224.
+
+Validation
+- API 0402918224 was detected as MARKER_MISMATCH and automatically rebuilt from the
+  spreadsheet without a special opt-in flag.
+- Post-repair scan returned no marker flags.

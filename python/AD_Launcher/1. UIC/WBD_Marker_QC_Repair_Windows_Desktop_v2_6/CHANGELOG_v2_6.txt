@@ -1,0 +1,6 @@
+WBD Marker QC and Repair - Version 2.6
+
+- Added automatic fallback from TVD placement to MD survey-row placement when the complete authoritative TVD marker set cannot be mapped to the PDF TVD scale.
+- Covers non-monotonic TVD surveys and older sidetrack diagrams with incompatible TVD references/ranges.
+- Added JEWETT 1 (0402918211) and JEWETT 3 H7C (0403038853) to the sample smoke-test set when those files are available.
+- The Activity log and repair summary identify when MD fallback was used.

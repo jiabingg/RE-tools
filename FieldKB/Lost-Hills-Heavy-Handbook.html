@@ -1,0 +1,1689 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Onboarding handbook for the Lost Hills Heavy oil asset - geology, reservoir engineering, production engineering, surveillance, UIC history and a 90-day ramp plan. Notes are stored in this browser.">
+<style>
+  html{color-scheme:light dark}
+  body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<title>Lost Hills Heavy Handbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  --paper:#F1F2ED;
+  --surface:#FAFAF8;
+  --surface-2:#E9EBE4;
+  --ink:#191D1A;
+  --muted:#5D645C;
+  --rule:#D5D8CF;
+  --hot:#BE4318;
+  --hot-soft:#F3DED4;
+  --cool:#2C6B87;
+  --cool-soft:#DCE7EC;
+  --sand:#7E6A3F;
+  --sand-soft:#EBE5D5;
+  --shadow:0 1px 2px rgba(25,29,26,.06),0 8px 24px -16px rgba(25,29,26,.28);
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#131614; --surface:#1B201C; --surface-2:#232923;
+    --ink:#E8EAE3; --muted:#98A096; --rule:#2C322D;
+    --hot:#EA7A4E; --hot-soft:#37231B;
+    --cool:#74B4CF; --cool-soft:#182A31;
+    --sand:#C6AB6C; --sand-soft:#2B271B;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -16px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131614; --surface:#1B201C; --surface-2:#232923;
+  --ink:#E8EAE3; --muted:#98A096; --rule:#2C322D;
+  --hot:#EA7A4E; --hot-soft:#37231B;
+  --cool:#74B4CF; --cool-soft:#182A31;
+  --sand:#C6AB6C; --sand-soft:#2B271B;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -16px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--f-body); font-size:16.5px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+h1,h2,h3,h4{font-family:var(--f-display); text-wrap:balance; margin:0; line-height:1.18}
+
+/* ---------- shell ---------- */
+.shell{display:grid; grid-template-columns:250px minmax(0,1fr); gap:0; max-width:1320px; margin:0 auto}
+.rail{
+  position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+  border-right:1px solid var(--rule); padding:26px 20px 40px 24px; background:var(--paper);
+}
+.rail .brand{font-family:var(--f-display); font-weight:700; font-size:15px; letter-spacing:-.01em; line-height:1.25}
+.rail .brand span{display:block; font-family:var(--f-mono); font-size:10px; font-weight:500;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--hot); margin-bottom:5px}
+.rail nav{margin-top:22px; display:flex; flex-direction:column; gap:1px}
+.rail nav a{
+  display:flex; gap:9px; align-items:baseline; text-decoration:none; padding:5px 8px 5px 6px;
+  border-radius:4px; font-family:var(--f-display); font-size:13.5px; font-weight:500; color:var(--muted);
+}
+.rail nav a .n{font-family:var(--f-mono); font-style:normal; font-size:10px; color:var(--rule); font-weight:600; min-width:15px}
+.rail nav a:hover{background:var(--surface-2); color:var(--ink)}
+.rail nav a.on{color:var(--ink); background:var(--surface-2)}
+.rail nav a.on .n{color:var(--hot)}
+.rail .sep{height:1px; background:var(--rule); margin:12px 6px}
+.themebtn{
+  margin-top:20px; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  background:none; border:1px solid var(--rule); color:var(--muted); padding:6px 10px; border-radius:4px; cursor:pointer;
+}
+.themebtn:hover{color:var(--ink); border-color:var(--muted)}
+
+main{padding:0 clamp(20px,4vw,64px) 120px; min-width:0}
+
+/* ---------- masthead ---------- */
+.masthead{padding:56px 0 34px; border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--hot); font-weight:600}
+.masthead h1{font-size:clamp(38px,5.4vw,60px); font-weight:700; letter-spacing:-.028em; margin:12px 0 0}
+.masthead .sub{font-size:19px; color:var(--muted); max-width:60ch; margin-top:14px}
+.stampline{display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:24px;
+  font-family:var(--f-mono); font-size:11px; color:var(--muted); letter-spacing:.03em}
+.stampline b{color:var(--ink); font-weight:600}
+
+/* ---------- sections ---------- */
+section{padding-top:64px; scroll-margin-top:12px}
+.sechead{display:flex; align-items:baseline; gap:14px; border-bottom:1px solid var(--rule); padding-bottom:10px; margin-bottom:26px}
+.sechead .num{font-family:var(--f-mono); font-size:12px; font-weight:600; color:var(--hot); letter-spacing:.08em}
+.sechead h2{font-size:clamp(23px,2.7vw,31px); font-weight:600; letter-spacing:-.02em}
+.lede{font-size:18px; max-width:66ch; color:var(--ink)}
+p{max-width:68ch; margin:0 0 15px}
+main ul,main ol{max-width:68ch; padding-left:20px; margin:0 0 15px}
+main li{margin-bottom:7px}
+strong{font-weight:600}
+code,.mono{font-family:var(--f-mono); font-size:.88em}
+.wellid{font-family:var(--f-mono); font-size:.86em; background:var(--surface-2); padding:1px 4px; border-radius:3px; white-space:nowrap}
+
+/* ---------- depth tiers ---------- */
+.tier{border-left:3px solid var(--rule); padding-left:20px; margin:26px 0}
+.tier.t-geo{border-left-color:var(--sand)}
+.tier.t-res{border-left-color:var(--hot)}
+.tier.t-prod{border-left-color:var(--cool)}
+.tierlabel{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); font-weight:600; margin-bottom:8px; display:block}
+.tier h3{font-size:20px; font-weight:600; letter-spacing:-.015em; margin-bottom:10px}
+
+/* ---------- data blocks ---------- */
+.scroll{overflow-x:auto; margin:22px 0; border:1px solid var(--rule); border-radius:6px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14px; font-variant-numeric:tabular-nums}
+th,td{padding:9px 13px; text-align:left; border-bottom:1px solid var(--rule); white-space:nowrap; vertical-align:top}
+thead th{font-family:var(--f-display); font-size:11px; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--muted); background:var(--surface-2); border-bottom:1px solid var(--rule)}
+tbody tr:last-child td{border-bottom:none}
+td.num{font-family:var(--f-mono); font-size:13px}
+td.name{font-family:var(--f-display); font-weight:600; font-size:13.5px; white-space:normal; min-width:170px}
+caption{caption-side:bottom; text-align:left; padding:10px 13px; font-size:12.5px; color:var(--muted);
+  border-top:1px solid var(--rule); max-width:74ch; white-space:normal}
+
+.specgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:14px; margin:24px 0}
+.spec{background:var(--surface); border:1px solid var(--rule); border-radius:7px; padding:16px 17px}
+.spec h4{font-size:16px; font-weight:600; letter-spacing:-.01em; margin-bottom:2px}
+.spec .tagline{font-size:12.5px; color:var(--muted); margin-bottom:12px; line-height:1.4}
+.spec dl{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:0;
+  font-family:var(--f-mono); font-size:12px; font-variant-numeric:tabular-nums}
+.spec dt{color:var(--muted)}
+.spec dd{margin:0; text-align:right; font-weight:500}
+.spec .zone{margin-top:12px; padding-top:10px; border-top:1px solid var(--rule);
+  font-family:var(--f-mono); font-size:11px; color:var(--muted); line-height:1.5}
+
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1px; background:var(--rule);
+  border:1px solid var(--rule); border-radius:7px; overflow:hidden; margin:24px 0}
+.kpi{background:var(--surface); padding:15px 16px}
+.kpi .v{font-family:var(--f-display); font-size:25px; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1.1}
+.kpi .l{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:5px; line-height:1.45}
+
+.callout{border:1px solid var(--rule); border-left:3px solid var(--hot); background:var(--hot-soft);
+  border-radius:0 6px 6px 0; padding:15px 18px; margin:22px 0; max-width:76ch}
+.callout.cool{border-left-color:var(--cool); background:var(--cool-soft)}
+.callout.sand{border-left-color:var(--sand); background:var(--sand-soft)}
+.callout .h{font-family:var(--f-display); font-weight:600; font-size:13px; letter-spacing:.02em; margin-bottom:5px}
+.callout p{margin:0; font-size:15px; max-width:64ch}
+.callout p + p{margin-top:9px}
+
+.rules{list-style:none; padding:0; margin:20px 0; max-width:none;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1px; background:var(--rule);
+  border:1px solid var(--rule); border-radius:7px; overflow:hidden}
+.rules li{background:var(--surface); padding:15px 17px; margin:0}
+.rules .rk{font-family:var(--f-display); font-weight:600; font-size:14px; margin-bottom:5px; letter-spacing:-.01em}
+.rules .rb{font-size:14.5px; color:var(--muted); line-height:1.5}
+.rules .rb b{color:var(--ink)}
+
+.figure{margin:26px 0; border:1px solid var(--rule); border-radius:7px; background:var(--surface); padding:20px}
+.figure figcaption{font-size:12.5px; color:var(--muted); margin-top:12px; line-height:1.5; max-width:70ch}
+.figwrap{overflow-x:auto}
+
+.timeline{list-style:none; padding:0; margin:22px 0; max-width:78ch}
+.timeline li{display:grid; grid-template-columns:96px 1fr; gap:16px; padding:11px 0; margin:0; border-top:1px solid var(--rule)}
+.timeline li:last-child{border-bottom:1px solid var(--rule)}
+.timeline .yr{font-family:var(--f-mono); font-size:12px; font-weight:600; color:var(--hot); padding-top:2px}
+.timeline .ev{font-size:15px}
+.timeline .ev b{font-weight:600}
+
+.phases{display:grid; grid-template-columns:repeat(auto-fit,minmax(258px,1fr)); gap:14px; margin:24px 0}
+.phase{background:var(--surface); border:1px solid var(--rule); border-radius:7px; padding:17px 18px}
+.phase .p{font-family:var(--f-mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--hot); font-weight:600}
+.phase h4{font-size:16.5px; font-weight:600; margin:6px 0 10px; letter-spacing:-.01em}
+.phase ul{padding-left:17px; margin:0; font-size:14.5px}
+.phase li{margin-bottom:6px; color:var(--muted)}
+.phase li b{color:var(--ink); font-weight:600}
+
+.gloss{display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:2px 26px; margin:22px 0}
+.gloss div{border-bottom:1px solid var(--rule); padding:8px 0; font-size:14.5px}
+.gloss dt{font-family:var(--f-mono); font-weight:600; font-size:13px; color:var(--ink)}
+.gloss dd{margin:2px 0 0; color:var(--muted); font-size:14px; line-height:1.5}
+
+.docs{list-style:none; padding:0; margin:22px 0; max-width:none}
+.docs li{display:grid; grid-template-columns:1fr auto; gap:14px; align-items:baseline;
+  padding:10px 0; margin:0; border-bottom:1px solid var(--rule)}
+.docs .f{font-family:var(--f-mono); font-size:12.5px; word-break:break-word}
+.docs .w{font-size:13.5px; color:var(--muted); text-align:right; max-width:42ch}
+
+.footnote{margin-top:70px; padding-top:20px; border-top:1px solid var(--rule); font-size:13px; color:var(--muted); max-width:74ch}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static; height:auto; border-right:none; border-bottom:1px solid var(--rule); padding:18px 20px}
+  .rail nav{flex-direction:row; flex-wrap:wrap; gap:2px; margin-top:14px}
+  .rail nav a{font-size:12.5px; padding:4px 8px}
+  .rail nav a .n{display:none}
+  .rail .sep{display:none}
+  .timeline li{grid-template-columns:74px 1fr; gap:12px}
+}
+@media print{
+  .rail{display:none} .shell{display:block} main{padding:0}
+}
+:focus-visible{outline:2px solid var(--hot); outline-offset:2px; border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+/* ---------- search ---------- */
+.searchwrap{margin-top:18px; position:relative}
+#q{width:100%; font-family:var(--f-mono); font-size:12px; padding:7px 9px; border-radius:4px;
+  border:1px solid var(--rule); background:var(--surface); color:var(--ink)}
+#q::placeholder{color:var(--muted)}
+.hitcount{font-family:var(--f-mono); font-size:10px; color:var(--hot); margin-left:auto; font-weight:600}
+.rail nav a.hide{display:none}
+mark{background:var(--hot-soft); color:var(--ink); box-shadow:inset 0 -2px 0 var(--hot); padding:0 1px; border-radius:2px}
+
+/* ---------- notes ---------- */
+.sechead{position:relative}
+.sechead .addnote{margin-left:auto}
+.addnote{font-family:var(--f-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; font-weight:600;
+  background:none; border:1px solid var(--rule); color:var(--muted); padding:5px 10px; border-radius:4px;
+  cursor:pointer; white-space:nowrap}
+.addnote:hover{color:var(--hot); border-color:var(--hot)}
+.notes{display:flex; flex-direction:column; gap:10px; margin:0 0 22px}
+.notes:empty{margin:0}
+.note{border:1px solid var(--rule); border-left:3px solid var(--cool); background:var(--cool-soft);
+  border-radius:0 6px 6px 0; padding:12px 15px; max-width:76ch}
+.note .meta{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+.note .stamp{font-family:var(--f-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--cool); font-weight:600}
+.note .acts{margin-left:auto; display:flex; gap:4px}
+.note .acts button{font-family:var(--f-mono); font-size:10px; background:none; border:none; color:var(--muted);
+  cursor:pointer; padding:2px 5px; border-radius:3px; letter-spacing:.06em; text-transform:uppercase}
+.note .acts button:hover{color:var(--ink); background:var(--surface)}
+.note .body{font-size:15px; white-space:pre-wrap; line-height:1.55}
+.editor{border:1px solid var(--cool); border-radius:6px; background:var(--surface); padding:12px; max-width:76ch}
+.editor textarea{width:100%; min-height:96px; resize:vertical; font-family:var(--f-body); font-size:15px;
+  line-height:1.55; color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:4px; padding:9px 11px}
+.editor .row{display:flex; gap:8px; margin-top:9px; align-items:center}
+.editor .hint{font-family:var(--f-mono); font-size:10px; color:var(--muted); margin-left:auto}
+.btn{font-family:var(--f-display); font-size:12.5px; font-weight:600; padding:6px 13px; border-radius:4px;
+  border:1px solid var(--rule); background:var(--surface); color:var(--ink); cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--cool); border-color:var(--cool); color:var(--surface)}
+:root[data-theme="dark"] .btn.pri,
+:root:not([data-theme="light"]) .btn.pri{color:#101413}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .btn.pri{color:#FAFAF8}}
+.btn.pri:hover{filter:brightness(1.08)}
+
+/* ---------- checkable list ---------- */
+li.chk{list-style:none; display:grid; grid-template-columns:18px 1fr; gap:9px; align-items:start; margin-left:-26px}
+li.chk input{margin:5px 0 0; accent-color:var(--hot); width:14px; height:14px; cursor:pointer}
+li.chk.done > span{opacity:.5; text-decoration:line-through}
+
+/* ---------- notes drawer ---------- */
+.drawerbtn{position:fixed; right:20px; bottom:20px; z-index:40; font-family:var(--f-display); font-weight:600;
+  font-size:13px; padding:10px 16px; border-radius:22px; border:1px solid var(--rule);
+  background:var(--surface); color:var(--ink); box-shadow:var(--shadow); cursor:pointer}
+.drawerbtn b{font-family:var(--f-mono); font-size:11px; color:var(--hot); margin-left:5px}
+.drawer{position:fixed; top:0; right:0; z-index:50; width:min(420px,92vw); height:100%;
+  background:var(--surface); border-left:1px solid var(--rule); box-shadow:var(--shadow);
+  display:flex; flex-direction:column; transform:translateX(101%); transition:transform .22s ease}
+.drawer.open{transform:none}
+.drawer header{display:flex; align-items:center; gap:10px; padding:16px 18px; border-bottom:1px solid var(--rule)}
+.drawer header h3{font-size:16px; font-weight:600}
+.drawer header .x{margin-left:auto; background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; line-height:1; padding:0 4px}
+.drawer .list{flex:1; overflow-y:auto; padding:14px 18px; display:flex; flex-direction:column; gap:12px}
+.drawer .list .empty{font-size:14px; color:var(--muted); line-height:1.55}
+.dnote{border-bottom:1px solid var(--rule); padding-bottom:11px}
+.dnote a{font-family:var(--f-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--hot); font-weight:600; text-decoration:none}
+.dnote a:hover{text-decoration:underline}
+.dnote .stamp{font-family:var(--f-mono); font-size:10px; color:var(--muted); margin-left:8px}
+.dnote p{font-size:14px; margin:5px 0 0; white-space:pre-wrap; max-width:none; line-height:1.5}
+.drawer footer{border-top:1px solid var(--rule); padding:13px 18px; display:flex; flex-wrap:wrap; gap:7px}
+.drawer footer .btn{font-size:11.5px; padding:5px 10px}
+.drawer footer .note-status{flex-basis:100%; font-family:var(--f-mono); font-size:10.5px; color:var(--muted); line-height:1.5}
+.scrim{position:fixed; inset:0; z-index:45; background:rgba(0,0,0,.28); opacity:0; pointer-events:none; transition:opacity .22s ease}
+.scrim.on{opacity:1; pointer-events:auto}
+
+@media print{
+  .drawerbtn,.drawer,.scrim,.addnote,.searchwrap,.themebtn{display:none!important}
+  .note{break-inside:avoid; background:none; border-left:3px solid #666}
+}
+</style>
+
+<div class="shell">
+<aside class="rail">
+  <div class="brand"><span>Aera / CRC · Kern County</span>Lost Hills Heavy<br>Field Handbook</div>
+  <div class="searchwrap"><input id="q" type="search" placeholder="Search the handbook…" autocomplete="off"></div>
+  <nav id="nav">
+    <a href="#start"><i class="n">00</i>Start here</a>
+    <a href="#glance"><i class="n">01</i>The field at a glance</a>
+    <div class="sep"></div>
+    <a href="#geology"><i class="n">02</i>Geology</a>
+    <a href="#reservoir"><i class="n">03</i>Reservoir engineering</a>
+    <a href="#production"><i class="n">04</i>Production engineering</a>
+    <a href="#steam"><i class="n">05</i>Steam &amp; surveillance</a>
+    <div class="sep"></div>
+    <a href="#loop"><i class="n">06</i>The pattern-review loop</a>
+    <a href="#scorecard"><i class="n">07</i>Project scorecard</a>
+    <a href="#uic"><i class="n">08</i>Regulatory &amp; UIC</a>
+    <a href="#pipeline"><i class="n">09</i>Development pipeline</a>
+    <div class="sep"></div>
+    <a href="#lessons"><i class="n">10</i>Field-proven lessons</a>
+    <a href="#ramp"><i class="n">11</i>Your first 90 days</a>
+    <a href="#glossary"><i class="n">12</i>Glossary</a>
+    <a href="#sources"><i class="n">13</i>Source documents</a>
+  </nav>
+  <button class="themebtn" id="tt" type="button">Theme</button>
+  <button class="themebtn" id="pr" type="button" style="margin-left:6px">Print</button>
+</aside>
+
+<main>
+
+<header class="masthead">
+  <div class="eyebrow">Onboarding reference · synthesized from 16 asset documents</div>
+  <h1>Lost Hills Heavy</h1>
+  <p class="sub">A working handbook for a new engineer on the Tulare and Etchegoin steamfloods — the geology that
+  controls the flood, the reservoir engineering that sizes it, and the production practice that keeps it alive.</p>
+  <div class="stampline">
+    <span>Operator of record in sources · <b>Aera Energy LLC</b></span>
+    <span>Sections <b>12 &amp; 13 / 26S / 20E</b> and <b>18 &amp; 19 / 26S / 21E</b></span>
+    <span>Reservoirs <b>Tulare · Upper Etchegoin · Lower Etchegoin</b></span>
+    <span>UIC project <b>43200022</b></span>
+  </div>
+</header>
+
+<!-- ============ 00 START ============ -->
+<section id="start">
+  <div class="sechead"><span class="num">00</span><h2>Start here</h2></div>
+  <p class="lede">Lost Hills Heavy is a shallow, unconsolidated, 10–19° API steamflood. Almost everything that goes
+  right or wrong here traces back to one of three facts: the sand is <em>very</em> shallow, the oil is <em>very</em>
+  viscous, and the rock has <em>no</em> strength. Hold those three and most of the field's behaviour becomes predictable.</p>
+
+  <div class="callout sand">
+    <div class="h">Three facts that explain the field</div>
+    <p><b>Shallow.</b> Top of Tulare T1A sits near 200 ft at the crest; East Flank patterns average ~300 ft. Shallow
+    means a low fracture gradient, which means a hard ceiling on injection pressure, which means limited injectivity
+    and a permanent risk of steam reaching surface.</p>
+    <p><b>Viscous and cold.</b> Native reservoir temperature is ~82 °F. Cold, high-saturation oil resists steam
+    injection until enough heat is in the rock — modelling shows injectivity stays constrained through the first
+    0.28–0.37 pore volumes injected. That is why every new pattern is cycle-steamed before continuous injection.</p>
+    <p><b>Unconsolidated.</b> Porosity 34–48%, permeability up to several darcies, and cores that are "poorly
+    lithified material held together by high-viscosity oil." Heat the oil and the grains move. Sand production is
+    the dominant producer failure mode; observed well-failure rate ran <b>17 %/yr</b> against a 5 %/yr design assumption.</p>
+  </div>
+
+  <div class="tier t-geo">
+    <span class="tierlabel">How this handbook is organised</span>
+    <p>The three technical sections — geology, reservoir engineering, production engineering — each run at the same
+    three depths, so you can read across at whatever level you need:</p>
+    <ul>
+      <li><b>Overview</b> — what you'd tell someone in the truck on the way to the lease.</li>
+      <li><b>Detailed breakdown</b> — the numbers, mechanisms and methods actually used in the asset's studies.</li>
+      <li><b>Field practice</b> — what the reviews concluded people should <em>do</em>, including the mistakes already paid for.</li>
+    </ul>
+    <p style="margin-top:14px"><b>Make it yours.</b> Every section takes notes — hit <b>+ Note</b> in any section heading and
+    what you write is saved in this browser and reappears next time you open the page. The <b>Notes</b> button at the
+    bottom right collects them all in one place, with export and import so you can move them between machines or back
+    them up. The checklists in <a href="#ramp">§11</a> tick and stay ticked. Nothing you write leaves your browser.</p>
+  </div>
+
+  <div class="callout">
+    <div class="h">Read the vintages before you quote a number</div>
+    <p>These documents span 2004 to 2023 and each snapshot is true only for its date. The Phase I East Flank project
+    appears twice — 28 % recovery at 0.57 PVI in the 2010 review, 38 % at 1.47 PVI in the 2018 review — and both are
+    correct. Recovery, OSR, pattern counts and rates all move. Treat every figure here as
+    <em>the value at the date of that study</em>, and pull today's from the live databases before it goes in a deck.
+    The asset has also changed hands: the studies are Aera-era, and Lost Hills now sits inside CRC's portfolio.</p>
+  </div>
+</section>
+
+<!-- ============ 01 GLANCE ============ -->
+<section id="glance">
+  <div class="sechead"><span class="num">01</span><h2>The field at a glance</h2></div>
+  <p class="lede">One anticline, three stacked heavy-oil reservoirs, roughly 126 active patterns, and a steam plant
+  that is the binding constraint on almost every decision.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">~40 mi</div><div class="l">NW of Bakersfield, San&nbsp;Joaquin Basin</div></div>
+    <div class="kpi"><div class="v">10–19°</div><div class="l">API gravity across the three reservoirs</div></div>
+    <div class="kpi"><div class="v">~147</div><div class="l">MMBO developed-pattern OOIP (Tul + UE + LE)</div></div>
+    <div class="kpi"><div class="v">~126</div><div class="l">Active patterns (75 Tul / 39 LE / 12 UE)</div></div>
+    <div class="kpi"><div class="v">27,500</div><div class="l">BSPD realistic steam capacity (30,000 nameplate)</div></div>
+    <div class="kpi"><div class="v">2,198</div><div class="l">Wellbore diagrams in the 43200022 UIC review</div></div>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:600;margin:34px 0 4px">The three reservoirs</h3>
+  <div class="specgrid">
+    <div class="spec">
+      <h4>Tulare</h4>
+      <div class="tagline">Pleistocene fluvio-lacustrine sheets, mouth bars and stacked channels. The workhorse:
+      ~60 % of production and injection.</div>
+      <dl>
+        <dt>API</dt><dd>12–15°</dd>
+        <dt>Permeability</dt><dd>1,000–8,000 mD</dd>
+        <dt>Porosity</dt><dd>34–42 %</dd>
+        <dt>Oil saturation</dt><dd>35–85 %</dd>
+        <dt>Net pay</dt><dd>~100 ft</dd>
+        <dt>Developed OOIP</dt><dd>86 MMBO</dd>
+        <dt>Active patterns</dt><dd>~75</dd>
+        <dt>OSR / water cut</dt><dd>0.25+ / 81 %</dd>
+      </dl>
+      <div class="zone">Zones T1A–T1C, T2A–T2C, T3A–T3B (+ Rider, not fluxed)<br>Trap: shale interbeds; crest is air sand<br>~2, 3.25 and 5-acre patterns</div>
+    </div>
+    <div class="spec">
+      <h4>Upper Etchegoin</h4>
+      <div class="tagline">Pliocene turbidites eroded into a diatomite/shale background, trapped against the base-Tulare
+      unconformity.</div>
+      <dl>
+        <dt>API</dt><dd>12–16°</dd>
+        <dt>Permeability</dt><dd>500–4,000 mD</dd>
+        <dt>Porosity</dt><dd>35–40 %</dd>
+        <dt>Oil saturation</dt><dd>35–65 %</dd>
+        <dt>Net pay</dt><dd>~120 ft</dd>
+        <dt>Developed OOIP</dt><dd>37 MMBO</dd>
+        <dt>Active patterns</dt><dd>~12</dd>
+        <dt>OSR / water cut</dt><dd>0.15 / 95 %</dd>
+      </dl>
+      <div class="zone">Zones B1A, B2A, B2B, B2C, C1<br>Trap: base-Tulare unconformity<br>~2 and 3.25-acre patterns</div>
+    </div>
+    <div class="spec">
+      <h4>Lower Etchegoin</h4>
+      <div class="tagline">Low-permeability punctuated turbidites in mostly shale and diatomite. Structural trap.
+      The only reservoir with horizontal producers.</div>
+      <dl>
+        <dt>API</dt><dd>13–19°</dd>
+        <dt>Permeability</dt><dd>10–2,000 mD</dd>
+        <dt>Porosity</dt><dd>34–48 %</dd>
+        <dt>Oil saturation</dt><dd>20–65 %</dd>
+        <dt>Net pay</dt><dd>~180 ft</dd>
+        <dt>Developed OOIP</dt><dd>24 MMBO</dd>
+        <dt>Active patterns</dt><dd>~39</dd>
+        <dt>OSR / water cut</dt><dd>0.15 / 94 %</dd>
+      </dl>
+      <div class="zone">Zones D through H<br>Trap: structural (anticlinal closure)<br>~2-acre patterns · 8 horizontal producers</div>
+    </div>
+  </div>
+
+  <div class="callout cool">
+    <div class="h">What the completions look like</div>
+    <p>All three reservoirs are developed the same way: <b>vertical wells, gravel-packed slotted liner</b>. Injectors
+    use limited-entry perforations — which is why you cannot cycle steam into an injector, and why injector completion
+    design is effectively a one-shot decision until the next redrill.</p>
+  </div>
+</section>
+
+<!-- ============ 02 GEOLOGY ============ -->
+<section id="geology">
+  <div class="sechead"><span class="num">02</span><h2>Geology</h2></div>
+  <p class="lede">The Lost Hills Anticline is a faulted, asymmetrical, doubly plunging fold trending NW–SE. Three
+  stacked reservoirs sit on it, each trapped by a different mechanism, all charged from the same source.</p>
+
+  <div class="tier t-geo">
+    <span class="tierlabel">Overview</span>
+    <h3>One structure, three traps, one oil</h3>
+    <p>The San Joaquin Basin is a former fore-arc basin bounded by the Sierra Nevada to the east and the Coast Ranges
+    to the west. Oil at Lost Hills was generated in <b>Kreyenhagen and Temblor</b> source rocks in the
+    <b>Buttonwillow depocenter</b> to the east, and migrated up fractures into the structure. Pyrochromatography on
+    Tulare, Upper Etchegoin and Lower Etchegoin oil samples returns nearly identical fingerprints — strong evidence
+    that <b>Tulare oil leaked up through the basal unconformity</b> from the Etchegoin below it rather than arriving
+    separately.</p>
+    <p>Above that unconformity the Pleistocene Tulare was deposited as a fluvio-lacustrine sequence sourced from the
+    Temblor Range 20 miles west. Below it the Pliocene Etchegoin was deposited in estuarine-to-shallow-marine
+    conditions — diatomaceous siltstones and claystones with fine silty sand interbeds. The three traps are genuinely
+    different, and that difference drives everything downstream:</p>
+    <ul>
+      <li><b>Tulare</b> — anticlinal closure with interbedded siltstone and claystone as internal seals. Productive on
+      the <em>northeast flank</em>, bounded by <b>air sands on the axis to the southwest</b> and the <b>aquifer to the northeast</b>.</li>
+      <li><b>Upper Etchegoin</b> — trapped at the angular unconformity at the base of the Tulare.</li>
+      <li><b>Lower Etchegoin</b> — structural trap; low permeability, and the one interval where fracturing has been
+      raised as a possible completion improvement.</li>
+    </ul>
+  </div>
+
+  <figure class="figure">
+    <div class="figwrap">
+      <svg viewBox="0 0 700 452" width="700" style="max-width:100%;height:auto" role="img"
+           aria-label="Stratigraphic column of Lost Hills from Tulare down to Kreyenhagen, with the heavy-oil reservoir intervals expanded.">
+        <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--muted)">
+          <text x="0" y="12" font-size="10" letter-spacing="1.4">STRATIGRAPHIC COLUMN</text>
+          <text x="392" y="12" font-size="10" letter-spacing="1.4">HEAVY-OIL INTERVALS · MARKERS</text>
+        </g>
+
+        <!-- regional column -->
+        <g>
+          <rect x="0" y="26" width="150" height="30" fill="var(--sand-soft)" stroke="var(--rule)"/>
+          <rect x="0" y="56" width="150" height="66" fill="var(--sand-soft)" stroke="var(--rule)"/>
+          <rect x="0" y="122" width="150" height="74" fill="var(--cool-soft)" stroke="var(--rule)"/>
+          <rect x="0" y="196" width="150" height="40" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="0" y="236" width="150" height="52" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="0" y="288" width="150" height="34" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="0" y="322" width="150" height="40" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="0" y="362" width="150" height="34" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="0" y="396" width="150" height="34" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <g font-family="Archivo, sans-serif" font-size="11.5" fill="var(--ink)" font-weight="600">
+            <text x="9" y="45">Alluvium</text>
+            <text x="9" y="82">TULARE</text>
+            <text x="9" y="151">ETCHEGOIN</text>
+            <text x="9" y="220">San Joaquin</text>
+            <text x="9" y="265">MONTEREY</text>
+            <text x="9" y="308">Reef Ridge Sh.</text>
+            <text x="9" y="345">TEMBLOR</text>
+            <text x="9" y="382">KREYENHAGEN</text>
+            <text x="9" y="416">Lodo / Moreno</text>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--muted)">
+            <text x="9" y="96">Pleistocene · fluvio-lacustrine</text>
+            <text x="9" y="165">Pliocene · shallow marine</text>
+            <text x="9" y="279">source / seal</text>
+            <text x="9" y="359">source</text>
+            <text x="9" y="396">source</text>
+          </g>
+          <!-- unconformity squiggle -->
+          <path d="M0 122 q7 -5 14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t14 0 t10 0"
+                fill="none" stroke="var(--hot)" stroke-width="2"/>
+          <text x="4" y="118" font-family="IBM Plex Mono, monospace" font-size="8.5" fill="var(--hot)" font-weight="600">PLIO-PLEISTOCENE UNCONFORMITY</text>
+        </g>
+
+        <!-- connector -->
+        <path d="M150 56 L392 26 M150 196 L392 430" fill="none" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 3"/>
+
+        <!-- expanded reservoir column -->
+        <g>
+          <rect x="392" y="26" width="118" height="22" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="392" y="48" width="118" height="30" fill="var(--sand-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="78" width="118" height="38" fill="var(--sand-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="116" width="118" height="26" fill="var(--sand-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="142" width="118" height="24" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="392" y="166" width="118" height="24" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="392" y="190" width="118" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <rect x="392" y="210" width="118" height="30" fill="var(--sand-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="240" width="118" height="30" fill="var(--sand-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="272" width="118" height="26" fill="var(--cool-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="298" width="118" height="26" fill="var(--cool-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="324" width="118" height="24" fill="var(--cool-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="348" width="118" height="22" fill="var(--cool-soft)" stroke="var(--rule)"/>
+          <rect x="392" y="374" width="118" height="56" fill="var(--cool-soft)" stroke="var(--rule)"/>
+          <path d="M392 272 h118" stroke="var(--hot)" stroke-width="2"/>
+          <g font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--ink)">
+            <text x="400" y="41">Rider</text>
+            <text x="400" y="67">T1A</text>
+            <text x="400" y="101">T1B</text>
+            <text x="400" y="133">T1C</text>
+            <text x="400" y="158">T2A</text>
+            <text x="400" y="182">T2B</text>
+            <text x="400" y="204">T2C</text>
+            <text x="400" y="229">T3A</text>
+            <text x="400" y="259">T3B</text>
+            <text x="400" y="289">B1A</text>
+            <text x="400" y="315">B2A · B2B · B2C</text>
+            <text x="400" y="340">C1</text>
+            <text x="400" y="364">D</text>
+            <text x="400" y="400">E · F · G · H</text>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--muted)">
+            <text x="518" y="41">not fluxed</text>
+            <text x="518" y="67">thief zone</text>
+            <text x="518" y="101">main pay</text>
+            <text x="518" y="229">early injection target</text>
+            <text x="518" y="315">Upper Etch main pay</text>
+            <text x="518" y="400">Lower Etch</text>
+          </g>
+          <g font-family="Archivo, sans-serif" font-size="10.5" font-weight="600" fill="var(--sand)">
+            <text x="640" y="100" text-anchor="end">TULARE</text>
+          </g>
+          <g font-family="Archivo, sans-serif" font-size="10.5" font-weight="600" fill="var(--cool)">
+            <text x="640" y="316" text-anchor="end">ETCHEGOIN</text>
+          </g>
+          <line x1="618" y1="48" x2="618" y2="270" stroke="var(--sand)" stroke-width="2"/>
+          <line x1="618" y1="272" x2="618" y2="430" stroke="var(--cool)" stroke-width="2"/>
+        </g>
+      </svg>
+    </div>
+    <figcaption>Left: the regional column adapted from Land (1984). Right: the nine Tulare markers actually modelled
+      (Rider, 1A, 1B, 1C, 2A, 2B, 2C, 3A, 3B) over the base-Tulare unconformity, with the Etchegoin sands beneath.
+      Note that the Rider carries volume but is <em>not</em> fluxed — excluding it cut 0.5 MMBO from Phase I's booked OOIP.</figcaption>
+  </figure>
+
+  <div class="tier t-geo">
+    <span class="tierlabel">Detailed breakdown</span>
+    <h3>Structure</h3>
+    <p>The anticline is the southern end of a 60-mile fold extending through the Kettleman Hills. The southwest limb
+    dips 30° or less; the northeast limb dips 40–50°. Inside the heavy-oil area of interest, though, the Tulare is
+    much gentler: <b>shallow dip near the axis, roughly 5–7° NE on the flank</b>, with the axis plunging 1–2° SE.
+    That 6.5° flank dip is not cosmetic — it is the number used to set injector placement (see §03).</p>
+    <p>Medwedeff described the structure as a northeast-verging <b>growth fault-bend fold</b>, with major slip from
+    late Miocene to late Pleistocene. Wickham's later review of additional seismic concluded Medwedeff had picked the
+    top of the Monterey too high, and reinterpreted the thrust as cutting <em>through</em> the Reef Ridge at 45–50°
+    rather than flattening into layering, with a wedge and backthrusting at depth to reconcile the displacement.
+    <b>Underlying units are heavily normal-faulted; the Tulare itself is largely unfaulted.</b></p>
+
+    <h3 style="margin-top:26px">Tulare stratigraphy and depositional model</h3>
+    <p>Three sand packages, nine markers, one modelled unconformity. The depositional story explains their geometry:</p>
+    <ul>
+      <li><b>T3</b> — transgressive shoreline facies laid across the eroded topographic high of the anticline. Thins over
+      the axis (the fold was already high ground before the Tulare arrived) and is most massive immediately above the
+      unconformity.</li>
+      <li><b>T2</b> — deposited during the same transgressive-to-maximum phase; like T3 it occurs in <b>narrow lenses
+      subparallel to the fold axis</b>. Individual sands thin upward and get dirtier upward.</li>
+      <li>The <b>maximum transgression</b> is marked by a northeastward-thickening claystone wedge that separates T1
+      from T2 — your most reliable internal seal.</li>
+      <li><b>T1</b> — the regressive progradational package that filled the basin. It <b>blankets</b> T2 and T3 with
+      relatively consistent gross and net thickness across the property, implying a nearly horizontal depositional
+      surface. Fine to very fine grained, subangular, very friable, 1–3 D.</li>
+    </ul>
+    <p>Sand geometry overall: lacustrine deltaic mouth bars, stacked channels and overbank deposits — sheets and troughs.
+    Both the horizontal and vertical distribution trends "directly affect steam distribution and subsequent oil
+    production," which is the whole reason the geologic model exists.</p>
+
+    <h3 style="margin-top:26px">Air sands — the defining hazard</h3>
+    <p>Air sands were identified from core and from density–neutron crossover. Near the axis they share a common base
+    elevation of about <b>300–310 ft subsea</b>, suggesting gravity drainage of oil as the structure was uplifted. The
+    geologic model simplifies this to a single <b>air–oil contact at 310 ft SSE</b> across all zones. Their significance
+    is operational, not academic: an air sand in communication with an injection interval is a thief zone and a
+    steam-to-surface pathway.</p>
+    <p>In most of the field the air sands sit in the Tulare Rider, which isn't produced. But <b>toward the crest — the
+    westernmost wells — air sands extend down into the producing T1</b>. The 1991 North Tulare review called this out
+    explicitly for the 5137-13 and 5039-13 pattern areas and concluded: future drilling must take air-sand depth into
+    account. Stratigraphic test well <span class="wellid">TOL5512-12</span> also found desaturation <em>below</em> the
+    T1 oil zone, which was interpreted as a withdrawn water table with mudstones ponding oil above the air sand — and
+    which motivated modelling a permeability barrier (a fault) in that area.</p>
+
+    <h3 style="margin-top:26px">Petrophysics and the 3D model</h3>
+    <p>The Tulare has little clay but does contain diatomite rip-up clasts, so grain density varies. The model
+    handles that with a density-derived grain density and an Archie saturation, tied to core from nine wells:</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Property</th><th>Method used at Lost Hills</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Grain density</td><td>GD = 1.634 + (0.5066 × RHOBS), fit to core grain density</td></tr>
+          <tr><td class="name">Porosity</td><td>PHITUL = (GD − RHOBS) / (GD − 1)</td></tr>
+          <tr><td class="name">Saturation</td><td>Archie: SW = ((REST × PHITUL<sup>1.8</sup>) / 0.5)<sup>−1/1.8</sup> — valid because clay content is low</td></tr>
+          <tr><td class="name">Gas / air</td><td>Density–neutron crossover magnitude</td></tr>
+          <tr><td class="name">Net pay cutoff</td><td>Porosity ≥ 27 %. <b>No oil-saturation cutoff</b> — core shows genuinely low-S<sub>o</sub> Tulare sections</td></tr>
+          <tr><td class="name">Permeability</td><td>Only a weak correlation with oil saturation in core; not predicted from logs</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The 3D model is built in <b>EarthVision</b>, rotated 28° west of north (roughly parallel to strike), on a
+    50 × 50 × 10 ft structural grid and a 50 × 50 × 3 ft property grid — fine enough to honour the thin T2 beds.
+    Tops came from 696 wells; property logs from 589. Every zone carries its own air–oil and oil–water contacts.</p>
+    <div class="callout">
+      <div class="h">Know what the model is not for</div>
+      <p>The Tulare geologic model was explicitly <b>not designed for numerical reservoir simulation</b>, and no
+      geologic model existed that could be imported into the simulator. Every simulation study in these documents had
+      to hand-build simplified layer-cake geology, and the modellers hit convergence errors when they tried to carry
+      real heterogeneity through. If someone asks for a "full-field simulation," that gap is the first thing to raise.</p>
+    </div>
+  </div>
+
+  <div class="tier t-geo">
+    <span class="tierlabel">Field practice</span>
+    <h3>What a geologist on this asset actually does</h3>
+    <ul>
+      <li><b>Pick air sands before you pick a well path.</b> On every proposed location, log the air-sand depth and
+      set the casing shoe at the top of normally saturated pay. Historic practice on the LH2B project was exactly this.</li>
+      <li><b>Complete below an air sand only with a confining shale between.</b> The 1991 North Tulare review made this
+      a standing recommendation, and paired it with: run bond logs, because improperly cemented casing is a steam-migration
+      path independent of the perforations.</li>
+      <li><b>Use CNL logs to map the steam chest.</b> Observation-well CNLs plus open-hole logs from redrills are the
+      asset's primary saturation surveillance. "Map the steam chests — CNL logs" is a standing surveillance instruction.</li>
+      <li><b>Beware propagated correlations.</b> The UIC review found Aera's Etchegoin tops in Section 12 deviating
+      significantly from an independent interpretation, with the angular unconformity relationship not preserved —
+      the suspicion being that markers were propagated top-down instead of bottom-up. Correlate up from the unconformity.</li>
+      <li><b>Recovery factors over 100 % mean the OOIP is wrong, not the production.</b> MD Tulare 77/81 booked
+      95.3 % RE with an ultimate of ~105 %; UE South patterns show 152 % and 178 %. Conservative porosity and
+      saturation cutoffs, plus edge wells with 100 % allocation drawing fluid from outside the pattern, both push
+      apparent RE up. Take it as a volumetric flag.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 03 RESERVOIR ============ -->
+<section id="reservoir">
+  <div class="sechead"><span class="num">03</span><h2>Reservoir engineering</h2></div>
+  <p class="lede">Lost Hills does not history-match a simulator. It forecasts with <b>empirical pattern-group
+  analogues and type curves</b>, and it manages with three ratios: pore volumes injected, steam flux, and oil–steam ratio.</p>
+
+  <div class="tier t-res">
+    <span class="tierlabel">Overview</span>
+    <h3>The mental model</h3>
+    <p>A pattern's life has three phases, and every decision maps to one of them:</p>
+    <div class="phases">
+      <div class="phase">
+        <div class="p">Phase 1</div>
+        <h4>Early</h4>
+        <ul>
+          <li><b>Primary</b> ~14 BOPD per producer in the T1</li>
+          <li><b>Cyclic steam</b> ~26 BOPD per producer at 100 BS/NFP cycles, lasting ~5 months per cycle</li>
+          <li>Injectivity is <b>constrained by cold viscous oil</b> until 0.28–0.37 PV injected</li>
+          <li>Peak arrives ~16 months and 0.27 PV after continuous injection starts at 1.5 flux</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="p">Phase 2</div>
+        <h4>Plateau</h4>
+        <ul>
+          <li>Hold <b>target steam flux</b>; watch OSR, produced steam and flowline temperature</li>
+          <li>Ends when depletion forces the first steam cut — <b>~0.80 PVI</b> at a 1.5 flux</li>
+          <li>Real projects have run <b>longer</b> than forecast whenever actual flux came in under target</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="p">Phase 3</div>
+        <h4>Decline</h4>
+        <ul>
+          <li>Steam declines with oil to hold OSR above the economic limit</li>
+          <li>Nominal decline <b>15.8 %</b> from analogue pattern groups</li>
+          <li>Terminate below <b>5 BOPD per producer</b> or at ultimate recovery</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout cool">
+      <div class="h">The single most useful plot on the asset</div>
+      <p><b>Recovery efficiency vs. pore volumes of steam injected (E<sub>R</sub> vs. Q<sub>is</sub>)</b>, normalized to
+      exclude primary. Over the analogue pattern groups it plots as a near-straight line, which means the slope
+      <em>is</em> the instantaneous oil–steam ratio. Every project gets benchmarked on this one chart, and it is how
+      you tell "mature" from "underperforming" at a glance: 1991 North Tulare sits at 24 % RE for 0.6 PVI where the
+      analogues say it should be over 40 %.</p>
+    </div>
+  </div>
+
+  <div class="tier t-res">
+    <span class="tierlabel">Detailed breakdown</span>
+    <h3>The design constants</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Parameter</th><th>Value</th><th>Where it came from</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Target steam flux (Tulare EF)</td><td class="num">1.50 BSPD/ac-ft</td><td>Belridge Tulare runs 2.0, but Belridge is frontal-advance dominated; the Lost Hills flank is <b>gravity-drainage dominated</b>, so the optimum is lower</td></tr>
+          <tr><td class="name">Operating flux, Phase II/III</td><td class="num">1.2 target, 1.06–1.10 actual</td><td>Pattern-level fluxes in practice range ~0.65–2.00</td></tr>
+          <tr><td class="name">Target flux (Upper Etchegoin)</td><td class="num">1.00 BSPD/ac-ft</td><td>1977 MD UE Sec 13 analogue; ~280 BSPD per injector</td></tr>
+          <tr><td class="name">Design oil–steam ratio</td><td class="num">0.264</td><td>Analogue OOIP-weighted average was 0.256; the F<sub>obv</sub> correlation suggested 0.304 — 0.264 chosen to lean on observed Lost Hills behaviour</td></tr>
+          <tr><td class="name">Plateau ends at</td><td class="num">0.80 PVI @ 1.5 flux</td><td>Interpolated between 0.91 PVI @ 0.9 flux (Lost Hills analogues) and 0.68 PVI @ 2.0 flux (Belridge Block 7)</td></tr>
+          <tr><td class="name">Time to peak</td><td class="num">16 months / 0.27 PV</td><td>Interpolated between 22 months @ 0.80 flux (TulrWeGo 1988) and 12 months @ 2.00 flux (Belridge Block 8)</td></tr>
+          <tr><td class="name">Nominal decline</td><td class="num">15.8 %</td><td>DCA on TulrWeGo 1983 and TulrMD 1981</td></tr>
+          <tr><td class="name">Injector offset from pattern centre</td><td class="num">45–50 ft downdip</td><td>Simulation at 6.5° dip; same answer for 5-spot and 7-spot</td></tr>
+          <tr><td class="name">Reservoir temperature / pressure</td><td class="num">82 °F · ~100 psi</td><td>Temperature log at <span class="wellid">LH5052-13</span>; UE Sec 19 uses 100 °F / 100 psi for limited-entry calcs</td></tr>
+          <tr><td class="name">Injector BHP constraint</td><td class="num">≤ 1.1 psi/ft to top perf</td><td>Matches the UIC variance ceiling; producers held so top-perf pressure ≤ 20 psia; BH quality assumed 65 %</td></tr>
+          <tr><td class="name">k<sub>v</sub>/k<sub>h</sub></td><td class="num">0.1</td><td>Belridge Tulare default — no Lost Hills-specific lab data</td></tr>
+          <tr><td class="name">Water model</td><td class="num">~0.80 cum water cut</td><td>Aquifer is <b>not</b> active — RFT in the T1 aquifer showed low pressures</td></tr>
+        </tbody>
+        <caption>Design basis for the East Flank Tulare expansion, with the Upper Etchegoin Section 19 equivalents where they differ. Several thermal properties are inherited from Belridge for lack of Lost Hills lab data — worth knowing before you defend a number.</caption>
+      </table>
+    </div>
+
+    <h3 style="margin-top:30px">Pattern configuration: why seven-spot</h3>
+    <div class="figure">
+      <div class="figwrap">
+        <svg viewBox="0 0 660 244" width="660" style="max-width:100%;height:auto" role="img"
+             aria-label="Inverted five-spot and seven-spot pattern schematics with injector placed downdip of pattern centre.">
+          <g font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)" letter-spacing="1.2">
+            <text x="8" y="14">INVERTED 5-SPOT · 1 INJ : 1 PROD</text>
+            <text x="352" y="14">INVERTED 7-SPOT · 1 INJ : 2 PROD</text>
+          </g>
+          <!-- 5 spot -->
+          <g>
+            <rect x="34" y="38" width="150" height="150" fill="none" stroke="var(--rule)" stroke-width="1.5"/>
+            <g fill="var(--cool)">
+              <circle cx="34" cy="38" r="6"/><circle cx="184" cy="38" r="6"/>
+              <circle cx="34" cy="188" r="6"/><circle cx="184" cy="188" r="6"/>
+            </g>
+            <circle cx="109" cy="113" r="4" fill="none" stroke="var(--muted)" stroke-dasharray="2 2"/>
+            <circle cx="109" cy="134" r="8" fill="var(--hot)"/>
+            <path d="M109 113 L109 130" stroke="var(--hot)" stroke-width="1.5"/>
+            <text x="122" y="138" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--hot)">45–50 ft downdip</text>
+            <text x="34" y="212" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--muted)">peak rate = baseline · ult. RE = baseline</text>
+          </g>
+          <!-- 7 spot -->
+          <g transform="translate(352,0)">
+            <polygon points="75,38 150,80 150,164 75,206 0,164 0,80" fill="none" stroke="var(--rule)" stroke-width="1.5"/>
+            <g fill="var(--cool)">
+              <circle cx="75" cy="38" r="6"/><circle cx="150" cy="80" r="6"/><circle cx="150" cy="164" r="6"/>
+              <circle cx="75" cy="206" r="6"/><circle cx="0" cy="164" r="6"/><circle cx="0" cy="80" r="6"/>
+            </g>
+            <circle cx="75" cy="122" r="4" fill="none" stroke="var(--muted)" stroke-dasharray="2 2"/>
+            <circle cx="75" cy="143" r="8" fill="var(--hot)"/>
+            <path d="M75 122 L75 139" stroke="var(--hot)" stroke-width="1.5"/>
+            <text x="0" y="230" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--muted)">peak +25 % · ult. RE +6 % · earlier first steam cut</text>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--muted)">
+            <circle cx="200" cy="228" r="5" fill="var(--cool)"/><text x="212" y="232">producer</text>
+            <circle cx="278" cy="228" r="5" fill="var(--hot)"/><text x="290" y="232">steam injector</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>Standard pattern size is <b>3.25 acres</b> for Tulare patterns that don't bound earlier development.
+        Nine-spots were rejected outright — steam breaks through prematurely to the side producers. At 6.5° flank dip,
+        putting the injector at pattern centre makes updip producers break through at 374 days while downdip producers
+        wait 942; moving it 45–50 ft downdip tightens that spread and maximises oil rate.</figcaption>
+    </div>
+    <p>The seven-spot's advantages compound in exactly the conditions Lost Hills has: it starts at double the initial
+    rate (2:1 producer-to-injector, no interference early), delivers a peak over 25 % higher, and ends 6 % higher on
+    ultimate recovery through better sweep. Crucially it is also <b>less exposed to the early injectivity constraint</b>
+    — twice as many producers means twice as many points to cycle steam into the reservoir while the rock is still cold.
+    The trade is capital: in a low-price environment the Upper Etchegoin Section 19 study chose the cheaper 2.5-acre
+    five-spot despite knowing seven-spots perform slightly better.</p>
+
+    <h3 style="margin-top:26px">How forecasts actually get built here</h3>
+    <ol>
+      <li><b>Select analogue pattern groups</b> by vintage, configuration and structural position — and disqualify the
+      ones that would mislead. The documented disqualifications: TulrSouth 1991/1993 (fed by fluid migration from the
+      old in-situ combustion project), Tulr2B 1994 and TulrInfill 2000 (surrounded by active floods),
+      TulrNorth 1991 (pressure-constrained, air-sand thieves, steam-to-surface), Tulr2B 1990 (too high on structure,
+      thin sands, no dip), TulrEtch2B 1990 (commingled Tulare + UE).</li>
+      <li><b>Pick wells by SoφH</b>, pull ~28 years of history, date-normalize, and run Monte Carlo (Crystal Ball,
+      later IHS Harmony) for P10/P50/P90.</li>
+      <li><b>Build the type curve</b> and, when transferring between areas, scale by the <b>SoφH ratio</b> — Section 19's
+      Upper Etchegoin curve is the Section 13 curve times 0.56.</li>
+      <li><b>Cross-check the heat</b> with a Vogel analysis: convert the project's BTU requirement into a steam rate and
+      compare it to what's actually being injected. Chronic over-injection against Vogel means vertical leakage to
+      non-productive zones or lateral leakage out of the flood.</li>
+    </ol>
+
+    <h3 style="margin-top:26px">PVI is a sand-level number, not a project-level one</h3>
+    <p>This is the most repeated lesson in the reviews. A project-level PVI of 1.61 (MD 77/81) "alone is an indication
+    that the entire area is depleted" — until you break it out by sand and find remaining opportunity in T1B and T3B.
+    Conversely Phase II sat at 0.54 project PVI while T1A was already at 0.74, which justified cutting steam despite a
+    forecast that said cut at 0.80. Phase III sat at exactly the 0.45 PVI its forecast said to cut at, and did
+    <em>not</em> cut, because the thickest sand (T1B) was only at 0.41. The tool for this is the
+    <b>SSIC — Subsurface Injection Conformance — Segment Group Volumes</b>.</p>
+  </div>
+
+  <div class="tier t-res">
+    <span class="tierlabel">Field practice</span>
+    <h3>Decision rules the reviews actually applied</h3>
+    <ul class="rules">
+      <li><div class="rk">Never cut on project PVI alone</div><div class="rb">Break PVI out by sand at pattern level, then decide. Also weigh <b>produced steam, flowline temperature, RE, oil saturation logs and water-disposal constraints</b> — Phase III listed all five as reasons to hold rate.</div></li>
+      <li><div class="rk">Strong OSR outranks a desaturated log</div><div class="rb">At pattern 5052-13 the open-hole log showed every sand desaturated, yet the well produced strongly (possible heat suppression). With OSR still strong and flux moderate, the team held rate and put the injector on a <b>watch list for future cuts</b> instead.</div></li>
+      <li><div class="rk">High temperature plus produced steam equals over-injection</div><div class="rb">Ten Phase II injectors were cut on this signal, for a total 670 BSPD reduction that moved the project toward its Vogel heat requirement.</div></li>
+      <li><div class="rk">Cold patterns with intact saturation are redevelopment, not repair</div><div class="rb">Six TOWs across 1991 North Tulare showed near-intact oil and cold temperatures at 0.6 PVI. That is not a well problem; it is a project that was never processed.</div></li>
+      <li><div class="rk">Pattern size is a hard-won constant</div><div class="rb">Five-acre patterns at 1991 North Tulare could not be processed at the available injection pressure. <b>3.25 acres</b> is the standard for Tulare development, and 2.5-acre five-spots for the Upper Etchegoin.</div></li>
+      <li><div class="rk">Don't perforate the T1A</div><div class="rb">The recurring failure mode across the East Flank is a T1A thief zone. Newer redrills deliberately exclude T1A and the top of T1B; the North Tulare review recommends the top perforation sit at or below the <b>bottom half of the T1B</b> to raise the allowable pressure and stay away from air sands.</div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 04 PRODUCTION ============ -->
+<section id="production">
+  <div class="sechead"><span class="num">04</span><h2>Production engineering</h2></div>
+  <p class="lede">Shallow, unconsolidated, hot and heavy. Sand control, casing integrity and the vapour-recovery
+  system are where most of the barrels are won and lost.</p>
+
+  <div class="tier t-prod">
+    <span class="tierlabel">Overview</span>
+    <h3>What a well looks like and how it fails</h3>
+    <p>Every producer and injector across the three reservoirs is a vertical well with a <b>gravel-packed slotted
+    liner</b>; injectors carry <b>limited-entry perforations</b>. Producers are rod-pumped and are supposed to be
+    connected to the <b>CVR (casing vapour recovery) system</b>. Failure modes, in rough order of how often they appear
+    in the pattern reviews:</p>
+    <ol>
+      <li><b>Sanding.</b> Stuck pumps, short run life, liner failures, and ultimately redrills. Design assumed 5 %/yr
+      well failures; actual was <b>17 %/yr</b>. Cause: shallow formation → low compressive strength, plus the drag force
+      from grains released as oil viscosity drops with heat.</li>
+      <li><b>Casing damage and holes.</b> Parted casing at 288 ft, a hole at 53 ft taking all the steam, damage at
+      218–335 ft blocking survey tools. Shallow damage is common and often only found by a survey that won't pass.</li>
+      <li><b>High pickup.</b> Fill, scale or damage that stops the survey tool above the perforations, so you can no
+      longer measure the injection profile. Cleanouts, mud motors and slim flex tools are the escalation ladder;
+      if none work the well goes on the redrill list.</li>
+      <li><b>Thief-zone development.</b> Almost always the T1A. Patch, and if the patch fails or can't be gauged, redrill
+      and exclude the interval.</li>
+      <li><b>Surface equipment.</b> Cyclonic control valve failures, plugged instrument tubing, bad PLCs and dead
+      transmitters — repeatedly the actual reason a "reservoir" problem showed up.</li>
+    </ol>
+  </div>
+
+  <div class="tier t-prod">
+    <span class="tierlabel">Detailed breakdown</span>
+    <h3>The diagnostic set you carry per well</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Measurement</th><th>What it tells you</th><th>Rough reference values seen in reviews</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Flowline temperature</td><td>Whether the well is connected to injection</td><td class="num">&lt;150 °F cold · 180–230 °F connected · 240–300 °F breakthrough</td></tr>
+          <tr><td class="name">Casing temperature</td><td>Compare against flowline; a wide split suggests a line restriction or a flow problem</td><td class="num">e.g. 71 casing vs 300 flowline = investigate</td></tr>
+          <tr><td class="name">Produced steam via CVR</td><td>Direct breakthrough measurement</td><td class="num">0–20 BSPD normal · 25–60 BSPD problem well</td></tr>
+          <tr><td class="name">Casing pressure</td><td>CVR health; high casing pressure with a closed CVR is a choked well</td><td class="num">2–10 psi healthy · 29–44 psi typically CVR closed</td></tr>
+          <tr><td class="name">FOP (fluid over pump)</td><td>Whether the well is pumped off</td><td class="num">0 = pumped off · 127–248 ft = lift opportunity</td></tr>
+          <tr><td class="name">SSIC</td><td>Subsurface injection conformance — how close the profile is to target</td><td class="num">0.90–0.99 good · 0.62–0.78 poor</td></tr>
+          <tr><td class="name">Steam quality at the wellhead</td><td>How much heat you are actually delivering</td><td class="num">19 % = broken · 52 % = pre-2010 average · 77–89 % post-rework</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top:28px">The CVR system is a production variable, not plumbing</h3>
+    <p>The Phase I review is unambiguous on this. Wells that had their CVR closed and then reopened <b>did not recover
+    to their previous rate</b> (<span class="wellid">LH4076R-13</span>); wells choked to control produced steam took
+    severe production hits (<span class="wellid">LH4077R-13</span>, <span class="wellid">LH4054-13</span>). The MD 77/81
+    review found the opposite lever equally real: the MD CVR system was shut down in 2001 as uneconomic to repair, a
+    small group of wells was reconnected in 2012, the results were good enough that reconnecting became a
+    ranked candidate list, and the flood review was used to prioritise it. <b>Treat CVR status as a first-class item
+    on every well you look at.</b></p>
+
+    <h3 style="margin-top:26px">Cyclic steam and its eligibility rule</h3>
+    <p>Cyclic steam is how cold wells get connected and how new patterns get started. A cycle is sized around
+    <b>100 BS/NFP</b> in the East Flank design; the cycle ends when flowline temperature drops to about 120 °F, at
+    which point production falls off sharply. But there is a hard constraint you will hit constantly in the older
+    projects: <b>producers completed before ~2000 are generally not cyclic-steam candidates</b> — the aged completions
+    won't take steam. In 1991 North Tulare that rule alone removed cyclic steam as an option across most of the project,
+    which is a large part of why it never responded.</p>
+
+    <h3 style="margin-top:26px">Well-work vocabulary you'll see in every review</h3>
+    <dl class="gloss">
+      <div><dt>Redrill (R, R1 suffix)</dt><dd>New wellbore replacing a failed one — <span class="wellid">LH5126R1-13</span> is the second redrill of LH5126-13. The default fix once patching or cleanout has failed.</dd></div>
+      <div><dt>Patch</dt><dd>Isolating a thief interval inside the casing. Frequently fails, and once installed you generally lose the ability to run a profile below it.</dd></div>
+      <div><dt>Acid ballout / acid for profile</dt><dd>Chemical treatment to reopen perforations and improve conformance. Often only a temporary gain.</dd></div>
+      <div><dt>Cleanout</dt><dd>Removing fill to lower pickup so a survey can be run. Escalates to mud motor, then slim/flex survey tools.</dd></div>
+      <div><dt>KNPO / PO / FOP</dt><dd>Known-not-pumped-off, pumped off, fluid over pump. KNPO with no capacity to upsize is a hard stop, not a to-do.</dd></div>
+      <div><dt>TA / PA / ISI</dt><dd>Temporarily abandoned, permanently abandoned, idle-status indicator — the regulatory state of the wellbore.</dd></div>
+      <div><dt>UNEC</dt><dd>Uneconomic. Wells go UNEC and then reappear on drilling-candidate lists when an offset redrill proves the area.</dd></div>
+      <div><dt>RTI</dt><dd>Return to injection after a shutdown. Post-RTI injectivity step-changes are common and usually not actionable if there's no fill.</dd></div>
+    </dl>
+  </div>
+
+  <div class="tier t-prod">
+    <span class="tierlabel">Field practice</span>
+    <h3>Habits that separate a good review from a list of numbers</h3>
+    <ul>
+      <li><b>Check the surface equipment before you conclude anything about the reservoir.</b> Repeatedly, a
+      "pattern problem" was a failed control valve. In 2016 several cyclonic control valves had to be replaced across
+      the East Flank and injection targets were constrained for most of the year; rate measurement was simultaneously
+      corrupted by faulty PLCs. One survey read 27 BSPD where the records said 118 BSPD — the records were wrong.</li>
+      <li><b>Prove the redrill before you drill the neighbours.</b> The reviews routinely make producer redrills
+      <em>contingent</em> on the results of an injector redrill or an offset well. Write the contingency down.</li>
+      <li><b>Use offset open-hole logs as free saturation data.</b> Where no TOW exists in a pattern, recent redrill
+      open-hole logs and even Williamson wells drilled through the interval carry the CNL information you need.</li>
+      <li><b>Escalate before compliance forces your hand.</b> <span class="wellid">LC5176-13</span> had no compliant
+      survey from 2008 to 2017; it took a special flex tool to get a profile below the top perforation, which reset
+      the clock for five years and moved the well up the redrill priority. Being out of survey compliance is what
+      idles injectors permanently.</li>
+      <li><b>Record the reasoning, not just the decision.</b> A cancelled patch at pattern 5153-13 was documented with
+      the alternative (an ~$18,000 wellhead replacement) and the trigger to revisit it, explicitly "so we don't lose
+      track of our thought process." That habit is why these reviews are still usable a decade later.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 05 STEAM ============ -->
+<section id="steam">
+  <div class="sechead"><span class="num">05</span><h2>Steam and surveillance</h2></div>
+  <p class="lede">Steam is the scarce resource, the safety hazard and the main surveillance signal all at once.
+  Everything about how it is generated, delivered and measured matters to the reservoir.</p>
+
+  <div class="tier t-prod">
+    <span class="tierlabel">Overview</span>
+    <h3>The system and its constraints</h3>
+    <ul>
+      <li><b>Capacity.</b> Nominal 30,000 BSPD; realistic ~27,500 BSPD, and the binding constraint is <b>water
+      treatment capacity feeding the generators</b>, not the generators. As of the 2016 study the field ran at ~80 %
+      of plant maximum. Drill schedules in the development pipeline are explicitly annotated <em>"depends on steam
+      availability."</em></li>
+      <li><b>Distribution.</b> A 10″ main feeds all of Lost Hills Heavy, branching to 6″ and 4″ lines. The 2010 rework
+      insulated all three sizes, repaired damaged pipe, and replaced top-of-branch tapping with a <b>hard T-split</b>
+      for uniform distribution. Quality went from ~52 % to <b>77 %</b> on Phases I–II and <b>89 %</b> on Phase III.
+      Distance to the generators is a real variable: 1991 North Tulare's poor performance is partly attributed to it.</li>
+      <li><b>Drive pressure.</b> Historically above 500 psi; from 2017 it slid to a sustained low around 300 psi.
+      Aim for <b>~900 psi manifold pressure</b> as the surveillance standard.</li>
+      <li><b>Quality improvement buys plateau, not just heat.</b> Both the Phase I and Phase II reviews attribute
+      their extended production plateau directly to the quality improvement, and both used a Vogel heat balance to
+      argue the same BTUs could then be delivered with less steam: Phase I 3,709 → 3,115 BSPD, a 593 BSPD cut.</li>
+    </ul>
+  </div>
+
+  <div class="tier t-prod">
+    <span class="tierlabel">Detailed breakdown</span>
+    <h3>The surveillance stack</h3>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Tool</th><th>Answers</th><th>Cadence / note</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Steam injection profile survey</td><td>Where the steam is actually going, and where pickup is</td><td>Regulatory requirement. Cannot be run on packer-completed injectors — which is why those wells get idled</td></tr>
+          <tr><td class="name">RA tracer survey</td><td>Zonal allocation between perforation clusters</td><td>Standard: an RA shot wherever there is <b>≥ 7 ft separation between perforations</b></td></tr>
+          <tr><td class="name">TOW temperature logs</td><td>Areal and vertical sweep; whether the pattern is heated</td><td>Compare passes year over year — cooling trends are as informative as heating</td></tr>
+          <tr><td class="name">CNL saturation logs</td><td>Desaturation by sand; steam-chest mapping</td><td>In TOWs, and free from every new redrill's open hole</td></tr>
+          <tr><td class="name">SSIC tool</td><td>Segment-group pore volumes injected by sand</td><td>The input to every sand-level PVI decision</td></tr>
+          <tr><td class="name">Flowline temperature mapping</td><td>Which producers are connected, where breakthrough is</td><td>Kept as temperature maps, FLT bubble maps and FLT histograms across the surveillance area</td></tr>
+          <tr><td class="name">Infrared flyover</td><td>Areal thermal anomalies at surface</td><td>The 2016 sweep over Belridge and Lost Hills is what found the casing hole at 53 ft on <span class="wellid">LH5076-13</span></td></tr>
+          <tr><td class="name">Tiltmeter monitoring</td><td>Ground deformation ahead of a steam-to-surface event</td><td>Part of the standing steam-to-surface prevention program alongside flyovers and wellhead temperature</td></tr>
+          <tr><td class="name">Fibre-optic temperature profiles</td><td>Conformance on support injectors</td><td>Flagged for the Lower Etchegoin horizontal wells</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tier t-prod">
+    <span class="tierlabel">Field practice</span>
+    <h3>Standing surveillance guidance by area</h3>
+    <p>This is the asset's own area-by-area steer — the closest thing to a depletion strategy that exists in short form.</p>
+    <ul class="rules">
+      <li><div class="rk">LHC3 Tulare</div><div class="rb">Get the <b>flank wells connected to the steam chest</b>.</div></li>
+      <li><div class="rk">LH3C Lower Etchegoin</div><div class="rb">Watch flux rate — historically <b>under-fluxed</b>. Aggressively soak the cold wells.</div></li>
+      <li><div class="rk">Section 19 Upper Etchegoin</div><div class="rb">Drill additional primary wells; <b>ultimately should be waterflooded</b>.</div></li>
+      <li><div class="rk">Martin &amp; Dudley</div><div class="rb">Etchegoin — recomplete into <b>under-processed sands</b>.</div></li>
+      <li><div class="rk">2B Etchegoin</div><div class="rb">Under-processed reservoir. High-leverage R&amp;R or surveillance drilling. Restore steam as it becomes available.</div></li>
+      <li><div class="rk">2T Tulare</div><div class="rb">Considerable up-structure potential. <b>Do not cut steam here</b> — drainage is coming from up structure.</div></li>
+      <li><div class="rk">2B Tulare &amp; 3C Upper Etchegoin</div><div class="rb">Be <b>conservative</b> about restoring steam.</div></li>
+      <li><div class="rk">LH2 Lower Etch horizontals</div><div class="rb">Stay on top of cycle treatments (high payout). Start looking at support injectors — is there enough steam? Check conformance and fibre-optic temperature profiles.</div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 06 LOOP ============ -->
+<section id="loop">
+  <div class="sechead"><span class="num">06</span><h2>The pattern-review loop</h2></div>
+  <p class="lede">The Recovery Process Evaluation is the asset's core recurring deliverable and the reason these
+  documents exist. Learn its shape and you understand most of what the team does.</p>
+
+  <p>An RPE (also called a flood review) is run by a <b>multidisciplinary team — a reservoir engineer, a geologist
+  and a production engineer</b> — at project level, then pattern level, then well level. Its purpose is to assess RE,
+  PVI and OSR; review subsurface injection conformance and prescribe corrective action; re-set steam injection targets;
+  and identify redrill, lift-optimisation and stimulation candidates.</p>
+
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Step</th><th>What you assemble</th><th>What it decides</th></tr></thead>
+      <tbody>
+        <tr><td class="name">1 · Pull the reference documents</td><td>Geologic model, reservoir model, area development history, depletion plan</td><td>Whether a documented basis even exists — for the Getty- and Mobil-era projects it often does not</td></tr>
+        <tr><td class="name">2 · Reconcile volumetrics</td><td>3D model STOOIP by pattern and sand; adjust for expansions and excluded zones</td><td>The denominator for every RE number you're about to quote</td></tr>
+        <tr><td class="name">3 · Production &amp; injection history</td><td>Cumulative oil, water, gas; rates; water cut; cumulative and current OSR; flux history</td><td>Where the project sits in its three-phase life</td></tr>
+        <tr><td class="name">4 · Conformance</td><td>SSIC segment-group PVI by sand; profile surveys; steam quality measurements</td><td>Whether steam is reaching the pay or a thief</td></tr>
+        <tr><td class="name">5 · Temperature &amp; saturation</td><td>TOW temperature logs, CNLs, redrill open-hole logs, flowline temperatures</td><td>Areal and vertical sweep; is the pattern actually processed?</td></tr>
+        <tr><td class="name">6 · Pattern-by-pattern</td><td>Injector state and completion, PVI by interval, producer table, CVR and produced steam</td><td>The action items — redrills, patches, acids, cyclics, lift changes, CVR reconnections, target changes</td></tr>
+        <tr><td class="name">7 · DCA and benchmarking</td><td>Exponential decline in DSS; RE vs PVI against all Lost Hills projects</td><td>Ultimate recovery and remaining reserves; whether this project is above or below the field trend</td></tr>
+        <tr><td class="name">8 · Heat balance</td><td>Vogel BTU requirement vs actual injection</td><td>The defensible size of a steam cut</td></tr>
+      </tbody>
+      <caption>Typical RPE outputs run from a handful to a few dozen actions — Phase II produced 4 cyclic steams, 5 producer redrills, 2 injector redrills, 4 patches, 7 lift optimisations, 3 acid stimulations and 10 injection-target reductions.</caption>
+    </table>
+  </div>
+
+  <div class="callout cool">
+    <div class="h">Toolset</div>
+    <p>OpenWorks · EarthVision · Petrel · the subsurface injection conformance (SSIC) tool · DSS · OpenWells · WRA ·
+    LEGO · ArcGIS · DIMS · Business Objects · IHS Harmony · PEEP (case building and scheduling) · Tableau (base decline) ·
+    Excel. On the regulatory side, WellSTAR for CalGEM submissions.</p>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:600;margin:30px 0 8px">The planning cycle around it</h3>
+  <p>The RPE feeds the annual rhythm: <b>pattern review → flood review → reservoir model → depletion plan → AFE →
+  operating plan → reserves</b>. Practical notes from the asset's own transition material:</p>
+  <ul>
+    <li>Base decline is carried in <b>Tableau</b>; projects are added to the PVUD C2 case.</li>
+    <li><b>PEEP</b> cases are built per injector and producer, then run through Scheduler and consolidated. An AFE
+    typically carries four cases.</li>
+    <li>Rules of thumb used for quick forecasts: field decline ~8 %, water decline ~3 %, water cut ~91 %,
+    roughly 200 BWPD per Tulare well and 400 BWPD per Etchegoin well, steam from OSR, and 1P/3P bracketing the mid
+    case at roughly 80 % / 120 %.</li>
+    <li>AFE cost estimates split <b>tangible vs non-tangible</b> and <b>drilling vs facilities</b>. Request an XPT
+    test on a development package to inform completion design.</li>
+    <li>Royalty matters to project selection: the LH3, LHC and MD fee properties carry <b>no royalty</b>; the West
+    Government Lease carries a royalty (12.5 % in the later reviews; a 6.5 % overriding royalty with participation in
+    a reduction program in the 2004 model — <em>confirm the current terms with Land before you use either</em>).
+    Any well drilled within 75 ft either side of the Section 13/18 line splits production half to each.</li>
+  </ul>
+</section>
+
+<!-- ============ 07 SCORECARD ============ -->
+<section id="scorecard">
+  <div class="sechead"><span class="num">07</span><h2>Project scorecard</h2></div>
+  <p class="lede">Seven projects, four operators, five decades. Read down the PVI and RE columns together — that pair
+  tells you almost everything about where a project sits and what to do with it.</p>
+
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Project</th><th>Developed</th><th>Config</th><th>Acres</th><th>NFP</th><th>S<sub>o</sub></th>
+          <th>STOOIP</th><th>Cum oil</th><th>RE</th><th>PVI</th><th>Cum OSR</th><th>Ult. RE</th><th>As of</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="name">MD Tulare 77/81<br><span style="font-weight:400;color:var(--muted);font-size:12px">Getty · Sec 13</span></td>
+          <td class="num">1977 &amp; 1981</td><td class="num">12 pat · 5→9-spot</td><td class="num">35</td><td class="num">102 ft</td><td class="num">60 %</td>
+          <td class="num">6.36 MMBO</td><td class="num">6.0 MMBO</td><td class="num">95.3 %</td><td class="num">1.61</td><td class="num">0.37</td><td class="num">~105 %</td><td class="num">2015</td></tr>
+        <tr><td class="name">1991 North Tulare<br><span style="font-weight:400;color:var(--muted);font-size:12px">Mobil · LH3 fee</span></td>
+          <td class="num">1991</td><td class="num">5 pat · 7-spot · 5 ac</td><td class="num">24</td><td class="num">100 ft</td><td class="num">67 %</td>
+          <td class="num">5.53 MMBO</td><td class="num">1.27 MMBO</td><td class="num">24.4 %</td><td class="num">0.60</td><td class="num">0.26</td><td class="num">27 %</td><td class="num">2014</td></tr>
+        <tr><td class="name">Tulare EF Phase I<br><span style="font-weight:400;color:var(--muted);font-size:12px">Aera · Sec 13</span></td>
+          <td class="num">2004</td><td class="num">14→16 pat · 7-spot</td><td class="num">44.6</td><td class="num">83.5 ft</td><td class="num">65 %</td>
+          <td class="num">8.10 MMBO</td><td class="num">3.0 MMBO</td><td class="num">38 %</td><td class="num">1.47</td><td class="num">0.18</td><td class="num">76 %</td><td class="num">2018</td></tr>
+        <tr><td class="name">Tulare EF Phase II<br><span style="font-weight:400;color:var(--muted);font-size:12px">Aera · West Gov / LH3</span></td>
+          <td class="num">2007</td><td class="num">16→18 pat · 7-spot</td><td class="num">49</td><td class="num">69 ft</td><td class="num">69 %</td>
+          <td class="num">8.06 MMBO</td><td class="num">1.81 MMBO</td><td class="num">22 %</td><td class="num">0.54</td><td class="num">0.28</td><td class="num">57 %</td><td class="num">2012</td></tr>
+        <tr><td class="name">Tulare EF Phase III<br><span style="font-weight:400;color:var(--muted);font-size:12px">Aera · West Gov, Sec 18</span></td>
+          <td class="num">~2009</td><td class="num">12→13 pat · 7-spot</td><td class="num">40</td><td class="num">70 ft</td><td class="num">62 %</td>
+          <td class="num">5.48 MMBO</td><td class="num">0.94 MMBO</td><td class="num">17 %</td><td class="num">0.45</td><td class="num">0.23</td><td class="num">54 %</td><td class="num">2013</td></tr>
+        <tr><td class="name">UE South 90/91<br><span style="font-weight:400;color:var(--muted);font-size:12px">Mobil · Upper Etchegoin</span></td>
+          <td class="num">1990 &amp; 1991</td><td class="num">12 pat · 7-spot + 5-spot</td><td class="num">32</td><td class="num">134 ft</td><td class="num">49 %</td>
+          <td class="num">7.04 MMBO</td><td class="num">6.5 MMBO</td><td class="num">92 %</td><td class="num">1.40</td><td class="num">0.33</td><td class="num">—</td><td class="num">2016</td></tr>
+        <tr><td class="name">UE Sec 19 Phase II<br><span style="font-weight:400;color:var(--muted);font-size:12px">Proposed · not yet developed</span></td>
+          <td class="num">proposed</td><td class="num">8 pat · 5-spot · 2.5 ac</td><td class="num">20</td><td class="num">110 ft</td><td class="num">35–65 %</td>
+          <td class="num">3.03 MMBO</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">38 %</td><td class="num">2016</td></tr>
+      </tbody>
+      <caption>Every row is a snapshot at the date in the last column, taken from that project's Recovery Process
+      Evaluation. NFP = net feet of pay. Ultimate RE is the study's projection, not a booked number — and the values
+      above 100 % are a signal that OOIP was calculated conservatively, not that more oil came out than was there.</caption>
+    </table>
+  </div>
+
+  <div class="callout">
+    <div class="h">How to read the pairs</div>
+    <p><b>High PVI + high RE</b> (MD 77/81, UE South 90/91): mature, near economic limit, current OSR looks
+    flatteringly high only because steam has been cut. Value here is in <em>reconnecting CVR, sand-level infill and
+    replacing packer injectors</em> — not in blanket steam.</p>
+    <p><b>Low PVI + low RE</b> (1991 North Tulare): the project was never processed. This is redevelopment territory —
+    smaller patterns, better completions, and the explicit lesson to avoid the T1A.</p>
+    <p><b>Mid PVI + on-trend RE</b> (EF Phases I–III): the working part of the flood. Manage flux, conformance and
+    produced steam; expect the plateau to run longer than forecast whenever actual flux lands under target.</p>
+  </div>
+</section>
+
+<!-- ============ 08 UIC ============ -->
+<section id="uic">
+  <div class="sechead"><span class="num">08</span><h2>Regulatory and UIC</h2></div>
+  <p class="lede">The injection pressure gradient is the single regulatory number that shapes field development here,
+  and its history at Lost Hills is written in blowouts.</p>
+
+  <div class="tier t-prod">
+    <span class="tierlabel">Overview</span>
+    <h3>Project lineage</h3>
+    <p>Lost Hills Heavy today sits under <b>UIC project 43200022</b> (Tulare/Etchegoin steamflood, Sections 13, 18, 19),
+    which is the merger of several older projects. The separate light-oil waterflood at Lost Hills 1 is
+    <b>43200025</b>. Knowing the lineage matters because approvals, pressure limits and zone definitions were granted
+    against the <em>predecessor</em> project numbers.</p>
+    <ul class="timeline">
+      <li><span class="yr">1962–1990</span><span class="ev"><b>In-situ (wet) combustion project</b> operating in the LH2 / Section 19 area. Fluid influx from it still explains anomalous performance in the South 1991 and 1993 pattern groups.</span></li>
+      <li><span class="yr">1975</span><span class="ev">43200004 — Getty, Tulare steamflood, Section 13.</span></li>
+      <li><span class="yr">1977</span><span class="ev">43200012 and 43200034 — Getty, Etchegoin, Section 13 (dual steamflood/waterflood and steam injection).</span></li>
+      <li><span class="yr">1983–1985</span><span class="ev">Gulf Oil — Tulare steamflood, then cyclic steam in Section 18.</span></li>
+      <li><span class="yr">1989</span><span class="ev">Mobil requests a <b>separate Etchegoin gradient</b> (Tulare 0.6, Etchegoin 0.8 psi/ft) with zones isolated by separate injectors — <b>DENIED</b>.</span></li>
+      <li><span class="yr">Aug 1990</span><span class="ev">Tubing-and-packer variance granted; higher injection pressure allowed for <b>limited-entry</b> injectors: <b>MASIP 1.1 psi/ft at 100 % steam quality</b>, with liquid fluid levels no higher than the bottom perforation.</span></li>
+      <li><span class="yr">Jan 1991</span><span class="ev">Alternative added: 0.6 psi/ft at the sand interface, with steam quality not to drop below 30 %.</span></li>
+      <li><span class="yr">Apr 1991</span><span class="ev"><b>1.1 psi/ft rescinded after multiple blowouts.</b> Injection capped at 0.6 psi/ft.</span></li>
+      <li><span class="yr">May 1991</span><span class="ev"><b>1.1 psi/ft reinstated</b> — the blowouts were attributed to operational error and abandonment issues rather than the gradient itself.</span></li>
+      <li><span class="yr">1991–2007</span><span class="ev">Successive expansions across Sections 13, 18 and 19 under Mobil and then Aera; 43200022 formed by merging 43200004 and 43200034 in Aug 2002.</span></li>
+      <li><span class="yr">2018</span><span class="ev">DOGGR recognises a zone-name change on 43200025 from Tulare/Etchegoin to <b>Etchegoin/Reef Ridge</b> — the most recent (2005) pressure approval still carries the old name.</span></li>
+      <li><span class="yr">2021</span><span class="ev">Steam-to-surface event in the <b>Lower Etchegoin</b>.</span></li>
+    </ul>
+  </div>
+
+  <div class="tier t-prod">
+    <span class="tierlabel">Field practice</span>
+    <h3>What this means for your day job</h3>
+    <ul>
+      <li><b>The gradient is why pattern sizes are small.</b> Large patterns require high injection rates; shallow
+      targets cap the pressure; the two are irreconcilable. That is the whole 1991 North Tulare story, and one operator
+      chose to break the pressure limit deliberately (<span class="wellid">LH5035</span>) and put steam on the ground.</li>
+      <li><b>Packer injectors are a compliance dead end.</b> Injectors need periodic steam injection surveys; a
+      tubing-and-packer completion prevents running one. Across MD 77/81 and UE South 90/91, this single fact idled
+      almost every original injector. The survivors are slim-hole replacements completed <em>without</em> packers, and
+      new injection in those areas requires drilling new injectors. (The reviews cite a two-year cadence in one place
+      and five years in another — confirm the current CalGEM requirement rather than either.)</li>
+      <li><b>Poorly abandoned wells are a live crossflow and steam-to-surface risk.</b> The MD 77/81 review attributes
+      unexplained production increases to possible crossflow between the Etchegoin and Tulare through poorly abandoned
+      wells near water-disposal wells. The UE Sec 19 study makes an <b>AOR review of a 250 ft radius</b> a
+      pre-condition of drilling, with any suspect wells re-abandoned first.</li>
+      <li><b>Marker and zone definitions are contested.</b> The UIC work flagged that "EST markers are crossing existing
+      markers used for UIC project review," that Williamson has been redefined into the Reef Ridge, and that the Tulare
+      strat column in the viewer appears to have T1/T2/T3 out of order. Never assume the marker set in a database
+      matches the one a UIC project was approved against.</li>
+      <li><b>Scale of the current review.</b> The 43200022 project-by-project review covers <b>150 development wells
+      and 2,198 wellbore diagrams</b>. Budget accordingly.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 09 PIPELINE ============ -->
+<section id="pipeline">
+  <div class="sechead"><span class="num">09</span><h2>Development pipeline</h2></div>
+  <p class="lede">Development focus is Tulare and Upper Etchegoin. There is running room in every direction — and a
+  land constraint in most of them.</p>
+
+  <div class="scroll">
+    <table>
+      <thead><tr><th>CER project</th><th>Schedule</th><th>Reservoir</th><th>AOR / UIC</th><th>Status</th><th>Prod</th><th>Inj</th><th>TOW</th><th>Reserve category</th></tr></thead>
+      <tbody>
+        <tr><td class="name">T21-LH-A</td><td class="num">2023</td><td>Tulare</td><td>Not required</td><td>Walked</td><td class="num">13</td><td class="num">0</td><td class="num">0</td><td class="num">2PU</td></tr>
+        <tr><td class="name">T23-LH-A</td><td class="num">2023</td><td>Tulare</td><td>Not required</td><td>Walked</td><td class="num">7</td><td class="num">0</td><td class="num">0</td><td class="num">2PU</td></tr>
+        <tr><td class="name">T22-LH-A</td><td class="num">2023</td><td>Tulare</td><td>Approved</td><td>Walked</td><td class="num">12</td><td class="num">2</td><td class="num">0</td><td class="num">2PU</td></tr>
+        <tr><td class="name">T23-LH-B</td><td class="num">2023</td><td>Tulare</td><td>Approved</td><td>Walked</td><td class="num">11</td><td class="num">7</td><td class="num">0</td><td class="num">2PU</td></tr>
+        <tr><td class="name">T23-LH-5Acre</td><td class="num">2023</td><td>Tulare</td><td>Approved</td><td>Walked</td><td class="num">7</td><td class="num">7</td><td class="num">0</td><td class="num">2CDP</td></tr>
+        <tr><td class="name">T23-LH-LE13-P4</td><td class="num">2023</td><td>Upper Etchegoin</td><td>Submitted</td><td>Walked, awaiting AOR</td><td class="num">7</td><td class="num">4</td><td class="num">1</td><td class="num">2CDP</td></tr>
+        <tr><td class="name">T12-LH-NPH2</td><td class="num">2024</td><td>Tulare</td><td>Submitted w/ UIC</td><td>CER ready</td><td class="num">22</td><td class="num">9</td><td class="num">4</td><td class="num">2CDP</td></tr>
+        <tr><td class="name">T24-LH-T19-P1</td><td class="num">—</td><td>Tulare</td><td>Submitted w/ UIC</td><td>CER ready</td><td class="num">26</td><td class="num">7</td><td class="num">2</td><td class="num">—</td></tr>
+        <tr><td class="name">T22-LH-EF-Phase4</td><td class="num">—</td><td>Tulare</td><td>Submitted w/ UIC</td><td>CER ready, awaiting Green Zone</td><td class="num">12</td><td class="num">8</td><td class="num">1</td><td class="num">2CDU</td></tr>
+        <tr><td class="name">T26-LH-19-PH1</td><td class="num">—</td><td>Tulare &amp; Upper Etch</td><td>Not submitted</td><td>—</td><td class="num">20</td><td class="num">7</td><td class="num">0</td><td class="num">—</td></tr>
+      </tbody>
+      <caption>Development opportunity list as of January 2023. Drill schedule depends on steam availability; the
+      Green Zone constraint requires offset BLM acreage before drilling can proceed.</caption>
+    </table>
+  </div>
+
+  <div class="callout sand">
+    <div class="h">The Green Zone constraint</div>
+    <p>Maximum surface disturbance has been reached in <b>Section 18</b>. The plan from around 2018 is to bank surface
+    east of the Green Zone to allow future disturbance, which requires the swapped area to be <b>fully restored</b>.
+    Drought and lack of investment in watering the area have kept it from reaching that standard — so this is a real,
+    live blocker on the East Flank Phase 4 package, not a formality.</p>
+  </div>
+
+  <h3 style="font-size:18px;font-weight:600;margin:30px 0 8px">Where the growth is</h3>
+  <ul>
+    <li><b>North and west</b> — limited until more leases are acquired; a north lease purchase was rejected by Crimson.</li>
+    <li><b>East</b> — limited pending a land swap with BLM.</li>
+    <li><b>South</b> — currently viable.</li>
+    <li><b>Commingling</b> — the overview recommends future commingling of Upper Etchegoin and Tulare, and several
+    existing wells near the crest already produce both.</li>
+    <li><b>Idle-well sidetracks</b> — 169 idle wells reviewed at 100 %, 29 candidates submitted (17 %), 4 online at
+    ~100 BOPD, and ~30 more with future potential. Cheap barrels relative to new drills.</li>
+    <li><b>Recent drilling</b> — 57 producers drilled since 2018 delivering ~1,000 BOPD and 6,800 BWPD at 87 % water cut.</li>
+  </ul>
+</section>
+
+<!-- ============ 10 LESSONS ============ -->
+<section id="lessons">
+  <div class="sechead"><span class="num">10</span><h2>Field-proven lessons</h2></div>
+  <p class="lede">Twelve conclusions this asset has already paid for. Most of them recur across independent reviews
+  a decade apart, which is what makes them worth memorising.</p>
+
+  <ul class="rules">
+    <li><div class="rk">Don't oversize patterns</div><div class="rb">Five-acre patterns at 1991 North Tulare were drilled large to save money and then could not be processed within the pressure limits. <b>3.25 acres</b> is the Tulare standard.</div></li>
+    <li><div class="rk">Avoid the T1A</div><div class="rb">Every recurring conformance failure on the East Flank is a T1A thief. Newer redrills exclude T1A and the top of T1B; put the top perforation in the lower half of the T1B.</div></li>
+    <li><div class="rk">Never inject where you can't survey</div><div class="rb">Packer injectors, high pickup and casing damage all end the same way: no compliant profile, then a shut-in injector. Design and maintain for surveyability.</div></li>
+    <li><div class="rk">A patch buys time, not a solution</div><div class="rb">Patches at 5028-13, 5032-13, 5055-13, 5129-13 and 5153-13 either failed, leaked, or couldn't be gauged through the wellhead. Plan for the redrill.</div></li>
+    <li><div class="rk">Steam quality is a reservoir variable</div><div class="rb">52 % → 77–89 % extended the production plateau on two independent projects and allowed a Vogel-justified reduction in steam volume. Measure it; a 19 % reading is a broken valve upstream, not a reservoir fact.</div></li>
+    <li><div class="rk">Complete below air sands, behind shale</div><div class="rb">And run bond logs. Steam migrating <em>outside</em> the pipe to a shallow air sand is a documented cause of steam-to-surface, independent of where you perforated.</div></li>
+    <li><div class="rk">Cyclic steam has an expiry date</div><div class="rb">Producers completed before ~2000 generally will not take steam. If a cold pattern is full of pre-2000 completions, cyclic isn't a lever — redevelopment is.</div></li>
+    <li><div class="rk">Watch the CVR like a choke</div><div class="rb">Closing or choking a CVR to manage produced steam costs real oil, and wells often do not fully recover when it reopens. Reconnecting orphaned producers has repeatedly paid.</div></li>
+    <li><div class="rk">Benchmark on RE vs PVI</div><div class="rb">One plot ranks every project in the field. If a project is below the trend at its PVI, the cause is nearly always absent steam, oversized patterns, or conformance — in that order.</div></li>
+    <li><div class="rk">Forecast at sand level</div><div class="rb">A project-level PVI target for cutting steam will be wrong in both directions. Phase II cut at 0.54; Phase III held at 0.45. Both were right, because their sand-level distributions differed.</div></li>
+    <li><div class="rk">Assume the failure rate is 17 %, not 5 %</div><div class="rb">Sanding in shallow, unconsolidated, heated rock. Build it into well-count, workover and redrill planning up front.</div></li>
+    <li><div class="rk">Write down the depletion strategy</div><div class="rb">Multiple reviews open with "this team was unable to locate such a document." Forty years later, that absence still costs the asset money. Document injection strategy, pattern configuration, completion details and forecasts — for whoever inherits this next.</div></li>
+  </ul>
+</section>
+
+<!-- ============ 11 RAMP ============ -->
+<section id="ramp">
+  <div class="sechead"><span class="num">11</span><h2>Your first 90 days</h2></div>
+  <p class="lede">A sequence that front-loads the things you can only learn from people and data access, and defers
+  the reading you can do any time.</p>
+
+  <div class="phases">
+    <div class="phase">
+      <div class="p">Days 1–15</div>
+      <h4>Orientation and access</h4>
+      <ul>
+        <li>Get accounts on <b>OpenWorks, Petrel/EarthVision, DSS, OpenWells, WRA, PEEP, IHS Harmony, ArcGIS, WellSTAR</b> and the SSIC tool. Access latency is the single biggest ramp-up risk.</li>
+        <li>Read this handbook end to end, then the <b>2023 Lost Hills Heavy Overview</b> deck for the current picture.</li>
+        <li>Walk the field. See a producer, an injector wellhead, a TOW, the CVR line, the steam manifold and the water plant.</li>
+        <li>Build your own <b>well list by reservoir and status</b>, and learn the naming conventions: lease prefix, number, section suffix, R/R1 for redrills.</li>
+        <li>Meet the operations, steam, water, EHS/regulatory and drilling counterparts. Ask each what they wish reservoir engineering understood better.</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="p">Days 16–45</div>
+      <h4>Get fluent in one project</h4>
+      <ul>
+        <li>Pick <b>one East Flank phase</b> and reproduce its RPE from raw data: volumetrics, production, injection, PVI by sand, RE vs PVI.</li>
+        <li>Read the two extremes back to back — <b>MD Tulare 77/81</b> (mature, high RE) and <b>1991 North Tulare</b> (cold, unprocessed). Everything else falls between them.</li>
+        <li>Sit in on a <b>pattern review</b> and the LHH steam injection monthly meeting. Take the actions list and follow three items to completion.</li>
+        <li>Learn the <b>SSIC tool</b> properly — it is the backbone of every conformance argument you'll make.</li>
+        <li>Pull the type log for each reservoir and be able to pick T1A/1B/1C, T2, T3, B2A/B/C and the base-Tulare unconformity yourself.</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="p">Days 46–90</div>
+      <h4>Own something</h4>
+      <ul>
+        <li>Take a <b>pattern group</b> of your own: set injection targets, defend them with SSIC + PVI by sand + Vogel, and track the response.</li>
+        <li>Work one <b>development package</b> through the chain — reservoir model → depletion plan → AFE → PEEP cases → reserves.</li>
+        <li>Build the <b>steam-availability picture</b>: what capacity exists, what the water plant limits, and what that means for the drill schedule.</li>
+        <li>Get involved in the <b>43200022 UIC project review</b> and the AOR workflow. Regulatory literacy is a differentiator here.</li>
+        <li>Produce one written artifact — a pattern review, an RPE section, or a depletion-strategy note for a project that lacks one.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout cool">
+    <div class="h">Questions worth asking in week one</div>
+    <p>What is the current steam allocation and who arbitrates it? · What is today's manifold and drive pressure, and
+    has the post-2017 slide been recovered? · How many injectors are currently out of survey compliance? · What is the
+    live status of the Green Zone / BLM swap? · Which patterns are on the current steam-cut and steam-restore lists? ·
+    Where does the 43200022 project-by-project review stand with CalGEM? · Which projects still have no documented
+    depletion strategy?</p>
+  </div>
+</section>
+
+<!-- ============ 12 GLOSSARY ============ -->
+<section id="glossary">
+  <div class="sechead"><span class="num">12</span><h2>Glossary</h2></div>
+  <p class="lede">Terms and abbreviations used constantly in Lost Hills documents, in the sense this asset uses them.</p>
+  <dl class="gloss">
+    <div><dt>AOR</dt><dd>Area of Review — the radius around an injection project in which wells must be evaluated for integrity and proper abandonment.</dd></div>
+    <div><dt>BSPD / BS/NFP</dt><dd>Barrels of steam per day; barrels of steam per net foot of pay (the way cyclic steam volumes are sized).</dd></div>
+    <div><dt>CER</dt><dd>Capital expenditure request — the naming prefix on development packages (T22-LH-A and so on).</dd></div>
+    <div><dt>CNL</dt><dd>Compensated neutron log — the saturation log used to map desaturation and steam chests.</dd></div>
+    <div><dt>CVR</dt><dd>Casing vapour recovery — collects produced steam from producer casing annuli; also the direct measurement of steam breakthrough.</dd></div>
+    <div><dt>DCA</dt><dd>Decline curve analysis, run in DSS at Lost Hills.</dd></div>
+    <div><dt>DOGGR / CalGEM</dt><dd>The California oil and gas regulator; renamed from DOGGR to CalGEM in 2020. Older documents say DOGGR throughout.</dd></div>
+    <div><dt>Flux</dt><dd>Steam injection rate normalised to bulk reservoir volume, in BSPD per acre-foot. The primary injection control variable.</dd></div>
+    <div><dt>FOP</dt><dd>Fluid over pump, in feet. Non-zero FOP means the well is not pumped off and there may be lift upside.</dd></div>
+    <div><dt>Green Zone</dt><dd>Surface-disturbance-constrained area in Section 18; drilling there depends on banking restored acreage elsewhere.</dd></div>
+    <div><dt>High pickup</dt><dd>The depth at which a survey tool stops, above the intended perforations — fill, scale or casing damage. Blocks profile measurement.</dd></div>
+    <div><dt>ISI</dt><dd>Idle-status indicator on a wellbore; paired with TA/PA in the review tables.</dd></div>
+    <div><dt>Limited entry</dt><dd>Injector completion using restricted perforations to distribute steam across intervals. Precludes cycling steam into that well.</dd></div>
+    <div><dt>MASIP</dt><dd>Maximum allowable surface injection pressure — expressed at Lost Hills as a gradient in psi/ft.</dd></div>
+    <div><dt>NFP</dt><dd>Net feet of pay.</dd></div>
+    <div><dt>OSR / BOSR</dt><dd>Oil–steam ratio; breakeven OSR. A 2018 East Flank breakeven was quoted around 0.03, with an economic screening threshold of ~0.11 used when curtailing.</dd></div>
+    <div><dt>PVI / Q<sub>is</sub></dt><dd>Pore volumes of steam injected. The clock of a steamflood.</dd></div>
+    <div><dt>RE / E<sub>R</sub></dt><dd>Recovery efficiency — cumulative oil over STOOIP.</dd></div>
+    <div><dt>Rider</dt><dd>The sand package above T1A. Carries volume, is not fluxed, and frequently contains air sand.</dd></div>
+    <div><dt>RPE</dt><dd>Recovery Process Evaluation — the multidisciplinary flood review that is this asset's core deliverable.</dd></div>
+    <div><dt>Soφh / SoφH</dt><dd>Oil saturation × porosity × net thickness — the hydrocarbon-pore-thickness map used to select analogues and rank locations.</dd></div>
+    <div><dt>SSIC</dt><dd>Subsurface injection conformance tool — gives pore volumes injected by segment group (i.e. by sand).</dd></div>
+    <div><dt>STOOIP</dt><dd>Stock tank original oil in place, from the 3D geologic model.</dd></div>
+    <div><dt>Steam chest</dt><dd>The heated, desaturated volume around an injector. Mapped with CNLs and temperature surveys.</dd></div>
+    <div><dt>Thief zone</dt><dd>An interval taking steam disproportionately, starving the pay. At Lost Hills this usually means the T1A or an air sand.</dd></div>
+    <div><dt>TOW</dt><dd>Temperature observation well — unproduced wells logged for temperature and saturation over time.</dd></div>
+    <div><dt>UNEC</dt><dd>Uneconomic — a well status, not necessarily permanent.</dd></div>
+    <div><dt>Vogel analysis</dt><dd>The heat-balance method used here to convert a project's BTU requirement into a defensible steam injection rate.</dd></div>
+    <div><dt>Williamson</dt><dd>A deeper sand interval; wells drilled through it supplied CNL saturation data for the Upper Etchegoin reviews. Recently redefined into the Reef Ridge for UIC purposes.</dd></div>
+  </dl>
+</section>
+
+<!-- ============ 13 SOURCES ============ -->
+<section id="sources">
+  <div class="sechead"><span class="num">13</span><h2>Source documents</h2></div>
+  <p class="lede">Everything above is synthesized from these sixteen files in the Lost Hills folder. Go to the source
+  for figures, maps, cross-sections and pattern-level detail — none of the imagery is reproduced here.</p>
+
+  <ul class="docs">
+    <li><span class="f">06 · LH_Tulare_Geologic_Model_Report_v1.0</span><span class="w">Geology reference. Regional setting, structure, stratigraphy, depositional model, petrophysical equations, EarthVision model design, volumetrics by lease and subunit.</span></li>
+    <li><span class="f">RM · LH_Tulare_EF_Reservoir_Model_Report_v1.0</span><span class="w">The reservoir engineering bible. Analogue selection, five- vs seven-spot, flux/OSR/plateau derivations, injector placement, injectivity constraint, full VIP Therm decks and PVT/relperm inputs.</span></li>
+    <li><span class="f">01 · Tulare MD 77/81 RPE (Oct 2015)</span><span class="w">Mature high-RE project. Packer-injector compliance problem, CVR reconnection value, sand-level opportunity inside a "depleted" area.</span></li>
+    <li><span class="f">02 · 1991 North Tulare RPE (Jun 2014)</span><span class="w">The underperformance case study. Oversized patterns, shallow depth, air-sand thieves, steam-to-surface, cyclic ineligibility.</span></li>
+    <li><span class="f">03 · Tulare EF Phase I RPE (Sep 2018)</span><span class="w">The most granular pattern-by-pattern review in the set. Injector/producer tables, thief development, CVR impacts, drive-pressure history.</span></li>
+    <li><span class="f">RPE · LHH Phase I Flood Review v1.0 (May 2010)</span><span class="w">Earlier Phase I snapshot. Steam system rework, Vogel heat balance, the 17 % vs 5 % failure-rate finding.</span></li>
+    <li><span class="f">04 · LHH Phase II RPE (Oct 2012)</span><span class="w">Type-curve construction, sand-level PVI vs project PVI, the 670 BSPD steam cut and its Vogel justification.</span></li>
+    <li><span class="f">05 · LHH Phase III RPE (2013)</span><span class="w">The counter-case: PVI at the forecast cut point but no cut, because the thickest sand was under-processed.</span></li>
+    <li><span class="f">Highlighted · UE South 1990 &amp; 1991 RPE (2016)</span><span class="w">Upper Etchegoin equivalent. Williamson-well CNLs as a saturation source, curtailment decisions, packer-injector idling.</span></li>
+    <li><span class="f">Highlighted · 2016 Reservoir Modeling Documentation UE Sec 19</span><span class="w">Upper Etchegoin Section 19 forecast: 2.5-acre five-spot, SoφH-scaled type curve, steam capacity numbers, AOR pre-condition.</span></li>
+    <li><span class="f">Lost Hills Heavy Overview 2023</span><span class="w">Current-state deck. Reservoir properties, pattern counts, OSR and water cut by reservoir, sidetracks, development opportunities, Green Zone, UIC scope.</span></li>
+    <li><span class="f">Lost Hills UIC Project History</span><span class="w">Project lineage, pressure-gradient approvals and rescissions, injection intervals by section, marker/zone discrepancies.</span></li>
+    <li><span class="f">Lost Hills Self Study</span><span class="w">The area-by-area surveillance guidance, the influence diagram of steamflood drivers, and the map of where things live on the network.</span></li>
+    <li><span class="f">Lost Hills Transition</span><span class="w">Handover notes: forecasting rules of thumb, PEEP/Tableau workflow, AFE structure, the onboarding session agenda this handbook mirrors.</span></li>
+    <li><span class="f">Literature Review Notes</span><span class="w">Condensed findings across all the RPEs — a useful cross-check against this synthesis.</span></li>
+    <li><span class="f">LHH_Development_Opportunities_20230105.xlsx</span><span class="w">The development pipeline table reproduced in §09.</span></li>
+  </ul>
+
+  <p class="footnote">Compiled from the sixteen documents above. Figures are quoted as of each study's date and are not
+  a substitute for current data in DSS, PEEP or the corporate databases. Where two sources disagree — Phase I recovery
+  between the 2010 and 2018 reviews, the West Government Lease royalty rate, the injection-survey interval — both
+  readings are flagged in the text rather than silently reconciled. Verify anything load-bearing before it goes into
+  a submission or an AFE.</p>
+</section>
+
+</main>
+</div>
+
+<button class="drawerbtn" id="dbtn" type="button">Notes<b id="dcount">0</b></button>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="All notes">
+  <header>
+    <h3>My notes</h3>
+    <button class="x" id="dclose" type="button" aria-label="Close">×</button>
+  </header>
+  <div class="list" id="dlist"></div>
+  <footer>
+    <button class="btn" id="exp" type="button">Export</button>
+    <button class="btn" id="imp" type="button">Import</button>
+    <button class="btn" id="clr" type="button">Clear all</button>
+    <input type="file" id="impfile" accept="application/json,.json" hidden>
+    <div class="note-status" id="dstatus">Stored in this browser only.</div>
+  </footer>
+</aside>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- theme + print ---------------- */
+document.getElementById('tt').addEventListener('click',function(){
+  var r=document.documentElement, cur=r.getAttribute('data-theme');
+  if(!cur){ cur=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'; }
+  r.setAttribute('data-theme',cur==='dark'?'light':'dark');
+});
+document.getElementById('pr').addEventListener('click',function(){ window.print(); });
+
+/* ---------------- storage ---------------- */
+var KEY='lhh-handbook-v1';
+var state={v:1,notes:{},checks:{}};
+var storageOK=true;
+try{
+  var raw=window.localStorage.getItem(KEY);
+  if(raw){ var p=JSON.parse(raw); if(p&&typeof p==='object'){ state.notes=p.notes||{}; state.checks=p.checks||{}; } }
+}catch(e){ storageOK=false; }
+function persist(){
+  if(!storageOK) return false;
+  try{ window.localStorage.setItem(KEY,JSON.stringify(state)); return true; }
+  catch(e){ storageOK=false; setStatus('Could not save — this browser is blocking site storage. Export your notes to keep them.'); return false; }
+}
+function setStatus(msg){ var el=document.getElementById('dstatus'); if(el) el.textContent=msg; }
+if(!storageOK) setStatus('This browser is blocking site storage, so notes will not survive a reload.');
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function stamp(ts){
+  var d=new Date(ts);
+  return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' · '+
+         d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+}
+
+/* ---------------- section registry ---------------- */
+var sections=[].slice.call(document.querySelectorAll('main section'));
+var titleOf={};
+sections.forEach(function(sec){
+  var h=sec.querySelector('.sechead h2');
+  titleOf[sec.id]=h?h.textContent.trim():sec.id;
+});
+
+/* inject note affordances */
+sections.forEach(function(sec){
+  var head=sec.querySelector('.sechead');
+  if(!head) return;
+  var b=document.createElement('button');
+  b.type='button'; b.className='addnote'; b.textContent='+ Note';
+  b.setAttribute('aria-label','Add a note to '+titleOf[sec.id]);
+  b.addEventListener('click',function(){ openEditor(sec.id,null); });
+  head.appendChild(b);
+  var box=document.createElement('div');
+  box.className='notes'; box.setAttribute('data-for',sec.id);
+  head.insertAdjacentElement('afterend',box);
+});
+
+function boxFor(id){ return document.querySelector('.notes[data-for="'+id+'"]'); }
+
+function renderSection(id){
+  var box=boxFor(id); if(!box) return;
+  var open=box.querySelector('.editor');
+  box.querySelectorAll('.note').forEach(function(n){ n.remove(); });
+  var list=state.notes[id]||[];
+  list.slice().sort(function(a,b){ return a.ts-b.ts; }).forEach(function(n){
+    var el=document.createElement('div'); el.className='note'; el.setAttribute('data-id',n.id);
+    var meta=document.createElement('div'); meta.className='meta';
+    var s=document.createElement('span'); s.className='stamp'; s.textContent=stamp(n.ts)+(n.edited?' · edited':'');
+    var acts=document.createElement('div'); acts.className='acts';
+    var e=document.createElement('button'); e.type='button'; e.textContent='Edit';
+    e.addEventListener('click',function(){ openEditor(id,n.id); });
+    var d=document.createElement('button'); d.type='button'; d.textContent='Delete';
+    d.addEventListener('click',function(){
+      state.notes[id]=(state.notes[id]||[]).filter(function(x){ return x.id!==n.id; });
+      if(!state.notes[id].length) delete state.notes[id];
+      persist(); renderSection(id); renderDrawer();
+    });
+    acts.appendChild(e); acts.appendChild(d);
+    meta.appendChild(s); meta.appendChild(acts);
+    var body=document.createElement('div'); body.className='body'; body.textContent=n.t;
+    el.appendChild(meta); el.appendChild(body);
+    if(open) box.insertBefore(el,open); else box.appendChild(el);
+  });
+}
+
+function openEditor(id,noteId){
+  var box=boxFor(id); if(!box) return;
+  var prev=box.querySelector('.editor'); if(prev) prev.remove();
+  var existing=noteId?(state.notes[id]||[]).filter(function(x){return x.id===noteId;})[0]:null;
+
+  var ed=document.createElement('div'); ed.className='editor';
+  var ta=document.createElement('textarea');
+  ta.placeholder='Note on '+titleOf[id]+'…';
+  ta.value=existing?existing.t:'';
+  var row=document.createElement('div'); row.className='row';
+  var save=document.createElement('button'); save.type='button'; save.className='btn pri'; save.textContent=existing?'Update':'Save note';
+  var cancel=document.createElement('button'); cancel.type='button'; cancel.className='btn'; cancel.textContent='Cancel';
+  var hint=document.createElement('span'); hint.className='hint'; hint.textContent='Ctrl/⌘ + Enter to save';
+  row.appendChild(save); row.appendChild(cancel); row.appendChild(hint);
+  ed.appendChild(ta); ed.appendChild(row);
+  box.appendChild(ed);
+  ta.focus();
+
+  function commit(){
+    var txt=ta.value.trim();
+    if(!txt){ ed.remove(); return; }
+    if(existing){ existing.t=txt; existing.edited=true; }
+    else{ (state.notes[id]=state.notes[id]||[]).push({id:uid(),t:txt,ts:Date.now()}); }
+    persist(); ed.remove(); renderSection(id); renderDrawer();
+  }
+  save.addEventListener('click',commit);
+  cancel.addEventListener('click',function(){ ed.remove(); });
+  ta.addEventListener('keydown',function(ev){
+    if((ev.metaKey||ev.ctrlKey)&&ev.key==='Enter'){ ev.preventDefault(); commit(); }
+    if(ev.key==='Escape'){ ed.remove(); }
+  });
+}
+
+sections.forEach(function(s){ renderSection(s.id); });
+
+/* ---------------- checkable ramp items ---------------- */
+[].slice.call(document.querySelectorAll('#ramp .phase')).forEach(function(ph,pi){
+  [].slice.call(ph.querySelectorAll('li')).forEach(function(li,li_i){
+    var k='ramp:'+pi+':'+li_i;
+    var span=document.createElement('span');
+    while(li.firstChild) span.appendChild(li.firstChild);
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!state.checks[k];
+    cb.setAttribute('aria-label','Mark step complete');
+    li.className='chk'+(cb.checked?' done':'');
+    li.appendChild(cb); li.appendChild(span);
+    cb.addEventListener('change',function(){
+      if(cb.checked) state.checks[k]=true; else delete state.checks[k];
+      li.classList.toggle('done',cb.checked); persist();
+    });
+  });
+});
+
+/* ---------------- notes drawer ---------------- */
+var drawer=document.getElementById('drawer'), scrim=document.getElementById('scrim');
+function noteCount(){ return Object.keys(state.notes).reduce(function(n,k){ return n+state.notes[k].length; },0); }
+function renderDrawer(){
+  var list=document.getElementById('dlist');
+  document.getElementById('dcount').textContent=String(noteCount());
+  list.innerHTML='';
+  var any=false;
+  sections.forEach(function(sec){
+    var ns=state.notes[sec.id]; if(!ns||!ns.length) return;
+    any=true;
+    ns.slice().sort(function(a,b){ return a.ts-b.ts; }).forEach(function(n){
+      var d=document.createElement('div'); d.className='dnote';
+      var a=document.createElement('a'); a.href='#'+sec.id; a.textContent=titleOf[sec.id];
+      a.addEventListener('click',closeDrawer);
+      var s=document.createElement('span'); s.className='stamp'; s.textContent=stamp(n.ts);
+      var p=document.createElement('p'); p.textContent=n.t;
+      d.appendChild(a); d.appendChild(s); d.appendChild(p);
+      list.appendChild(d);
+    });
+  });
+  if(!any){
+    var e=document.createElement('div'); e.className='empty';
+    e.textContent='No notes yet. Use “+ Note” in any section heading — what you write is saved in this browser and shows up under that heading every time you open the handbook.';
+    list.appendChild(e);
+  }
+}
+function openDrawer(){ drawer.classList.add('open'); scrim.classList.add('on'); }
+function closeDrawer(){ drawer.classList.remove('open'); scrim.classList.remove('on'); }
+document.getElementById('dbtn').addEventListener('click',openDrawer);
+document.getElementById('dclose').addEventListener('click',closeDrawer);
+scrim.addEventListener('click',closeDrawer);
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
+renderDrawer();
+
+/* ---------------- export / import ---------------- */
+function payload(){
+  return JSON.stringify({app:'lost-hills-heavy-handbook',v:1,exported:new Date().toISOString(),
+    notes:state.notes,checks:state.checks},null,2);
+}
+document.getElementById('exp').addEventListener('click',function(){
+  var name='lost-hills-notes-'+new Date().toISOString().slice(0,10)+'.json';
+  var text=payload();
+  if(window.claude&&typeof window.claude.use==='function'){
+    window.claude.use('downloads').then(function(dl){
+      if(dl&&dl.save){ dl.save({filename:name,data:text}).then(function(){ setStatus('Exported '+name+'.'); },
+        function(){ setStatus('Export was declined or unavailable — try Copy instead.'); }); }
+      else blobSave(name,text);
+    },function(){ blobSave(name,text); });
+  } else blobSave(name,text);
+});
+function blobSave(name,text){
+  try{
+    var url=URL.createObjectURL(new Blob([text],{type:'application/json'}));
+    var a=document.createElement('a'); a.href=url; a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); },2000);
+    setStatus('Exported '+name+'.');
+  }catch(e){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ setStatus('Download blocked here — notes copied to your clipboard as JSON instead.'); },
+        function(){ setStatus('Could not export in this view. Open the downloaded standalone copy and export from there.'); });
+    } else setStatus('Could not export in this view.');
+  }
+}
+document.getElementById('imp').addEventListener('click',function(){ document.getElementById('impfile').click(); });
+document.getElementById('impfile').addEventListener('change',function(ev){
+  var f=ev.target.files&&ev.target.files[0]; if(!f) return;
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{
+      var d=JSON.parse(String(fr.result));
+      if(!d||typeof d!=='object'||!d.notes) throw new Error('shape');
+      var added=0;
+      Object.keys(d.notes).forEach(function(k){
+        var mine=state.notes[k]=state.notes[k]||[];
+        var seen={}; mine.forEach(function(n){ seen[n.id]=1; });
+        (d.notes[k]||[]).forEach(function(n){
+          if(!n||!n.t) return;
+          if(n.id&&seen[n.id]) return;
+          mine.push({id:n.id||uid(),t:String(n.t),ts:n.ts||Date.now(),edited:!!n.edited}); added++;
+        });
+        if(!mine.length) delete state.notes[k];
+      });
+      if(d.checks) Object.keys(d.checks).forEach(function(k){ state.checks[k]=true; });
+      persist();
+      sections.forEach(function(s){ renderSection(s.id); });
+      [].slice.call(document.querySelectorAll('#ramp .phase')).forEach(function(ph,pi){
+        [].slice.call(ph.querySelectorAll('li.chk')).forEach(function(li,li_i){
+          var on=!!state.checks['ramp:'+pi+':'+li_i];
+          var cb=li.querySelector('input'); if(cb) cb.checked=on;
+          li.classList.toggle('done',on);
+        });
+      });
+      renderDrawer();
+      setStatus('Imported '+added+' note'+(added===1?'':'s')+' from '+f.name+'.');
+    }catch(err){ setStatus('That file is not a handbook notes export.'); }
+  };
+  fr.readAsText(f);
+  ev.target.value='';
+});
+document.getElementById('clr').addEventListener('click',function(){
+  if(!noteCount()){ setStatus('Nothing to clear.'); return; }
+  var btn=this;
+  if(btn.dataset.armed!=='1'){
+    btn.dataset.armed='1'; btn.textContent='Confirm clear';
+    setStatus('Click again to delete all '+noteCount()+' notes. Export first if you want a copy.');
+    setTimeout(function(){ btn.dataset.armed='0'; btn.textContent='Clear all'; },5000);
+    return;
+  }
+  state.notes={}; state.checks={}; persist();
+  sections.forEach(function(s){ renderSection(s.id); });
+  [].slice.call(document.querySelectorAll('#ramp li.chk')).forEach(function(li){
+    var cb=li.querySelector('input'); if(cb) cb.checked=false; li.classList.remove('done');
+  });
+  renderDrawer(); btn.dataset.armed='0'; btn.textContent='Clear all';
+  setStatus('All notes cleared.');
+});
+
+/* ---------------- nav highlight ---------------- */
+var links=[].slice.call(document.querySelectorAll('#nav a'));
+var secEls=links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+function sync(){
+  var y=window.scrollY+140, best=0;
+  for(var i=0;i<secEls.length;i++){ if(secEls[i]&&secEls[i].offsetTop<=y) best=i; }
+  links.forEach(function(a,i){ a.classList.toggle('on', i===best); });
+}
+var tick=false;
+window.addEventListener('scroll',function(){
+  if(tick) return; tick=true;
+  window.requestAnimationFrame(function(){ sync(); tick=false; });
+},{passive:true});
+sync();
+
+/* ---------------- search ---------------- */
+var q=document.getElementById('q');
+var haystack=secEls.map(function(s){ return s?s.textContent.toLowerCase():''; });
+function clearHits(){ links.forEach(function(a){ a.classList.remove('hide'); var c=a.querySelector('.hitcount'); if(c) c.remove(); }); }
+q.addEventListener('input',function(){
+  var term=q.value.trim().toLowerCase();
+  clearHits();
+  if(term.length<2){ sync(); return; }
+  links.forEach(function(a,i){
+    var hay=haystack[i], n=0, from=0, at;
+    while((at=hay.indexOf(term,from))!==-1){ n++; from=at+term.length; if(n>999) break; }
+    if(!n){ a.classList.add('hide'); return; }
+    a.classList.remove('on');
+    var c=document.createElement('span'); c.className='hitcount'; c.textContent=n;
+    a.appendChild(c);
+  });
+});
+q.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){ q.value=''; clearHits(); sync(); q.blur(); }
+  if(e.key==='Enter'){
+    var first=links.filter(function(a){ return !a.classList.contains('hide'); })[0];
+    if(first){ var t=document.querySelector(first.getAttribute('href')); if(t) t.scrollIntoView({behavior:'smooth'}); }
+  }
+});
+
+})();
+</script>
+
+</body>
+</html>
