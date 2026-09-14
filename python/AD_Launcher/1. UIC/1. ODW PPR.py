@@ -1,5 +1,9 @@
 #Help: Periodic Project Review using ODW data
 import os
+import json
+import urllib.request
+import urllib.parse
+import urllib.error
 import oracledb
 import tkinter as tk
 from tkinter import messagebox, scrolledtext, filedialog
@@ -77,6 +81,35 @@ def format_well_api_list(raw_api_list):
 def _is_api_column(col_name):
     """Return True if a column name looks like an API number column."""
     return 'API' in col_name.upper()
+
+
+# --------------------------------------------------------------------------
+# WellSTAR (CalGEM) API helpers
+# --------------------------------------------------------------------------
+WELLSTAR_LAYER = ("https://gis.conservation.ca.gov/server/rest/services/"
+                  "WellSTAR/Wells/MapServer/0")
+WELLSTAR_URL = WELLSTAR_LAYER + "/query"
+
+
+def to_calgem_api(api):
+    """Convert a 10-digit ODW API ('0402967770') to CalGEM's 8-digit
+    APINumber ('02967770') by stripping the '04' California state prefix.
+    Accepts 8-digit input unchanged. Strips dashes and whitespace."""
+    s = str(api).strip().replace('-', '').replace(' ', '')
+    if len(s) == 10 and s.startswith('04'):
+        return s[2:]
+    if len(s) == 8:
+        return s
+    # 12-digit UWI -> take first 10, then strip prefix
+    if len(s) == 12 and s.startswith('04'):
+        return s[2:10]
+    return s
+
+
+def from_calgem_api(api8):
+    """Convert CalGEM's 8-digit APINumber back to the 10-digit ODW form."""
+    s = str(api8).strip()
+    return '04' + s if len(s) == 8 else s
 
 
 # --------------------------------------------------------------------------
@@ -242,6 +275,7 @@ def export_all_tabs(app):
         ("Avg Tubing Pres",  app.tubing_tab),
         ("Monthly Prod Inj", app.prod_inj_tab),
         ("Daily Inj Pres",   app.daily_tab),
+        ("WellSTAR",         app.wellstar_tab),
     ]
 
     # Check that at least one tab has data
@@ -353,6 +387,7 @@ class WellAPITab(tb.Frame):
             ("Avg Tubing Pres",   self.app.tubing_tab),
             ("Monthly Prod/Inj",  self.app.prod_inj_tab),
             ("Daily Inj/Pres",    self.app.daily_tab),
+            ("WellSTAR",          self.app.wellstar_tab),
         ]
 
         errors = []
@@ -380,6 +415,8 @@ class _QueryTab:
     conn_manager = OracleConnectionManager()
 
     def _execute(self, sql, date_cols=None, sort=True):
+        conn = None
+        cursor = None
         try:
             conn = self.conn_manager.get_connection('odw')
             cursor = conn.cursor()
@@ -395,8 +432,6 @@ class _QueryTab:
                 self.current_data = df
             else:
                 self.clear_results()
-            cursor.close()
-            conn.close()
         except ConnectionError as e:
             messagebox.showerror("Connection Error", str(e))
             self.clear_results()
@@ -408,6 +443,13 @@ class _QueryTab:
         except Exception as e:
             messagebox.showerror("Error", f"Unexpected error: {e}")
             self.clear_results()
+        finally:
+            if cursor:
+                try: cursor.close()
+                except Exception: pass
+            if conn:
+                try: conn.close()
+                except Exception: pass
 
 
 # =========================================================================
@@ -433,22 +475,22 @@ class WellBasicDataTab(tb.Frame, TreeviewMixin, _QueryTab):
             self.clear_results(); return
         sql = f"""
 SELECT
-    wd.wlbr_nme                    AS well_name,
+    wdm.well_nme                   AS well_name,
     cd.opnl_fld                    AS field_name,
-    cd.cmpl_nme                    AS completion_name,
     cd.well_api_nbr                AS api_number,
-    wd.wlbr_api_suff_nbr           AS wellbore_suffix,
     wd.wlbr_incl_type_desc         AS wellbore_type,
     cd.prim_purp_type_cde          AS well_type,
-    cd.cmpl_state_type_cde         AS status,
+    cd.cmpl_state_type_desc        AS well_state,
+    cd.cmpl_state_eftv_dttm        AS state_effective_date,
     cd.in_svc_indc                 AS in_service,
     cd.init_prod_dte               AS initial_prod_date
 FROM dwrptg.cmpl_dmn cd
 JOIN dwrptg.wlbr_dmn wd ON cd.well_fac_id = wd.well_fac_id
+JOIN dwrptg.well_dmn wdm ON cd.well_fac_id = wdm.well_fac_id AND wdm.actv_indc = 'Y'
 WHERE cd.actv_indc = 'Y' AND cd.well_api_nbr IN ({formatted})
-ORDER BY cd.well_api_nbr, wd.wlbr_api_suff_nbr, cd.cmpl_nme
+ORDER BY cd.well_api_nbr, cd.cmpl_nme
 """
-        self._execute(sql, date_cols=['INITIAL_PROD_DATE'])
+        self._execute(sql, date_cols=['INITIAL_PROD_DATE', 'STATE_EFFECTIVE_DATE'])
 
 
 # =========================================================================
@@ -581,7 +623,7 @@ WITH T1 AS (
     SELECT cmpl_fac_id, eftv_dttm AS last_inj_dte FROM (
         SELECT cmpl_fac_id, eftv_dttm,
                DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
-        FROM cmpl_mnly_fact
+        FROM dwrptg.cmpl_mnly_fact
         WHERE aloc_wtr_inj_dly_rte_qty > 0 OR aloc_stm_inj_dly_rte_qty > 0
     ) WHERE rnk = 1
 ),
@@ -589,28 +631,40 @@ T2 AS (
     SELECT cmpl_fac_id, eftv_dttm AS last_prod_dte FROM (
         SELECT cmpl_fac_id, eftv_dttm,
                DENSE_RANK() OVER (PARTITION BY cmpl_fac_id ORDER BY eftv_dttm DESC) AS rnk
-        FROM cmpl_mnly_fact
+        FROM dwrptg.cmpl_mnly_fact
         WHERE aloc_gros_prod_dly_rte_qty > 0
     ) WHERE rnk = 1
+),
+SPUD AS (
+    -- Earliest wellbore start = original spud. Aggregating avoids the
+    -- cross-product you get joining wlbr_dmn directly when sidetracks exist.
+    SELECT well_fac_id, MIN(bore_start_dttm) AS spud_dte
+    FROM dwrptg.wlbr_dmn
+    WHERE bore_start_dttm IS NOT NULL
+    GROUP BY well_fac_id
 )
-SELECT wd.well_nme, wd.well_api_nbr, wd.fld_nme,
+SELECT cd.cmpl_nme, cd.well_api_nbr, cd.opnl_fld,
+       sp.spud_dte,
        cd.init_prod_dte, cd.init_inj_dte, cd.prim_purp_type_cde,
        cd.ENGR_STRG_NME,
        t1.last_inj_dte, t2.last_prod_dte,
-       cd.CMPL_STATE_TYPE_DESC, cd.CMPL_STATE_EFTV_DTTM
-FROM well_dmn wd
-JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-LEFT JOIN cmpl_non_ver_dmn cnd ON cd.cmpl_fac_id = cnd.cmpl_fac_id
-LEFT JOIN curr_cmpl_opnl_stat os ON cd.cmpl_fac_id = os.cmpl_fac_id
+       cd.CMPL_STATE_TYPE_DESC, cd.CMPL_STATE_EFTV_DTTM,
+       CASE WHEN cd.cmpl_state_type_cde IN ('ABND', 'TA')
+            THEN cd.cmpl_state_eftv_dttm END AS abandon_dte
+FROM dwrptg.cmpl_dmn cd
+LEFT JOIN SPUD sp ON cd.well_fac_id = sp.well_fac_id
+LEFT JOIN dwrptg.cmpl_non_ver_dmn cnd ON cd.cmpl_fac_id = cnd.cmpl_fac_id
+LEFT JOIN dwrptg.curr_cmpl_opnl_stat os ON cd.cmpl_fac_id = os.cmpl_fac_id
 LEFT JOIN T1 ON cd.cmpl_fac_id = T1.cmpl_fac_id
 LEFT JOIN T2 ON cd.cmpl_fac_id = T2.cmpl_fac_id
-WHERE cd.actv_indc = 'Y' AND wd.actv_indc = 'Y'
-  AND wd.well_api_nbr IN ({formatted})
+WHERE cd.actv_indc = 'Y'
+  AND cd.well_api_nbr IN ({formatted})
   AND cd.prim_purp_type_cde IN ('PROD', 'INJ')
 """
         self._execute(sql, date_cols=['LAST_INJ_DTE', 'LAST_PROD_DTE',
                                        'INIT_INJ_DTE', 'INIT_PROD_DTE',
-                                       'CMPL_STATE_EFTV_DTTM'])
+                                       'CMPL_STATE_EFTV_DTTM',
+                                       'SPUD_DTE', 'ABANDON_DTE'])
 
 
 # =========================================================================
@@ -645,20 +699,19 @@ class TubingPressureTab(tb.Frame, TreeviewMixin, _QueryTab):
         if not formatted:
             self.clear_results(); self.avg_pressure_label.config(text="N/A"); return
         sql = f"""
-SELECT wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id,
+SELECT cd.cmpl_nme, cd.well_api_nbr, cd.cmpl_fac_id,
     AVG(CASE WHEN cf.aloc_stm_inj_vol_qty > 0
          THEN cf.aloc_stm_inj_vol_qty END) AS avg_stm_inj_vol,
     ROUND(AVG(CASE WHEN cf.aloc_wtr_inj_vol_qty > 0
               THEN cf.aloc_wtr_inj_vol_qty END), 2) AS avg_wtr_inj_vol,
     ROUND(AVG(CASE WHEN cf.wlhd_tbg_prsr_qty > 0
               THEN cf.wlhd_tbg_prsr_qty END), 2) AS avg_wlhd_tbg_prsr
-FROM well_dmn wd
-JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-JOIN cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
-WHERE wd.actv_indc = 'Y' AND cd.actv_indc = 'Y'
+FROM dwrptg.cmpl_dmn cd
+JOIN dwrptg.cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+WHERE cd.actv_indc = 'Y'
     AND cf.eftv_dttm >= TRUNC(SYSDATE) - 60
-    AND wd.well_api_nbr IN ({formatted})
-GROUP BY wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id
+    AND cd.well_api_nbr IN ({formatted})
+GROUP BY cd.cmpl_nme, cd.well_api_nbr, cd.cmpl_fac_id
 """
         self._execute(sql)
         # Calculate overall average after data loads
@@ -696,8 +749,8 @@ class ProductionInjectionTab(tb.Frame, TreeviewMixin, _QueryTab):
             self.clear_results(); return
         sql = f"""
 SELECT
-    wd.well_nme AS "WELL NAME",
-    wd.well_api_nbr AS "WELL API",
+    cd.cmpl_nme AS "WELL NAME",
+    cd.well_api_nbr AS "WELL API",
     cf.eftv_dttm AS "DATE",
     cf.aloc_oil_prod_dly_rte_qty AS "OIL PROD BOPD",
     cf.aloc_wtr_prod_dly_rte_qty AS "WATER PROD BWPD",
@@ -705,14 +758,13 @@ SELECT
     cf.aloc_stm_inj_dly_rte_qty AS "STEAM INJ Per Day",
     cf.aloc_wtr_inj_dly_rte_qty AS "WATER INJ Per Day",
     cf.aloc_gas_inj_dly_rte_qty AS "GAS INJ Per Day"
-FROM well_dmn wd
-JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-JOIN cmpl_mnly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
-WHERE cd.actv_indc = 'Y' AND wd.actv_indc = 'Y'
-    AND wd.well_api_nbr IN ({formatted})
-    AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -65)
+FROM dwrptg.cmpl_dmn cd
+JOIN dwrptg.cmpl_mnly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+WHERE cd.actv_indc = 'Y'
+    AND cd.well_api_nbr IN ({formatted})
+    AND cf.eftv_dttm >= ADD_MONTHS(TRUNC(SYSDATE), -62)
     AND cf.eftv_dttm <= TRUNC(SYSDATE)
-ORDER BY wd.well_api_nbr, cf.eftv_dttm
+ORDER BY cd.well_api_nbr, cf.eftv_dttm
 """
         self._execute(sql, date_cols=['DATE'], sort=False)
 
@@ -739,20 +791,226 @@ class DailyInjectionPressureTab(tb.Frame, TreeviewMixin, _QueryTab):
         if not formatted:
             self.clear_results(); return
         sql = f"""
-SELECT wd.well_nme, wd.well_api_nbr, cd.cmpl_nme, cd.cmpl_fac_id,
+SELECT cd.cmpl_nme, cd.well_api_nbr, cd.cmpl_fac_id,
     cf.eftv_dttm,
     cf.aloc_stm_inj_vol_qty,
     cf.aloc_wtr_inj_vol_qty,
     cf.wlhd_tbg_prsr_qty
-FROM well_dmn wd
-JOIN cmpl_dmn cd ON wd.well_fac_id = cd.well_fac_id
-JOIN cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
-WHERE wd.actv_indc = 'Y' AND cd.actv_indc = 'Y'
+FROM dwrptg.cmpl_dmn cd
+JOIN dwrptg.cmpl_dly_fact cf ON cd.cmpl_fac_id = cf.cmpl_fac_id
+WHERE cd.actv_indc = 'Y'
     AND cf.eftv_dttm >= TRUNC(SYSDATE) - 60
-    AND wd.well_api_nbr IN ({formatted})
+    AND cd.well_api_nbr IN ({formatted})
 ORDER BY cf.eftv_dttm
 """
         self._execute(sql, date_cols=['EFTV_DTTM'], sort=False)
+
+
+# =========================================================================
+#  TAB 8 – WellSTAR (CalGEM) Well Information
+# =========================================================================
+class WellStarTab(tb.Frame, TreeviewMixin):
+    """Pulls well state/status, name, and well type (Cyclic Steam, Steam Flood
+    injector, Oil and Gas, etc.) from CalGEM's public WellSTAR ArcGIS REST API.
+    This is the regulatory view of the well, independent of ODW."""
+
+    def __init__(self, parent, app):
+        super().__init__(parent)
+        self.app = app
+        self.current_data = None
+        self._api_field = None      # cached (field_name, length)
+        self._build()
+
+    def _build(self):
+        tb.Label(self, text="WellSTAR (CalGEM) Well Information",
+                 font=("Helvetica", 16, "bold")).pack(pady=10)
+
+        info = tb.Frame(self)
+        info.pack(pady=5, padx=20, fill="x")
+        tb.Label(info, text="Source: CalGEM WellSTAR public GIS service "
+                            "(regulatory well type & status)",
+                 font=("TkDefaultFont", 9)).pack(side="left", padx=5)
+        self.status_label = tb.Label(info, text="", bootstyle="success",
+                                      font=("TkDefaultFont", 10, "bold"))
+        self.status_label.pack(side="right", padx=5)
+
+        self.tree_frame, self.result_tree = build_treeview(self)
+        self.tree_frame.pack(pady=10, padx=20, fill="both", expand=True)
+        build_button_bar(self, self).pack(pady=10)
+
+    def pull_data(self):
+        apis = self.app.api_tab.get_apis()
+        if not apis:
+            self.clear_results()
+            self.status_label.config(text="")
+            return
+
+        # Discover the layer's real API field name + length, then query.
+        try:
+            fld, length = self._discover_api_field()
+        except Exception as e:
+            messagebox.showerror(
+                "WellSTAR Error",
+                f"Could not read the WellSTAR layer schema.\n\n{e}\n\n"
+                "Check your internet connection or corporate proxy.")
+            self.clear_results()
+            self.status_label.config(text="")
+            return
+
+        # Format the APIs to match that field's width
+        if length and length <= 8:
+            api_list = [to_calgem_api(a) for a in apis]
+        else:
+            api_list = [from_calgem_api(to_calgem_api(a)) for a in apis]
+        api_list = [a for a in api_list if a]
+        if not api_list:
+            self.clear_results()
+            return
+
+        try:
+            features = self._query_wellstar(fld, api_list)
+        except urllib.error.URLError as e:
+            messagebox.showerror(
+                "Network Error",
+                f"Could not reach CalGEM WellSTAR.\n\n{e}\n\n"
+                "Check your internet connection or corporate proxy.")
+            self.clear_results()
+            self.status_label.config(text="")
+            return
+        except Exception as e:
+            messagebox.showerror(
+                "WellSTAR Error",
+                f"CalGEM query failed on field '{fld}'.\n\n{e}")
+            self.clear_results()
+            self.status_label.config(text="")
+            return
+
+        if not features:
+            self.clear_results()
+            self.status_label.config(text="0 wells found")
+            messagebox.showinfo(
+                "No Results",
+                "No matching wells found in WellSTAR for these API numbers.")
+            return
+
+        self._show_features(features, len(api_list))
+
+    def _discover_api_field(self):
+        """Read the layer metadata and return (field_name, length) for the
+        API-number field. Cached after the first successful lookup."""
+        if getattr(self, "_api_field", None):
+            return self._api_field
+
+        url = WELLSTAR_LAYER + "?f=json"
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (compatible; PPR-Tool/1.0)"})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            meta = json.loads(resp.read().decode("utf-8"))
+
+        if "error" in meta:
+            raise RuntimeError(meta["error"].get("message", "Unknown error"))
+
+        fields = meta.get("fields") or []
+        # Preference order: exact API-number fields first
+        preferred = ["API", "APINUMBER", "APINBR", "APINUM", "API8", "APINO"]
+        by_upper = {}
+        for f in fields:
+            name = f.get("name") or ""
+            by_upper[name.upper()] = (name, f.get("length"))
+
+        for p in preferred:
+            if p in by_upper:
+                self._api_field = by_upper[p]
+                return self._api_field
+
+        # Fallback: any string field with API in the name
+        for upper, (name, ln) in by_upper.items():
+            if "API" in upper:
+                self._api_field = (name, ln)
+                return self._api_field
+
+        raise RuntimeError(
+            "No API-number field found on the WellSTAR layer. "
+            "Available fields: " + ", ".join(sorted(by_upper)))
+
+    def _query_wellstar(self, api_field, api_list, batch=100):
+        """POST a query to WellSTAR in batches. Returns list of features.
+        Raises RuntimeError carrying CalGEM's own error text."""
+        all_features = []
+        for i in range(0, len(api_list), batch):
+            chunk = api_list[i:i + batch]
+            in_list = ",".join(
+                "'{}'".format(a.replace("'", "''")) for a in chunk)
+            data = urllib.parse.urlencode({
+                "where": f"{api_field} IN ({in_list})",
+                "outFields": "*",          # avoid invalid-field errors
+                "returnGeometry": "false",
+                "f": "json",
+            }).encode("utf-8")
+
+            req = urllib.request.Request(
+                WELLSTAR_URL, data=data,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (compatible; PPR-Tool/1.0)",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                })
+            with urllib.request.urlopen(req, timeout=90) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+
+            if "error" in payload:
+                err = payload["error"]
+                msg = err.get("message", "Unknown error")
+                details = "; ".join(err.get("details") or [])
+                raise RuntimeError(f"{msg} {details}".strip())
+
+            all_features.extend(payload.get("features", []))
+        return all_features
+
+    @staticmethod
+    def _pick(attrs, *names):
+        """Return the first present, non-empty attribute among `names`."""
+        for n in names:
+            if n in attrs and attrs[n] not in (None, ""):
+                return str(attrs[n]).strip()
+        return ""
+
+    def _show_features(self, features, asked):
+        rows = []
+        for feat in features:
+            a = feat.get("attributes", {}) or {}
+            lease = self._pick(a, "LeaseName", "Lease")
+            num = self._pick(a, "WellNumber", "WellNum")
+            well_name = f"{lease} {num}".strip()
+            api_raw = self._pick(a, "API", "APINumber", "APINbr", "API8",
+                                 "APINum", "APINo")
+            rows.append({
+                "API_NUMBER": from_calgem_api(api_raw),
+                "WELL_NAME": well_name,
+                "LEASE_NAME": lease,
+                "WELL_NUMBER": num,
+                "WELL_TYPE": self._pick(a, "WellTypeLong", "WellType"),
+                "WELL_DESIGNATION": self._pick(a, "WellDesignation",
+                                               "WellDesign"),
+                "WELL_STATUS": self._pick(a, "WellStatusDescription",
+                                          "WellStatus"),
+                "OPERATOR": self._pick(a, "OperatorName", "Operator"),
+                "COUNTY": self._pick(a, "CountyName", "County"),
+            })
+
+        df = pd.DataFrame(rows, columns=[
+            "API_NUMBER", "WELL_NAME", "LEASE_NAME", "WELL_NUMBER",
+            "WELL_TYPE", "WELL_DESIGNATION", "WELL_STATUS",
+            "OPERATOR", "COUNTY"])
+
+        self.display_results(df, apply_global_sort=False)
+        self.current_data = df
+
+        found = len(df)
+        if found < asked:
+            self.status_label.config(
+                text=f"{found} of {asked} well(s) found in WellSTAR")
+        else:
+            self.status_label.config(text=f"{found} well(s) found")
 
 
 # =========================================================================
@@ -794,6 +1052,9 @@ class MainApplication(tb.Window):
 
         self.daily_tab = DailyInjectionPressureTab(self.notebook, self)
         self.notebook.add(self.daily_tab, text="  Daily Inj/Pres  ")
+
+        self.wellstar_tab = WellStarTab(self.notebook, self)
+        self.notebook.add(self.wellstar_tab, text="  WellSTAR  ")
 
 
 if __name__ == "__main__":
